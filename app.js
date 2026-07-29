@@ -13,6 +13,7 @@ class DNCLApp {
     this.isPlaying = false;
     this.playInterval = null;
     this.isDragging = false; // ドラッグ中かどうかのフラグ（タップ誤判定防止）
+    this.playbackSpeed = 400; // 自動再生の間隔 (ms)
 
     // DOM要素のキャッシュ
     this.problemSelect = document.getElementById("problem-select");
@@ -24,7 +25,11 @@ class DNCLApp {
     this.editorList = document.getElementById("editor-list");
     
     this.runBtn = document.getElementById("run-btn");
-    this.stepBtn = document.getElementById("step-btn");
+    this.stepBackBtn = document.getElementById("step-back-btn");
+    this.stepForwardBtn = document.getElementById("step-forward-btn");
+    this.stepCounter = document.getElementById("step-counter");
+    this.speedRange = document.getElementById("speed-range");
+    this.speedVal = document.getElementById("speed-val");
     this.resetBtn = document.getElementById("reset-btn");
     
     this.varsGrid = document.getElementById("vars-grid");
@@ -79,8 +84,19 @@ class DNCLApp {
 
     // アクションボタン
     this.runBtn.addEventListener("click", () => this.runCode());
-    this.stepBtn.addEventListener("click", () => this.stepForward());
+    this.stepForwardBtn.addEventListener("click", () => this.stepForward());
+    this.stepBackBtn.addEventListener("click", () => this.stepBack());
     this.resetBtn.addEventListener("click", () => this.resetExecution());
+
+    // 再生速度スライダー
+    this.speedRange.addEventListener("input", (e) => {
+      this.playbackSpeed = parseInt(e.target.value, 10);
+      this.speedVal.textContent = `${this.playbackSpeed}ms`;
+      if (this.isPlaying) {
+        clearInterval(this.playInterval);
+        this.startPlayback();
+      }
+    });
 
     // AI質問用モーダル
     this.aiPromptBtn.addEventListener("click", () => this.openAIModal());
@@ -234,6 +250,7 @@ class DNCLApp {
     this.editorBlocks = [];
     this.updatePreview();
     this.updateVariableMonitor(this.currentProblem.initialState);
+    this.updateStepControls();
   }
 
   shuffleArray(array) {
@@ -424,6 +441,7 @@ class DNCLApp {
     });
 
     this.updatePreview();
+    this.updateStepControls();
   }
 
   updatePreview() {
@@ -454,66 +472,124 @@ class DNCLApp {
 
   runCode() {
     if (this.editorBlocks.length === 0) return;
-    this.resetExecution();
 
-    const initialVars = this.getCurrentVariablesState();
-    
-    // エミュレータの実行
-    const result = this.interpreter.run(this.editorBlocks, initialVars);
-    this.traceResults = result;
-
-    if (!result.success) {
-      // 実行中のコンパイルエラーなど
-      this.consoleOutput.innerHTML = `<div class="console-line" style="border-left-color: var(--accent-red); color: var(--accent-red);">${result.error}</div>`;
-      this.statusBar.className = "status-bar fail";
-      this.statusText.innerHTML = `<i class="fas fa-times-circle"></i> 実行エラーが発生しました。カードの順序や穴埋めを確認してください。`;
-      this.statusBar.style.display = "flex";
+    if (this.isPlaying) {
+      this.pauseCode();
       return;
     }
 
-    // 全てのステップをアニメーションするか、一気に最終結果を表示するか
-    // 本機能では、自動でステップを進めて再生する
-    this.playSteps();
+    // 既に最後まで実行済みの状態、またはまだ一度も実行していない場合
+    if (!this.traceResults || this.currentStepIndex >= this.traceResults.trace.length - 1) {
+      const success = this.prepareExecution();
+      if (!success) return;
+    }
+
+    this.startPlayback();
   }
 
-  playSteps() {
+  startPlayback() {
     this.isPlaying = true;
-    this.currentStepIndex = 0;
-    this.runBtn.disabled = true;
-    this.stepBtn.disabled = true;
+    this.runBtn.innerHTML = '<i class="fas fa-pause"></i> 一時停止';
+    this.runBtn.className = "primary warning";
+    this.updateStepControls();
 
     this.playInterval = setInterval(() => {
-      if (this.currentStepIndex < this.traceResults.trace.length) {
-        this.renderStep(this.currentStepIndex);
+      if (this.currentStepIndex < this.traceResults.trace.length - 1) {
         this.currentStepIndex++;
+        this.renderStep(this.currentStepIndex);
+        this.updateStepControls();
       } else {
-        clearInterval(this.playInterval);
+        this.pauseCode();
         this.onExecutionFinished();
       }
-    }, 400); // 400ms間隔でステップが進む
+    }, this.playbackSpeed);
+  }
+
+  pauseCode() {
+    this.isPlaying = false;
+    if (this.playInterval) {
+      clearInterval(this.playInterval);
+      this.playInterval = null;
+    }
+    this.runBtn.innerHTML = '<i class="fas fa-play"></i> 実行';
+    this.runBtn.className = "primary";
+    this.updateStepControls();
+  }
+
+  prepareExecution() {
+    this.resetExecution();
+    const initialVars = this.getCurrentVariablesState();
+    this.traceResults = this.interpreter.run(this.editorBlocks, initialVars);
+
+    if (!this.traceResults.success) {
+      this.consoleOutput.innerHTML = `<div class="console-line" style="border-left-color: var(--accent-red); color: var(--accent-red);">${this.traceResults.error}</div>`;
+      this.statusBar.className = "status-bar fail";
+      this.statusText.innerHTML = `<i class="fas fa-times-circle"></i> 実行エラーが発生しました。カードの順序や穴埋めを確認してください。`;
+      this.statusBar.style.display = "flex";
+      this.updateStepControls();
+      return false;
+    }
+
+    this.currentStepIndex = 0;
+    this.renderStep(this.currentStepIndex);
+    this.updateStepControls();
+    return true;
   }
 
   stepForward() {
-    // 初回ステップ実行時
-    if (this.currentStepIndex === -1) {
-      this.resetExecution();
-      const initialVars = this.getCurrentVariablesState();
-      this.traceResults = this.interpreter.run(this.editorBlocks, initialVars);
-      
-      if (!this.traceResults.success) {
-        this.consoleOutput.innerHTML = `<div class="console-line" style="border-left-color: var(--accent-red); color: var(--accent-red);">${this.traceResults.error}</div>`;
-        return;
-      }
-      this.currentStepIndex = 0;
+    if (this.isPlaying) return;
+
+    if (!this.traceResults) {
+      const success = this.prepareExecution();
+      if (!success) return;
+      return;
     }
 
-    if (this.traceResults && this.currentStepIndex < this.traceResults.trace.length) {
-      this.renderStep(this.currentStepIndex);
+    if (this.currentStepIndex < this.traceResults.trace.length - 1) {
       this.currentStepIndex++;
-      
-      if (this.currentStepIndex === this.traceResults.trace.length) {
+      this.renderStep(this.currentStepIndex);
+      this.updateStepControls();
+
+      if (this.currentStepIndex === this.traceResults.trace.length - 1) {
         this.onExecutionFinished();
       }
+    }
+  }
+
+  stepBack() {
+    if (this.isPlaying || this.currentStepIndex <= 0) return;
+
+    if (this.traceResults) {
+      this.currentStepIndex--;
+      this.renderStep(this.currentStepIndex);
+      this.updateStepControls();
+      
+      // 最後まで実行した状態から戻る際はステータスバー等を一旦隠す
+      this.statusBar.style.display = "none";
+      this.explanationSection.style.display = "none";
+    }
+  }
+
+  updateStepControls() {
+    if (!this.traceResults || !this.traceResults.success) {
+      // 組み立てが1枚以上ある場合は進むボタンだけ活性化（実行準備）
+      const hasBlocks = this.editorBlocks.length > 0;
+      this.stepBackBtn.disabled = true;
+      this.stepForwardBtn.disabled = !hasBlocks;
+      this.stepCounter.textContent = "0/0";
+      return;
+    }
+
+    const total = this.traceResults.trace.length;
+    const current = this.currentStepIndex === -1 ? 0 : this.currentStepIndex + 1;
+    this.stepCounter.textContent = `${current}/${total}`;
+
+    if (this.isPlaying) {
+      this.stepBackBtn.disabled = true;
+      this.stepForwardBtn.disabled = true;
+    } else {
+      this.stepBackBtn.disabled = (this.currentStepIndex <= 0);
+      this.stepForwardBtn.disabled = (this.currentStepIndex >= total - 1);
     }
   }
 
@@ -637,8 +713,9 @@ class DNCLApp {
 
   onExecutionFinished() {
     this.isPlaying = false;
-    this.runBtn.disabled = false;
-    this.stepBtn.disabled = false;
+    this.runBtn.innerHTML = '<i class="fas fa-play"></i> 実行';
+    this.runBtn.className = "primary";
+    this.updateStepControls();
 
     // 正解判定
     const isCorrect = this.checkSolution();
@@ -913,11 +990,8 @@ class DNCLApp {
   }
 
   resetExecution() {
-    if (this.playInterval) clearInterval(this.playInterval);
-    this.isPlaying = false;
+    this.pauseCode();
     this.currentStepIndex = -1;
-    this.runBtn.disabled = false;
-    this.stepBtn.disabled = false;
     this.traceResults = null;
 
     // ハイライトを消す
@@ -928,7 +1002,10 @@ class DNCLApp {
     
     // 変数とコンソールの初期化
     this.consoleOutput.innerHTML = "";
-    this.updateVariableMonitor(this.currentProblem.initialState);
+    if (this.currentProblem) {
+      this.updateVariableMonitor(this.currentProblem.initialState);
+    }
+    this.updateStepControls();
   }
 
   // --- AI プロンプト連携機能 ---

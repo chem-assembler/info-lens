@@ -79,13 +79,30 @@
     <section class="pane" id="editor-pane" aria-labelledby="editor-pane-title">
       <div class="pane-header">
         <h2 id="editor-pane-title"><i class="fas fa-puzzle-piece"></i> プログラム組み立て</h2>
-        <div class="editor-actions" style="display: flex; gap: 0.5rem;">
-          <button id="run-btn" class="primary" title="組み立てたプログラムを自動実行します">
+        <div class="editor-actions" style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+          <!-- 実行（自動再生）ボタン -->
+          <button id="run-btn" class="primary" title="プログラムを自動実行します">
             <i class="fas fa-play"></i> 実行
           </button>
-          <button id="step-btn" class="secondary" title="1行ずつプログラムを実行します">
-            <i class="fas fa-shoe-prints"></i> 1行ずつ
-          </button>
+          
+          <!-- 手動ステップ制御グループ -->
+          <div class="step-controls-group" style="display: flex; align-items: center; gap: 0.3rem; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.2rem 0.5rem; height: 36px;">
+            <button id="step-back-btn" class="icon-btn" title="1行戻る (◁)" style="background: transparent; border: none; color: var(--text-primary); cursor: pointer; padding: 0 0.3rem; display: flex; align-items: center;" disabled>
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <span id="step-counter" style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary); min-width: 45px; text-align: center; user-select: none;">0/0</span>
+            <button id="step-forward-btn" class="icon-btn" title="1行進む (▷)" style="background: transparent; border: none; color: var(--text-primary); cursor: pointer; padding: 0 0.3rem; display: flex; align-items: center;" disabled>
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+
+          <!-- 再生速度調整 -->
+          <div class="speed-control" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-color); border-radius: 8px; padding: 0 0.6rem; height: 36px;">
+            <span style="font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.3rem;"><i class="fas fa-tachometer-alt"></i> 速度</span>
+            <input type="range" id="speed-range" min="100" max="2000" step="100" value="400" title="再生速度を調整します" style="width: 70px; accent-color: var(--accent-purple); height: 4px; cursor: pointer; border: none; background: rgba(255,255,255,0.1); border-radius: 2px;">
+            <span id="speed-val" style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); min-width: 45px;">400ms</span>
+          </div>
+
           <button id="show-answer-btn" class="secondary" title="この問題の正しい解答と解説を表示します">
             <i class="fas fa-lightbulb"></i> 模範解答
           </button>
