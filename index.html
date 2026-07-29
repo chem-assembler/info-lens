@@ -69,12 +69,15 @@
     <section class="pane" id="editor-pane" aria-labelledby="editor-pane-title">
       <div class="pane-header">
         <h2 id="editor-pane-title"><i class="fas fa-puzzle-piece"></i> プログラム組み立て</h2>
-        <div class="editor-actions">
+        <div class="editor-actions" style="display: flex; gap: 0.5rem;">
           <button id="run-btn" class="primary" title="組み立てたプログラムを自動実行します">
             <i class="fas fa-play"></i> 実行
           </button>
           <button id="step-btn" class="secondary" title="1行ずつプログラムを実行します">
-            <i class="fas fa-shoe-prints"></i> 1行ずつ実行
+            <i class="fas fa-shoe-prints"></i> 1行ずつ
+          </button>
+          <button id="show-answer-btn" class="secondary" title="この問題の正しい解答と解説を表示します">
+            <i class="fas fa-lightbulb"></i> 模範解答
           </button>
           <button id="reset-btn" class="secondary" title="実行状態を初期化します">
             <i class="fas fa-undo"></i> リセット
@@ -161,6 +164,23 @@
       <div class="modal-footer">
         <button id="copy-prompt-btn" class="primary"><i class="fas fa-copy"></i> プロンプトをコピー</button>
         <button id="download-prompt-btn" class="secondary"><i class="fas fa-download"></i> ファイル保存 (.md)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 模範解答モーダル -->
+  <div id="answer-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="answer-modal-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="answer-modal-title"><i class="fas fa-lightbulb"></i> 模範解答 (正解のコード)</h3>
+        <button id="close-answer-modal" class="close-btn" aria-label="閉じる"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-content">
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.2rem;">
+          この問題の正しい配置とインデント構造は以下の通りです。
+        </p>
+        <pre id="answer-code-preview" style="font-family: var(--font-mono); font-size: 0.85rem; color: #34d399; background: #05060a; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; white-space: pre-wrap; margin-bottom: 1.2rem;"></pre>
+        <div id="answer-explanation-text" style="font-size: 0.85rem; line-height: 1.6; color: var(--text-primary); border-top: 1px solid var(--border-color); padding-top: 1rem;"></div>
       </div>
     </div>
   </div>

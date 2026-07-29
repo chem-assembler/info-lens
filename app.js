@@ -43,6 +43,13 @@ class DNCLApp {
     this.copyPromptBtn = document.getElementById("copy-prompt-btn");
     this.downloadPromptBtn = document.getElementById("download-prompt-btn");
 
+    // 模範解答用
+    this.showAnswerBtn = document.getElementById("show-answer-btn");
+    this.answerModal = document.getElementById("answer-modal");
+    this.closeAnswerModalBtn = document.getElementById("close-answer-modal");
+    this.answerCodePreview = document.getElementById("answer-code-preview");
+    this.answerExplanationText = document.getElementById("answer-explanation-text");
+
     this.initEvents();
     this.loadProblemList();
   }
@@ -77,6 +84,13 @@ class DNCLApp {
     // モーダル外側クリックで閉じる
     this.aiModal.addEventListener("click", (e) => {
       if (e.target === this.aiModal) this.closeAIModal();
+    });
+
+    // 模範解答モーダル
+    this.showAnswerBtn.addEventListener("click", () => this.openAnswerModal());
+    this.closeAnswerModalBtn.addEventListener("click", () => this.closeAnswerModal());
+    this.answerModal.addEventListener("click", (e) => {
+      if (e.target === this.answerModal) this.closeAnswerModal();
     });
 
     // SortableJSの初期化 (トレイとエディタの連携)
@@ -706,6 +720,24 @@ ${consoleText}
     document.body.removeChild(link);
     
     URL.revokeObjectURL(url);
+  }
+
+  openAnswerModal() {
+    if (!this.currentProblem) return;
+    
+    const correctBlocks = this.currentProblem.correctBlocks;
+    const lines = correctBlocks.map(b => {
+      const space = "  ".repeat(b.indent);
+      return space + b.text;
+    });
+    
+    this.answerCodePreview.textContent = lines.join("\n");
+    this.answerExplanationText.textContent = this.currentProblem.explanation;
+    this.answerModal.classList.add("open");
+  }
+
+  closeAnswerModal() {
+    this.answerModal.classList.remove("open");
   }
 }
 
