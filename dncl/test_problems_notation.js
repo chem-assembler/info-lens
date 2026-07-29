@@ -86,6 +86,31 @@ if (warnings.length) {
   [...new Set(warnings)].forEach(w => console.log(`WARN  ${w}`));
 }
 
+/**
+ * app.js のアドバイス文もカード名を「」で引用している（例:「合計 を表示する」）。
+ * カードの表記を変えたらここも直さないと、**生徒が画面で見ているカード名と
+ * アドバイスの文言が食い違う**（2026-07-30 の第3ラウンドで実際に4箇所残った）。
+ */
+{
+  const fs = require("fs");
+  const appPath = path.join(__dirname, "app.js");
+  if (fs.existsSync(appPath)) {
+    const src = fs.readFileSync(appPath, "utf8");
+    src.split("\n").forEach((line, i) => {
+      // 「〈式〉 を表示する」のようにカードを引用している箇所だけを拾う
+      const m = line.match(/「[^」]{0,30}(?:を表示する|の整数部分)[^」]{0,10}」/g);
+      if (m) {
+        m.forEach(q => {
+          ngCount++;
+          console.log(`NG  app.js:${i + 1} アドバイス文がカードを旧表記で引用している`);
+          console.log(`      ${q}`);
+          console.log(`      → カードの新表記（例「表示する(合計)」）に合わせる`);
+        });
+      }
+    });
+  }
+}
+
 console.log("\n==============================");
 console.log(`検査したカード: ${cardCount} 件 / 旧表記の残り: ${ngCount} 件`);
 console.log(`解説文の要確認: ${[...new Set(warnings)].length} 箇所（FAILには数えない）`);
