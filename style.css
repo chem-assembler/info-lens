@@ -735,3 +735,44 @@ footer {
     height: 500px;
   }
 }
+
+/* 学習モード選択タブ */
+.mode-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  background: rgba(10, 11, 16, 0.4);
+  backdrop-filter: blur(10px);
+  padding: 0.75rem 2rem;
+  border-bottom: 1px solid var(--border-color);
+  z-index: 9;
+}
+
+.mode-tab {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.5rem 1.5rem;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all var(--transition-normal);
+}
+
+.mode-tab:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.mode-tab.active {
+  color: white;
+  background: linear-gradient(135deg, var(--accent-purple) 0%, #6d28d9 100%);
+  border-color: transparent;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+  transform: translateY(-1px);
+}

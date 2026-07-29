@@ -50,6 +50,12 @@ class DNCLApp {
     this.answerCodePreview = document.getElementById("answer-code-preview");
     this.answerExplanationText = document.getElementById("answer-explanation-text");
 
+    // モード切り替え用DOM & 状態変数
+    this.currentMode = "exercise"; // exercise (問題演習) or syntax (構文学習)
+    this.modeExerciseBtn = document.getElementById("mode-exercise-btn");
+    this.modeSyntaxBtn = document.getElementById("mode-syntax-btn");
+    this.difficultyTabs = document.getElementById("difficulty-tabs");
+
     this.initEvents();
     this.loadProblemList();
   }
@@ -93,6 +99,10 @@ class DNCLApp {
       if (e.target === this.answerModal) this.closeAnswerModal();
     });
 
+    // モード切り替えタブ
+    this.modeExerciseBtn.addEventListener("click", () => this.switchMode("exercise"));
+    this.modeSyntaxBtn.addEventListener("click", () => this.switchMode("syntax"));
+
     // SortableJSの初期化 (トレイとエディタの連携)
     new Sortable(this.trayList, {
       group: {
@@ -117,35 +127,58 @@ class DNCLApp {
     });
   }
 
+  switchMode(mode) {
+    if (this.currentMode === mode) return;
+    this.currentMode = mode;
+    
+    if (mode === "exercise") {
+      this.modeExerciseBtn.classList.add("active");
+      this.modeSyntaxBtn.classList.remove("active");
+      this.difficultyTabs.style.display = "flex";
+    } else {
+      this.modeSyntaxBtn.classList.add("active");
+      this.modeExerciseBtn.classList.remove("active");
+      this.difficultyTabs.style.display = "none";
+    }
+    
+    this.loadProblemList();
+  }
+
   loadProblemList() {
     this.problemSelect.innerHTML = "";
-    problems.forEach(p => {
+    const targetList = this.currentMode === "exercise" ? problems : syntaxLessons;
+    
+    targetList.forEach(p => {
       const opt = document.createElement("option");
       opt.value = p.id;
-      opt.textContent = `${p.title} (${p.difficulty})`;
+      opt.textContent = this.currentMode === "exercise" ? `${p.title} (${p.difficulty})` : p.title;
       this.problemSelect.appendChild(opt);
     });
     
-    // 初期問題ロード
-    if (problems.length > 0) {
-      this.loadProblem(problems[0].id);
+    if (targetList.length > 0) {
+      this.loadProblem(targetList[0].id);
     }
   }
 
   loadProblem(id) {
-    const problem = problems.find(p => p.id === id);
+    const targetList = this.currentMode === "exercise" ? problems : syntaxLessons;
+    const problem = targetList.find(p => p.id === id);
     if (!problem) return;
     this.currentProblem = problem;
 
-    // UI更新
     this.problemTitle.textContent = problem.title;
     this.problemDesc.textContent = problem.description;
     
-    this.difficultyBadge.textContent = problem.difficulty;
-    this.difficultyBadge.className = "difficulty-badge";
-    if (problem.difficulty === "初級") this.difficultyBadge.classList.add("easy");
-    else if (problem.difficulty === "中級") this.difficultyBadge.classList.add("normal");
-    else this.difficultyBadge.classList.add("hard");
+    if (this.currentMode === "exercise") {
+      this.difficultyBadge.style.display = "inline-block";
+      this.difficultyBadge.textContent = problem.difficulty;
+      this.difficultyBadge.className = "difficulty-badge";
+      if (problem.difficulty === "初級") this.difficultyBadge.classList.add("easy");
+      else if (problem.difficulty === "中級") this.difficultyBadge.classList.add("normal");
+      else this.difficultyBadge.classList.add("hard");
+    } else {
+      this.difficultyBadge.style.display = "none";
+    }
 
     this.resetWorkspace();
   }
@@ -155,27 +188,27 @@ class DNCLApp {
     this.statusBar.style.display = "none";
     this.explanationSection.style.display = "none";
 
-    // 難易度に応じたカードリストの取得
     let sourceBlocks = [];
-    if (this.currentDifficulty === "easy") {
-      sourceBlocks = [...this.currentProblem.easyBlocks];
-    } else if (this.currentDifficulty === "normal") {
-      sourceBlocks = [...this.currentProblem.normalBlocks];
-    } else if (this.currentDifficulty === "hard") {
-      sourceBlocks = [...this.currentProblem.hardBlocks];
+    if (this.currentMode === "exercise") {
+      if (this.currentDifficulty === "easy") {
+        sourceBlocks = [...this.currentProblem.easyBlocks];
+      } else if (this.currentDifficulty === "normal") {
+        sourceBlocks = [...this.currentProblem.normalBlocks];
+      } else if (this.currentDifficulty === "hard") {
+        sourceBlocks = [...this.currentProblem.hardBlocks];
+      }
+    } else {
+      sourceBlocks = [...this.currentProblem.blocks];
     }
 
-    // シャッフル
     sourceBlocks = this.shuffleArray(sourceBlocks);
 
-    // トレイの初期化
     this.trayList.innerHTML = "";
     sourceBlocks.forEach(block => {
       const card = this.createBlockCard(block);
       this.trayList.appendChild(card);
     });
 
-    // エディタの初期化 (最初は空)
     this.editorList.innerHTML = `
       <div class="empty-placeholder" id="workspace-placeholder">
         <i class="fas fa-code"></i>
@@ -212,7 +245,7 @@ class DNCLApp {
     textSpan.className = "block-text";
 
     // ハードモードの穴埋め入力欄のレンダリング
-    if (block.inputs && this.currentDifficulty === "hard") {
+    if (block.inputs && this.currentDifficulty === "hard" && this.currentMode === "exercise") {
       let html = block.text;
       Object.keys(block.inputs).forEach(key => {
         const inputSpec = block.inputs[key];
@@ -315,7 +348,9 @@ class DNCLApp {
       if (card.querySelectorAll("input").length > 0) {
         // ハードモードで入力欄がある場合、テキストは入力値で組み立てる
         let rawText = "";
-        const originalBlock = this.currentProblem.hardBlocks.find(b => b.id === id);
+        const originalBlock = (this.currentMode === "exercise" && this.currentProblem.hardBlocks)
+          ? this.currentProblem.hardBlocks.find(b => b.id === id)
+          : null;
         if (originalBlock) {
           rawText = originalBlock.text;
           card.querySelectorAll("input").forEach(input => {
@@ -323,8 +358,10 @@ class DNCLApp {
             const val = this.normalizeInputText(input.value) || `[${key}]`;
             rawText = rawText.replace(`[${key}]`, val);
           });
+          text = rawText;
+        } else {
+          text = textSpan.textContent;
         }
-        text = rawText;
       } else {
         text = textSpan.textContent;
       }
@@ -617,7 +654,7 @@ class DNCLApp {
     }
 
     // 4. ハードモードでの穴埋め入力値のチェック
-    if (this.currentDifficulty === "hard") {
+    if (this.currentDifficulty === "hard" && this.currentMode === "exercise") {
       for (let i = 0; i < this.editorBlocks.length; i++) {
         const userBlock = this.editorBlocks[i];
         const originalBlock = this.currentProblem.hardBlocks.find(b => b.id === userBlock.id);

@@ -35,6 +35,16 @@
     </div>
   </header>
 
+  <!-- モード切り替えタブ -->
+  <nav class="mode-tabs" aria-label="学習モードの選択">
+    <button id="mode-exercise-btn" class="mode-tab active" title="問題演習モードに切り替えます">
+      <i class="fas fa-tasks"></i> 問題演習編
+    </button>
+    <button id="mode-syntax-btn" class="mode-tab" title="基本構文の学習モードに切り替えます">
+      <i class="fas fa-book-reader"></i> 構文学習編
+    </button>
+  </nav>
+
   <!-- メインコンテンツ -->
   <main>
     
@@ -52,7 +62,7 @@
         </article>
 
         <!-- 難易度切り替えタブ -->
-        <nav class="difficulty-tabs" aria-label="問題の難易度設定">
+        <nav class="difficulty-tabs" id="difficulty-tabs" aria-label="問題の難易度設定">
           <div class="diff-tab active" data-difficulty="easy" id="tab-easy">イージー</div>
           <div class="diff-tab" data-difficulty="normal" id="tab-normal">ノーマル</div>
           <div class="diff-tab" data-difficulty="hard" id="tab-hard">ハード</div>

@@ -127,9 +127,8 @@ class DNCLInterpreter {
     // 論理演算子
     result = result.replace(/\s+かつ\s+/g, " && ");
     result = result.replace(/\s+または\s+/g, " || ");
-    // 等価演算子（DNCLでは単一の「=」が比較に使われることもあるが、基本「==」か「と等しい」）
-    // 既に == になっているものはそのまま、= のみで比較になっているものを修正したいが、代入と混同しないよう注意
-    // 共通テスト本番では比較は「==」や「が〜と等しい」等。ここでは単純にJS互換にする
+    // 商の整数部分 (例: A / B の整数部分 -> Math.floor(A / B))
+    result = result.replace(/(.+?)\s*の整数部分/g, "Math.floor($1)");
     return result;
   }
 
@@ -192,13 +191,15 @@ class DNCLInterpreter {
       }
 
       // トレースログを仕込む
-      if (jsLine.endsWith("{")) {
+      if (jsLine.startsWith("} else")) {
+        codeLines.push(jsLine);
+        codeLines.push(`_trace(${i}, ${getVarsStateCode()});`);
+        if (openBlocks.length > 0) openBlocks.pop();
+        openBlocks.push(curIndent); // else用のブロックインデントを積み直す
+      } else if (jsLine.endsWith("{")) {
         codeLines.push(jsLine);
         codeLines.push(`_trace(${i}, ${getVarsStateCode()});`);
         openBlocks.push(curIndent); // ブロックを開始したインデントを積む
-      } else if (jsLine.startsWith("} else")) {
-        codeLines.push(jsLine);
-        codeLines.push(`_trace(${i}, ${getVarsStateCode()});`);
       } else {
         codeLines.push(jsLine);
         codeLines.push(`_trace(${i}, ${getVarsStateCode()});`);
