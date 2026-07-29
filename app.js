@@ -578,6 +578,9 @@ class DNCLApp {
         }
       } else if (this.editorBlocks.length < this.currentProblem.correctBlocks.length) {
         failMessage = "プログラムの行数が足りないようです。必要なカードがすべて配置されているか確認してください。";
+      } else {
+        // 典型的な誤答パターンの分析
+        failMessage = this.getDetailedFeedback();
       }
       
       this.statusText.innerHTML = `<i class="fas fa-times-circle"></i> ${failMessage}`;
@@ -653,6 +656,130 @@ class DNCLApp {
     }
 
     return true;
+  }
+
+  /**
+   * 典型的な誤答パターンの並び順とインデントを分析し、具体的なデバッグアドバイスを返します。
+   */
+  getDetailedFeedback() {
+    const problemId = this.currentProblem.id;
+    const blocks = this.editorBlocks;
+    
+    const getBlock = (id) => blocks.find(b => b.id === id);
+    const getIndex = (id) => blocks.findIndex(b => b.id === id);
+
+    if (problemId === "sum_1_to_n") {
+      const idxLoop = getIndex("b3");
+      const idxAdd = getIndex("b4");
+      const idxPrint = getIndex("b5");
+      const idxInit = getIndex("b2");
+
+      if (idxLoop === -1 || idxAdd === -1 || idxPrint === -1 || idxInit === -1) {
+        return "必要なカードが不足しています。すべてのカードを配置してください。";
+      }
+
+      const blockLoop = getBlock("b3");
+      const blockAdd = getBlock("b4");
+      const blockPrint = getBlock("b5");
+
+      // 1. 初期化がループの中にある
+      if (idxInit > idxLoop && blocks[idxInit].indent > blockLoop.indent) {
+        return "【アドバイス】変数をリセットする初期化処理「合計 = 0」が繰り返し（ループ）の中に入っています。これでは繰り返すたびに合計値が毎回クリアされてしまいます。「合計 = 0」を繰り返しより上の位置に移動し、インデントを外してください。";
+      }
+      
+      // 2. 加算処理がループの外（下）にある
+      if (idxAdd < idxLoop || blockAdd.indent <= blockLoop.indent) {
+        return "【アドバイス】合計に i を足す処理「合計 = 合計 + i」が、繰り返し（ループ）の外にあります。これではループの中で値が加算されません。カードの右矢印ボタンを押してインデントを下げ、繰り返しの中に配置してください。";
+      }
+
+      // 3. 出力処理がループの中にある
+      if (idxPrint > idxLoop && blockPrint.indent > blockLoop.indent) {
+        return "【アドバイス】結果を表示する処理「合計 を表示する」が、繰り返し（ループ）の中に入っています。これでは途中の計算結果が何度も表示されてしまいます。「合計 を表示する」のインデントを減らして繰り返しの外に出すか、カードを一番下に移動してください。";
+      }
+      
+      // 4. 初期化が加算より下（しかしループの外）にある
+      if (idxInit > idxAdd) {
+        return "【アドバイス】「合計 = 0」の初期化処理が、足し算処理「合計 = 合計 + i」より下にあります。計算を始める前に初期化されるように、初期化カードを上に移動してください。";
+      }
+    }
+
+    if (problemId === "find_max") {
+      const idxLoop = getIndex("b2");
+      const idxIf = getIndex("b3");
+      const idxUpdate = getIndex("b4");
+      const idxPrint = getIndex("b5");
+      const idxInit = getIndex("b1");
+
+      if (idxLoop === -1 || idxIf === -1 || idxUpdate === -1 || idxPrint === -1 || idxInit === -1) {
+        return "必要なカードが不足しています。";
+      }
+
+      const blockLoop = getBlock("b2");
+      const blockIf = getBlock("b3");
+      const blockUpdate = getBlock("b4");
+      const blockPrint = getBlock("b5");
+
+      // 1. 条件分岐がループの外にある
+      if (idxIf < idxLoop || blockIf.indent <= blockLoop.indent) {
+        return "【アドバイス】条件判定「もし A[i] > 最大値 ならば:」が繰り返しの外にあります。配列の各要素を順番に調べるために、このカードを繰り返しの中（インデントを下げた位置）に配置してください。";
+      }
+
+      // 2. 更新処理が条件分岐の外にある
+      if (idxUpdate < idxIf || blockUpdate.indent <= blockIf.indent) {
+        return "【アドバイス】最大値を更新する処理「最大値 = A[i]」が、条件判定「もし A[i] > 最大値 ならば:」の範囲に入っていません。このカードのインデントをさらに1段下げて（インデント2）、条件を満たしたときだけ実行されるようにしてください。";
+      }
+
+      // 3. 出力がループの中にある
+      if (idxPrint > idxLoop && blockPrint.indent > blockLoop.indent) {
+        return "【アドバイス】結果を表示する処理「最大値 を表示する」が繰り返しの中に入っています。すべてのチェックが終わった最後に1回だけ表示されるよう、カードを一番下に移動し、インデントを外してください。";
+      }
+      
+      // 4. 初期化がループの中にある
+      if (idxInit > idxLoop) {
+        return "【アドバイス】初期化「最大値 = A[0]」が繰り返しの中にあります。これでは毎回最大値が先頭の値にリセットされてしまいます。初期化カードを一番上に移動してください。";
+      }
+    }
+
+    if (problemId === "linear_search") {
+      const idxInit = getIndex("b1");
+      const idxLoop = getIndex("b2");
+      const idxIf = getIndex("b3");
+      const idxAssign = getIndex("b4");
+      const idxBreak = getIndex("b5");
+      const idxPrint = getIndex("b6");
+
+      if (idxInit === -1 || idxLoop === -1 || idxIf === -1 || idxAssign === -1 || idxBreak === -1 || idxPrint === -1) {
+        return "必要なカードが不足しています。";
+      }
+
+      const blockLoop = getBlock("b2");
+      const blockIf = getBlock("b3");
+      const blockAssign = getBlock("b4");
+      const blockBreak = getBlock("b5");
+      const blockPrint = getBlock("b6");
+
+      // 1. 条件判定がループの外
+      if (idxIf < idxLoop || blockIf.indent <= blockLoop.indent) {
+        return "【アドバイス】条件判定「もし A[i] == target ならば:」が繰り返しの外にあります。配列の値を調べるために、繰り返しの中（インデントを下げた位置）に配置してください。";
+      }
+
+      // 2. 位置代入が条件分岐の外
+      if (idxAssign < idxIf || blockAssign.indent <= blockIf.indent) {
+        return "【アドバイス】見つかった位置を記録する「位置 = i」が、条件判定「もし A[i] == target ならば:」の外側にあります。値が一致したときだけ記録されるよう、インデントを下げて（インデント2）配置してください。";
+      }
+
+      // 3. ループを抜けるが条件分岐の外
+      if (idxBreak < idxIf || blockBreak.indent <= blockIf.indent) {
+        return "【アドバイス】「ループを抜ける」が条件判定の外側にあります。これでは配列の最初の値を調べた直後に必ずループが終わってしまいます。インデントを下げて、見つかったときだけループを抜けるようにしてください。";
+      }
+
+      // 4. 出力がループの中
+      if (idxPrint > idxLoop && blockPrint.indent > blockLoop.indent) {
+        return "【アドバイス】出力処理「位置 を表示する」が繰り返しの中に入っています。探索がすべて終わった最後に表示されるよう、カードを一番下に移動し、インデントを外してください。";
+      }
+    }
+
+    return "プログラムの結果が期待と異なります。カードの並び順やインデント、穴埋めの値を確認してください。";
   }
 
   resetExecution() {
