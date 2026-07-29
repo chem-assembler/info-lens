@@ -169,27 +169,30 @@ class DNCLInterpreter {
     // ユーザーコードブロックをJSに変換して流し込む
     for (let i = 0; i < blocks.length; i++) {
       const currentBlock = blocks[i];
-      const nextBlock = blocks[i + 1];
       const curIndent = currentBlock.indent || 0;
-      const nextIndent = nextBlock ? (nextBlock.indent || 0) : 0;
 
-      let jsLine = this.convertLineToJS(currentBlock.text, nextIndent, curIndent);
+      let jsLine = this.convertLineToJS(currentBlock.text, 0, curIndent);
 
-      // 次のインデントが現在のインデントより浅くなる場合、閉じる必要がある中かっこを検出
+      // 現在の行を処理する前に、インデントの減少をチェックして } を補完する
       let closeBracesCode = "";
-      const isBlockStart = jsLine.endsWith("{");
+      const textTrim = currentBlock.text.trim();
+      const isElse = textTrim.startsWith("そうでなければ:") || textTrim.startsWith("そうではなくもし");
+      
+      // else系のときは、対応する if ブロックと同じインデントなので、スタック上の if (curIndent) はまだ閉じない。
+      // 通常の行のときは、スタック内の curIndent 以上のブロックをすべて閉じる。
+      while (openBlocks.length > 0 && (
+        isElse ? openBlocks[openBlocks.length - 1] > curIndent : openBlocks[openBlocks.length - 1] >= curIndent
+      )) {
+        openBlocks.pop();
+        closeBracesCode += "}\n";
+      }
 
-      // ブロック開始行ではない場合（または次の行のインデントが浅くなる場合）、
-      // スタック内の現在のインデント以上のブロックをすべて閉じる
-      if (!isBlockStart) {
-        while (openBlocks.length > 0 && openBlocks[openBlocks.length - 1] >= nextIndent) {
-          openBlocks.pop();
-          closeBracesCode += "}\n";
-        }
+      if (closeBracesCode) {
+        codeLines.push(closeBracesCode);
       }
 
       // トレースログを仕込む
-      if (isBlockStart) {
+      if (jsLine.endsWith("{")) {
         codeLines.push(jsLine);
         codeLines.push(`_trace(${i}, ${getVarsStateCode()});`);
         openBlocks.push(curIndent); // ブロックを開始したインデントを積む
@@ -199,9 +202,6 @@ class DNCLInterpreter {
       } else {
         codeLines.push(jsLine);
         codeLines.push(`_trace(${i}, ${getVarsStateCode()});`);
-        if (closeBracesCode) {
-          codeLines.push(closeBracesCode);
-        }
       }
     }
 
