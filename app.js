@@ -320,7 +320,7 @@ class DNCLApp {
           rawText = originalBlock.text;
           card.querySelectorAll("input").forEach(input => {
             const key = input.dataset.inputKey;
-            const val = input.value.trim() || `[${key}]`;
+            const val = this.normalizeInputText(input.value) || `[${key}]`;
             rawText = rawText.replace(`[${key}]`, val);
           });
         }
@@ -628,7 +628,9 @@ class DNCLApp {
             let inputsAllCorrect = true;
             Object.keys(originalBlock.inputs).forEach(key => {
               const inputEl = cardEl.querySelector(`input[data-input-key="${key}"]`);
-              if (!inputEl || inputEl.value.trim() !== originalBlock.inputs[key].correct) {
+              const userVal = this.normalizeInputText(inputEl ? inputEl.value : "");
+              const correctVal = this.normalizeInputText(originalBlock.inputs[key].correct);
+              if (userVal !== correctVal) {
                 inputsAllCorrect = false;
               }
             });
@@ -903,6 +905,26 @@ ${consoleText}
 
   closeAnswerModal() {
     this.answerModal.classList.remove("open");
+  }
+
+  /**
+   * 入力された全角文字（英数字、大かっこ、マイナス等）を半角に正規化します。
+   */
+  normalizeInputText(str) {
+    if (!str) return "";
+    return str.trim()
+      // 全角英数字を半角に変換
+      .replace(/[！-～]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
+      // 特殊な全角記号を半角に変換
+      .replace(/　/g, " ")
+      .replace(/－/g, "-")
+      .replace(/ー/g, "-")
+      .replace(/［/g, "[")
+      .replace(/］/g, "]")
+      .replace(/（/g, "(")
+      .replace(/）/g, ")")
+      .replace(/＝/g, "=")
+      .replace(/＋/g, "+");
   }
 }
 
