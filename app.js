@@ -670,6 +670,43 @@ class DNCLApp {
     const getBlock = (id) => blocks.find(b => b.id === id);
     const getIndex = (id) => blocks.findIndex(b => b.id === id);
 
+    if (problemId === "count_multiples_of_3") {
+      const idxLoop = getIndex("b3");
+      const idxIf = getIndex("b4");
+      const idxAdd = getIndex("b5");
+      const idxPrint = getIndex("b6");
+      const idxInit = getIndex("b2");
+
+      if (idxLoop === -1 || idxIf === -1 || idxAdd === -1 || idxPrint === -1 || idxInit === -1) {
+        return "必要なカードが不足しています。すべてのカードを配置してください。";
+      }
+
+      const blockLoop = getBlock("b3");
+      const blockIf = getBlock("b4");
+      const blockAdd = getBlock("b5");
+      const blockPrint = getBlock("b6");
+
+      // 1. 初期化がループの中にある
+      if (idxInit > idxLoop && blocks[idxInit].indent > blockLoop.indent) {
+        return "【アドバイス】カウント初期化処理「個数 = 0」が繰り返し（ループ）の中に入っています。これでは繰り返すたびに個数が 0 にクリアされてしまいます。「個数 = 0」を繰り返しより上の位置に移動し、インデントを外してください。";
+      }
+
+      // 2. 条件判定がループの外
+      if (idxIf < idxLoop || blockIf.indent <= blockLoop.indent) {
+        return "【アドバイス】条件判定「もし i % 3 == 0 ならば:」が繰り返しの外にあります。ループの中で各数値をチェックするために、このカードのインデントを下げて繰り返しの中に配置してください。";
+      }
+
+      // 3. カウントアップが条件分岐の外
+      if (idxAdd < idxIf || blockAdd.indent <= blockIf.indent) {
+        return "【アドバイス】個数を増やす処理「個数 = 個数 + 1」が、条件判定「もし i % 3 == 0 ならば:」の範囲に入っていません。このカードのインデントをさらに1段下げて（インデント2）、条件を満たしたときだけカウントされるようにしてください。";
+      }
+
+      // 4. 出力がループの中にある
+      if (idxPrint > idxLoop && blockPrint.indent > blockLoop.indent) {
+        return "【アドバイス】結果を表示する処理「個数 を表示する」が、繰り返し（ループ）の中に入っています。すべてのチェックが終わった最後に1回だけ表示されるよう、カードを一番下に移動し、インデントを外してください。";
+      }
+    }
+
     if (problemId === "sum_1_to_n") {
       const idxLoop = getIndex("b3");
       const idxAdd = getIndex("b4");
