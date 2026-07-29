@@ -143,36 +143,204 @@ class DNCLInterpreter {
   }
 
   /**
+   * 2次元配列のカンマ添字 A[i, j] を A[i][j] に変換する
+   * ネストした添字 (例: A[B[0], 1]) や式に対応
+   */
+  transform2DArrayIndices(expr) {
+    let str = expr;
+    let changed = true;
+    let guard = 0;
+    while (changed && guard++ < 20) {
+      changed = false;
+      const regex = /([a-zA-Z\u30a0-\u30ff\u3040-\u309f\u4e00-\u9faf_0-9]+)\[/g;
+      let match;
+      while ((match = regex.exec(str)) !== null) {
+        const ident = match[1];
+        const startBracketIdx = match.index + ident.length; // "[" の位置
+        
+        let bracketDepth = 0;
+        let parenDepth = 0;
+        let topCommaIdx = -1;
+        let endBracketIdx = -1;
+
+        for (let i = startBracketIdx; i < str.length; i++) {
+          const ch = str[i];
+          if (ch === "[") bracketDepth++;
+          else if (ch === "]") {
+            bracketDepth--;
+            if (bracketDepth === 0) {
+              endBracketIdx = i;
+              break;
+            }
+          } else if (ch === "(") parenDepth++;
+          else if (ch === ")") parenDepth--;
+          else if (ch === "," && bracketDepth === 1 && parenDepth === 0) {
+            topCommaIdx = i;
+          }
+        }
+
+        if (endBracketIdx !== -1 && topCommaIdx !== -1) {
+          const firstArg = str.substring(startBracketIdx + 1, topCommaIdx).trim();
+          const secondArg = str.substring(topCommaIdx + 1, endBracketIdx).trim();
+          const replacement = `${ident}[${firstArg}][${secondArg}]`;
+          str = str.substring(0, match.index) + replacement + str.substring(endBracketIdx + 1);
+          changed = true;
+          break;
+        }
+      }
+    }
+    return str;
+  }
+
+  /**
+   * 整数除算 ÷ を Math.floor((left) / (right)) に変換する
+   * ネストした括弧や連続する ÷、前置マイナス符号に対応
+   */
+  transformIntegerDivisions(expr) {
+    let str = expr;
+    let guard = 0;
+    while (str.includes("÷") && guard++ < 20) {
+      const divIdx = str.indexOf("÷");
+      
+      // 1. 左オペランドの終端を探す
+      let leftEnd = divIdx - 1;
+      while (leftEnd >= 0 && /\s/.test(str[leftEnd])) {
+        leftEnd--;
+      }
+      if (leftEnd < 0) break;
+
+      // 左オペランドの開始位置を探す
+      let leftStart = leftEnd;
+
+      const endCh = str[leftEnd];
+      if (endCh === ")" || endCh === "]") {
+        let pCount = (endCh === ")") ? 1 : 0;
+        let bCount = (endCh === "]") ? 1 : 0;
+        leftStart--;
+        while (leftStart >= 0 && (pCount > 0 || bCount > 0)) {
+          const c = str[leftStart];
+          if (c === ")") pCount++;
+          else if (c === "(") pCount--;
+          else if (c === "]") bCount++;
+          else if (c === "[") bCount--;
+          leftStart--;
+        }
+        while (leftStart >= 0 && /[a-zA-Z\u30a0-\u30ff\u3040-\u309f\u4e00-\u9faf_0-9\.]/.test(str[leftStart])) {
+          leftStart--;
+        }
+        leftStart++;
+      } else {
+        while (leftStart >= 0 && /[a-zA-Z\u30a0-\u30ff\u3040-\u309f\u4e00-\u9faf_0-9\.]/.test(str[leftStart])) {
+          leftStart--;
+        }
+        leftStart++;
+      }
+
+      // 前置マイナス/プラス符号の判定
+      let prevIdx = leftStart - 1;
+      while (prevIdx >= 0 && /\s/.test(str[prevIdx])) prevIdx--;
+      if (prevIdx >= 0 && (str[prevIdx] === "-" || str[prevIdx] === "+")) {
+        let beforeSign = prevIdx - 1;
+        while (beforeSign >= 0 && /\s/.test(str[beforeSign])) beforeSign--;
+        if (beforeSign < 0 || /[\+\-\*\/\%\=\<\>\(\,\:\!]/.test(str[beforeSign])) {
+          leftStart = prevIdx;
+        }
+      }
+
+      // 2. 右オペランドの開始位置を探す
+      let rightStart = divIdx + 1;
+      while (rightStart < str.length && /\s/.test(str[rightStart])) {
+        rightStart++;
+      }
+      if (rightStart >= str.length) break;
+
+      let rightEnd = rightStart;
+      if (str[rightEnd] === "-" || str[rightEnd] === "+") {
+        rightEnd++;
+        while (rightEnd < str.length && /\s/.test(str[rightEnd])) rightEnd++;
+      }
+
+      const firstRightCh = str[rightEnd];
+      if (firstRightCh === "(" || firstRightCh === "[") {
+        let pCount = (firstRightCh === "(") ? 1 : 0;
+        let bCount = (firstRightCh === "[") ? 1 : 0;
+        rightEnd++;
+        while (rightEnd < str.length && (pCount > 0 || bCount > 0)) {
+          const c = str[rightEnd];
+          if (c === "(") pCount++;
+          else if (c === ")") pCount--;
+          else if (c === "[") bCount++;
+          else if (c === "]") bCount--;
+          rightEnd++;
+        }
+      } else {
+        while (rightEnd < str.length && /[a-zA-Z\u30a0-\u30ff\u3040-\u309f\u4e00-\u9faf_0-9\.]/.test(str[rightEnd])) {
+          rightEnd++;
+        }
+        if (rightEnd < str.length && (str[rightEnd] === "[" || str[rightEnd] === "(")) {
+          const openCh = str[rightEnd];
+          let pCount = (openCh === "(") ? 1 : 0;
+          let bCount = (openCh === "[") ? 1 : 0;
+          rightEnd++;
+          while (rightEnd < str.length && (pCount > 0 || bCount > 0)) {
+            const c = str[rightEnd];
+            if (c === "(") pCount++;
+            else if (c === ")") pCount--;
+            else if (c === "[") bCount++;
+            else if (c === "]") bCount--;
+            rightEnd++;
+          }
+        }
+      }
+
+      const leftOperand = str.substring(leftStart, divIdx).trim();
+      const rightOperand = str.substring(divIdx + 1, rightEnd).trim();
+      const replacement = `Math.floor((${leftOperand}) / (${rightOperand}))`;
+      str = str.substring(0, leftStart) + replacement + str.substring(rightEnd);
+    }
+    return str;
+  }
+
+  /**
    * DNCL特有の表記をJS式に翻訳
    * - 「かつ」「または」「and」「or」「not」などの論理演算子の変換
    * - カンマ添字2次元配列 A[i,j] -> A[i][j]
    * - 整数除算 ÷ の変換
+   * - 文字列リテラルの保護
    */
   translateExpression(expr) {
     let result = expr;
 
-    // 2次元配列 A[i, j] -> A[i][j] (配列リテラル [1, 2] と区別するため直前に識別子)
-    result = result.replace(/([a-zA-Z\u30a0-\u30ff\u3040-\u309f\u4e00-\u9faf_0-9]+)\[([^\]]+?),\s*([^\]]+?)\]/g, "$1[$2][$3]");
+    // 1. 文字列リテラルの退避 (プレースホルダ方式)
+    const stringLiterals = [];
+    result = result.replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g, (match) => {
+      stringLiterals.push(match);
+      return `__STR_LITERAL_${stringLiterals.length - 1}__`;
+    });
 
-    // 整数除算 ÷ (例: 7 ÷ 2 -> Math.floor((7) / (2)))
-    while (result.includes("÷")) {
-      const next = result.replace(/((?:\([^()]*\)|[a-zA-Z\u30a0-\u30ff\u3040-\u309f\u4e00-\u9faf_0-9\.\[\]]+))\s*÷\s*((?:\([^()]*\)|[a-zA-Z\u30a0-\u30ff\u3040-\u309f\u4e00-\u9faf_0-9\.\[\]]+))/g, "Math.floor(($1) / ($2))");
-      if (next === result) break;
-      result = next;
-    }
+    // 2. 2次元配列 A[i, j] -> A[i][j] (入れ子添字対応)
+    result = this.transform2DArrayIndices(result);
 
-    // 論理演算子 (公式: and / or / not)
-    result = result.replace(/\bnot\b/gi, " !");
-    result = result.replace(/\band\b/gi, " && ");
-    result = result.replace(/\bor\b/gi, " || ");
+    // 3. 整数除算 ÷ -> Math.floor((left) / (right)) (連続÷、入れ子括弧、負の数床対応)
+    result = this.transformIntegerDivisions(result);
+
+    // 4. 論理演算子 (公式: and / or / not は小文字のみ)
+    result = result.replace(/\bnot\b/g, " !");
+    result = result.replace(/\band\b/g, " && ");
+    result = result.replace(/\bor\b/g, " || ");
     result = result.replace(/\s+かつ\s+/g, " && ");
     result = result.replace(/\s+または\s+/g, " || ");
 
-    // 商の整数部分 (例: A / B の整数部分 -> Math.floor(A / B))
+    // 5. 商の整数部分 (例: A / B の整数部分 -> Math.floor(A / B))
     result = result.replace(/(.+?)\s*の整数部分/g, "Math.floor($1)");
 
-    // 数字始まりの関数呼び出しを安全な識別子に変換 (例: 2倍にする(5) -> _2倍にする(5))
+    // 6. 数字始まりの関数呼び出しを安全な識別子に変換 (例: 2倍にする(5) -> _2倍にする(5))
     result = result.replace(/\b([0-9][a-zA-Z\u30a0-\u30ff\u3040-\u309f\u4e00-\u9faf_0-9]*)\s*\(/g, '_$1(');
+
+    // 7. 文字列リテラルの復元
+    result = result.replace(/__STR_LITERAL_(\d+)__/g, (_, index) => {
+      return stringLiterals[parseInt(index, 10)];
+    });
 
     return result;
   }
