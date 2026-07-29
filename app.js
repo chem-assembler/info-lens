@@ -132,6 +132,8 @@ class DNCLApp {
       delay: 80, // タッチ操作でのスクロール競合を防ぐための遅延
       delayOnTouchOnly: true,
       touchStartThreshold: 5,
+      filter: ".locked-card", // ロックされたカードはドラッグ不可にする
+      preventOnFilter: false,
       onStart: () => { this.isDragging = true; },
       onEnd: () => {
         setTimeout(() => { this.isDragging = false; }, 80);
@@ -150,6 +152,8 @@ class DNCLApp {
       delay: 80,
       delayOnTouchOnly: true,
       touchStartThreshold: 5,
+      filter: ".locked-card", // ロックされたカードはドラッグ不可にする
+      preventOnFilter: false,
       onStart: () => { this.isDragging = true; },
       onEnd: () => {
         setTimeout(() => { this.isDragging = false; }, 80);
@@ -232,23 +236,36 @@ class DNCLApp {
       sourceBlocks = [...this.currentProblem.blocks];
     }
 
-    sourceBlocks = this.shuffleArray(sourceBlocks);
+    // ロックされたカードはトレイから除外
+    const trayBlocks = this.shuffleArray(sourceBlocks.filter(block => !block.isLocked));
 
     this.trayList.innerHTML = "";
-    sourceBlocks.forEach(block => {
+    trayBlocks.forEach(block => {
       const card = this.createBlockCard(block);
       this.trayList.appendChild(card);
     });
 
-    this.editorList.innerHTML = `
-      <div class="empty-placeholder" id="workspace-placeholder">
-        <i class="fas fa-code"></i>
-        <span>ここにカードをドラッグ＆ドロップしてプログラムを組み立ててください</span>
-      </div>
-    `;
+    // エディタをクリア
+    this.editorList.innerHTML = "";
 
-    this.editorBlocks = [];
-    this.updatePreview();
+    // ロックされたカードを最初からエディタに配置
+    const lockedBlocks = this.currentProblem.correctBlocks.filter(block => block.isLocked);
+    
+    if (lockedBlocks.length > 0) {
+      lockedBlocks.forEach(block => {
+        const card = this.createBlockCard(block);
+        this.editorList.appendChild(card);
+      });
+    } else {
+      this.editorList.innerHTML = `
+        <div class="empty-placeholder" id="workspace-placeholder">
+          <i class="fas fa-code"></i>
+          <span>ここにカードをドラッグ＆ドロップしてプログラムを組み立ててください</span>
+        </div>
+      `;
+    }
+
+    this.onBlocksChanged();
     this.updateVariableMonitor(this.currentProblem.initialState);
     this.updateStepControls();
   }
@@ -271,6 +288,11 @@ class DNCLApp {
     if (block.isDummy) {
       card.classList.add("dummy-card");
       card.dataset.isDummy = "true";
+    }
+
+    if (block.isLocked) {
+      card.classList.add("locked-card");
+      card.dataset.isLocked = "true";
     }
 
     const textSpan = document.createElement("span");

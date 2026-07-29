@@ -935,3 +935,37 @@ footer {
 #tray-list::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.02);
 }
+
+/* 固定ロックカードのスタイル */
+.block-card.locked-card {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  border-left-color: #64748b !important; /* グレー系で固定であることを表現 */
+  cursor: default !important; /* 掴むカーソルを無効化 */
+  box-shadow: none !important;
+  opacity: 0.8;
+  position: relative;
+}
+
+.block-card.locked-card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.block-card.locked-card .indent-btn-group {
+  display: none !important; /* インデント操作を非表示に */
+}
+
+/* ロックカードの鍵アイコン表示 */
+.block-card.locked-card::after {
+  content: "\f023"; /* FontAwesomeのlockアイコン */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  color: #64748b;
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+}

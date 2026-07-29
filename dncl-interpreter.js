@@ -216,6 +216,36 @@ class DNCLInterpreter {
   }
 
   /**
+   * エラーメッセージを初心者向けに分かりやすい日本語に翻訳する
+   */
+  translateError(errMsg) {
+    if (!errMsg) return "プログラムの実行中に未知のエラーが発生しました。";
+
+    // 1. ReferenceError (変数未定義)
+    const refMatch = errMsg.match(/([a-zA-Z\u30a0-\u30ff\u3040-\u309f\u4e00-\u9faf_]+)\s+is\s+not\s+defined/);
+    if (refMatch) {
+      return `エラー: 変数「${refMatch[1]}」が定義されていません。初期化処理のカードを配置しているか、変数名のスペルが合っているか確認してください。`;
+    }
+
+    // 2. TypeError (未定義オブジェクト・配列へのアクセス)
+    if (errMsg.includes("Cannot read properties of undefined") || errMsg.includes("is undefined")) {
+      return "エラー: 未定義の変数、または存在しない配列の要素（インデックスが範囲外など）を参照しようとしています。";
+    }
+
+    // 3. SyntaxError (インデント崩れや括弧の不整合など)
+    if (errMsg.includes("Missing catch or finally") || errMsg.includes("Unexpected token") || errMsg.includes("Unexpected end of input")) {
+      return "構文エラー: プログラムの組み立て（もし、繰り返し、インデントの対応関係）に誤りがあります。カードの並び順とインデントを調整してください。";
+    }
+
+    // 4. その他の関数呼び出しエラー
+    if (errMsg.includes("is not a function")) {
+      return "エラー: 関数ではないオブジェクトを関数として呼び出そうとしています。記述ミスがないか確認してください。";
+    }
+
+    return "実行エラー: " + errMsg;
+  }
+
+  /**
    * DNCLコードの実行トレースを生成する
    */
   run(blocks, initialVars = {}) {
@@ -272,11 +302,14 @@ class DNCLInterpreter {
     try {
       const runner = new Function(sandboxCode);
       const result = runner();
+      if (result && !result.success) {
+        result.error = this.translateError(result.error);
+      }
       return result;
     } catch (compileError) {
       return {
         success: false,
-        error: "構文エラー: プログラムの組み立てまたは入力値に誤りがあります。 (" + compileError.message + ")",
+        error: this.translateError(compileError.message),
         trace: [],
         output: []
       };
