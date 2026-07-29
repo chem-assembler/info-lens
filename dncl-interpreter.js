@@ -86,6 +86,23 @@ class DNCLInterpreter {
       return `while (${this.translateExpression(cond)}) {`;
     }
 
+    // 6.5. 自作関数の定義
+    // 例: 関数 2倍にする(x) を定義する: -> function _2倍にする(x) {  (先頭数字は _ でエスケープ)
+    const funcMatch = js.match(/^関数\s*([a-zA-Z\u30a0-\u30ff\u3040-\u309f\u4e00-\u9faf_0-9]+)\((.*?)\)\s*を定義する:$/);
+    if (funcMatch) {
+      const rawName = funcMatch[1];
+      const funcName = /^[0-9]/.test(rawName) ? `_${rawName}` : rawName;
+      const args = funcMatch[2].trim();
+      return `function ${funcName}(${args}) {`;
+    }
+
+    // 6.6. 返り値 (返す)
+    // 例: 返す x * 2 -> return x * 2;
+    if (js.startsWith("返す ")) {
+      const expr = js.substring(3).trim();
+      return `return ${this.translateExpression(expr)};`;
+    }
+
     // 7. i を 1 から N まで 1 ずつ増やしながら繰り返す:
     // 例: i を 1 から N まで 1 ずつ増やしながら繰り返す:
     // DNCL規格: 「変数 を 初期値 から 目標値 まで 増分 ずつ増やしながら（減らしながら）、繰り返す:」
@@ -129,6 +146,8 @@ class DNCLInterpreter {
     result = result.replace(/\s+または\s+/g, " || ");
     // 商の整数部分 (例: A / B の整数部分 -> Math.floor(A / B))
     result = result.replace(/(.+?)\s*の整数部分/g, "Math.floor($1)");
+    // 数字始まりの関数呼び出しを安全な識別子に変換 (例: 2倍にする(5) -> _2倍にする(5))
+    result = result.replace(/\b([0-9][a-zA-Z\u30a0-\u30ff\u3040-\u309f\u4e00-\u9faf_0-9]*)\s*\(/g, '_$1(');
     return result;
   }
 

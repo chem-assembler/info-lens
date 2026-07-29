@@ -941,6 +941,21 @@ class DNCLApp {
       const idxArr = getIndex("l0");
       const idxVal = getIndex("l1");
       if (idxVal !== -1 && idxArr !== -1 && idxArr > idxVal) return false;
+    } else if (problemId === "lesson_while") {
+      const idxA = getIndex("l1");
+      const idxLoop = getIndex("l2");
+      if (idxLoop !== -1 && idxA !== -1 && idxA > idxLoop) return false;
+    } else if (problemId === "lesson_function") {
+      const idxDef = getIndex("l1");
+      const idxRet = getIndex("l2");
+      const idxCall = getIndex("l3");
+      // 関数定義は呼び出しより前、返すは定義ブロックの中（idxDef < idxRet < idxCall）
+      if (idxDef !== -1 && idxCall !== -1 && idxDef > idxCall) return false;
+      if (idxRet !== -1 && idxDef !== -1 && idxRet < idxDef) return false;
+    } else if (problemId === "lesson_2d_array") {
+      const idxArr = getIndex("l0");
+      const idxVal = getIndex("l1");
+      if (idxVal !== -1 && idxArr !== -1 && idxArr > idxVal) return false;
     }
 
     return true;
