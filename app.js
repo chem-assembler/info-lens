@@ -12,6 +12,7 @@ class DNCLApp {
     this.currentStepIndex = -1;
     this.isPlaying = false;
     this.playInterval = null;
+    this.isDragging = false; // ドラッグ中かどうかのフラグ（タップ誤判定防止）
 
     // DOM要素のキャッシュ
     this.problemSelect = document.getElementById("problem-select");
@@ -103,7 +104,7 @@ class DNCLApp {
     this.modeExerciseBtn.addEventListener("click", () => this.switchMode("exercise"));
     this.modeSyntaxBtn.addEventListener("click", () => this.switchMode("syntax"));
 
-    // SortableJSの初期化 (トレイとエディタの連携)
+    // SortableJSの初期化 (トレイとエディタの連携、タッチ対応オプション追加)
     new Sortable(this.trayList, {
       group: {
         name: "shared",
@@ -112,7 +113,14 @@ class DNCLApp {
       },
       animation: 150,
       ghostClass: "sortable-ghost",
-      onEnd: () => this.onBlocksChanged()
+      delay: 80, // タッチ操作でのスクロール競合を防ぐための遅延
+      delayOnTouchOnly: true,
+      touchStartThreshold: 5,
+      onStart: () => { this.isDragging = true; },
+      onEnd: () => {
+        setTimeout(() => { this.isDragging = false; }, 80);
+        this.onBlocksChanged();
+      }
     });
 
     new Sortable(this.editorList, {
@@ -123,7 +131,14 @@ class DNCLApp {
       },
       animation: 150,
       ghostClass: "sortable-ghost",
-      onEnd: () => this.onBlocksChanged()
+      delay: 80,
+      delayOnTouchOnly: true,
+      touchStartThreshold: 5,
+      onStart: () => { this.isDragging = true; },
+      onEnd: () => {
+        setTimeout(() => { this.isDragging = false; }, 80);
+        this.onBlocksChanged();
+      }
     });
   }
 
@@ -301,7 +316,46 @@ class DNCLApp {
     btnGroup.appendChild(incBtn);
     card.appendChild(btnGroup);
 
+    // タッチパッド・スマホ用のタップ簡単配置イベント
+    card.addEventListener("click", (e) => {
+      // インプット要素やインデントボタンのクリック時は何もしない
+      if (e.target.tagName === "INPUT" || e.target.closest(".indent-btn-group")) {
+        return;
+      }
+      
+      // ドラッグ操作中、または直後のクリック誤動作をガード
+      if (this.isDragging) {
+        return;
+      }
+
+      this.handleCardTap(card);
+    });
+
     return card;
+  }
+
+  /**
+   * カードタップ時にトレイとエディタ間を自動で移動させる（タッチ操作の補助）
+   */
+  handleCardTap(card) {
+    const isAtTray = this.trayList.contains(card);
+    
+    if (isAtTray) {
+      // トレイからエディタへ移動
+      const placeholder = document.getElementById("workspace-placeholder");
+      if (placeholder) placeholder.remove();
+      this.editorList.appendChild(card);
+    } else {
+      // エディタからトレイへ戻す
+      this.trayList.appendChild(card);
+      // インデントのリセット
+      const currentIndent = parseInt(card.dataset.indent || "0", 10);
+      card.classList.remove(`indent-${currentIndent}`);
+      card.classList.add("indent-0");
+      card.dataset.indent = "0";
+    }
+
+    this.onBlocksChanged();
   }
 
   adjustIndent(card, diff) {
