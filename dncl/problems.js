@@ -13,19 +13,19 @@ const problems = [
       { id: "b2", text: "合計 = 0", indent: 0 },
       { id: "b3", text: "i を 1 から N まで 1 ずつ増やしながら繰り返す:", indent: 0 },
       { id: "b4", text: "合計 = 合計 + i", indent: 1 },
-      { id: "b5", text: "合計 を表示する", indent: 0 }
+      { id: "b5", text: "表示する(合計)", indent: 0 }
     ],
     easyBlocks: [
       { id: "b4", text: "合計 = 合計 + i" },
       { id: "b1", text: "N = 10", isLocked: true },
-      { id: "b5", text: "合計 を表示する" },
+      { id: "b5", text: "表示する(合計)" },
       { id: "b3", text: "i を 1 から N まで 1 ずつ増やしながら繰り返す:" },
       { id: "b2", text: "合計 = 0" }
     ],
     normalBlocks: [
       { id: "b4", text: "合計 = 合計 + i" },
       { id: "b1", text: "N = 10", isLocked: true },
-      { id: "b5", text: "合計 を表示する" },
+      { id: "b5", text: "表示する(合計)" },
       { id: "b3", text: "i を 1 から N まで 1 ずつ増やしながら繰り返す:" },
       { id: "b2", text: "合計 = 0" },
       { id: "d1", text: "合計 = 合計 + 1", isDummy: true, reason: "これでは毎回1しか足されず、1からNまでの合計になりません。" },
@@ -34,7 +34,7 @@ const problems = [
     hardBlocks: [
       { id: "b4", text: "合計 = 合計 + [input_add]", inputs: { input_add: { placeholder: "足す値", correct: "i" } } },
       { id: "b1", text: "N = 10", isLocked: true },
-      { id: "b5", text: "[input_print] を表示する", inputs: { input_print: { placeholder: "表示する変数", correct: "合計" } } },
+      { id: "b5", text: "表示する([input_print])", inputs: { input_print: { placeholder: "表示する変数", correct: "合計" } } },
       { id: "b3", text: "i を 1 から N まで 1 ずつ増やしながら繰り返す:" },
       { id: "b2", text: "合計 = 0" }
     ],
@@ -67,12 +67,12 @@ const problems = [
       { id: "b3", text: "i を 1 から N まで 1 ずつ増やしながら繰り返す:", indent: 0 },
       { id: "b4", text: "もし i % 3 == 0 ならば:", indent: 1 },
       { id: "b5", text: "個数 = 個数 + 1", indent: 2 },
-      { id: "b6", text: "個数 を表示する", indent: 0 }
+      { id: "b6", text: "表示する(個数)", indent: 0 }
     ],
     easyBlocks: [
       { id: "b5", text: "個数 = 個数 + 1" },
       { id: "b1", text: "N = 20", isLocked: true },
-      { id: "b6", text: "個数 を表示する" },
+      { id: "b6", text: "表示する(個数)" },
       { id: "b3", text: "i を 1 から N まで 1 ずつ増やしながら繰り返す:" },
       { id: "b2", text: "個数 = 0" },
       { id: "b4", text: "もし i % 3 == 0 ならば:" }
@@ -80,7 +80,7 @@ const problems = [
     normalBlocks: [
       { id: "b5", text: "個数 = 個数 + 1" },
       { id: "b1", text: "N = 20", isLocked: true },
-      { id: "b6", text: "個数 を表示する" },
+      { id: "b6", text: "表示する(個数)" },
       { id: "b3", text: "i を 1 から N まで 1 ずつ増やしながら繰り返す:" },
       { id: "b2", text: "個数 = 0" },
       { id: "b4", text: "もし i % 3 == 0 ならば:" },
@@ -93,7 +93,7 @@ const problems = [
       { id: "b3", text: "i を 1 から N まで 1 ずつ増やしながら繰り返す:" },
       { id: "b4", text: "もし [input_cond] == 0 ならば:", inputs: { input_cond: { placeholder: "条件式 (例: i % 3)", correct: "i % 3" } } },
       { id: "b5", text: "個数 = [input_inc]", inputs: { input_inc: { placeholder: "加算式 (例: 個数 + 1)", correct: "個数 + 1" } } },
-      { id: "b6", text: "個数 を表示する" }
+      { id: "b6", text: "表示する(個数)" }
     ],
     narratives: {
       b1: (vars) => `変数 N に 20 を代入する`,
@@ -122,35 +122,35 @@ const problems = [
       { id: "b1", text: "西暦 = 2024", indent: 0, isLocked: true },
       { id: "b2", text: "うるう年 = 0", indent: 0 },
       { id: "b3", text: "もし 西暦 % 4 == 0 ならば:", indent: 0 },
-      { id: "b4", text: "もし 西暦 % 100 != 0 または 西暦 % 400 == 0 ならば:", indent: 1 },
+      { id: "b4", text: "もし 西暦 % 100 != 0 or 西暦 % 400 == 0 ならば:", indent: 1 },
       { id: "b5", text: "うるう年 = 1", indent: 2 },
-      { id: "b6", text: "うるう年 を表示する", indent: 0 }
+      { id: "b6", text: "表示する(うるう年)", indent: 0 }
     ],
     easyBlocks: [
       { id: "b5", text: "うるう年 = 1" },
       { id: "b1", text: "西暦 = 2024", isLocked: true },
-      { id: "b6", text: "うるう年 を表示する" },
+      { id: "b6", text: "表示する(うるう年)" },
       { id: "b3", text: "もし 西暦 % 4 == 0 ならば:" },
-      { id: "b4", text: "もし 西暦 % 100 != 0 または 西暦 % 400 == 0 ならば:" },
+      { id: "b4", text: "もし 西暦 % 100 != 0 or 西暦 % 400 == 0 ならば:" },
       { id: "b2", text: "うるう年 = 0" }
     ],
     normalBlocks: [
       { id: "b5", text: "うるう年 = 1" },
       { id: "b1", text: "西暦 = 2024", isLocked: true },
-      { id: "b6", text: "うるう年 を表示する" },
+      { id: "b6", text: "表示する(うるう年)" },
       { id: "b3", text: "もし 西暦 % 4 == 0 ならば:" },
-      { id: "b4", text: "もし 西暦 % 100 != 0 または 西暦 % 400 == 0 ならば:" },
+      { id: "b4", text: "もし 西暦 % 100 != 0 or 西暦 % 400 == 0 ならば:" },
       { id: "b2", text: "うるう年 = 0" },
-      { id: "d1", text: "もし 西暦 % 4 == 0 または 西暦 % 400 == 0 ならば:", isDummy: true, reason: "100の倍数である年を除外する条件（西暦 % 100 != 0）が抜けているため、1900年など（うるう年ではない）をうるう年と誤判定してしまいます。" },
+      { id: "d1", text: "もし 西暦 % 4 == 0 or 西暦 % 400 == 0 ならば:", isDummy: true, reason: "100の倍数である年を除外する条件（西暦 % 100 != 0）が抜けているため、1900年など（うるう年ではない）をうるう年と誤判定してしまいます。" },
       { id: "d2", text: "うるう年 = 0", isDummy: true, reason: "この初期化カードはすでに2行目に配置されているため重複してしまい不要です。" }
     ],
     hardBlocks: [
       { id: "b1", text: "西暦 = 2024", isLocked: true },
       { id: "b2", text: "うるう年 = 0" },
       { id: "b3", text: "もし [input_cond1] ならば:", inputs: { input_cond1: { placeholder: "最初の条件 (例: 西暦 % 4 == 0)", correct: "西暦 % 4 == 0" } } },
-      { id: "b4", text: "もし [input_cond2] ならば:", inputs: { input_cond2: { placeholder: "ネストの条件 (例: 西暦 % 100 != 0 または 西暦 % 400 == 0)", correct: "西暦 % 100 != 0 または 西暦 % 400 == 0" } } },
+      { id: "b4", text: "もし [input_cond2] ならば:", inputs: { input_cond2: { placeholder: "ネストの条件 (例: 西暦 % 100 != 0 or 西暦 % 400 == 0)", correct: "西暦 % 100 != 0 or 西暦 % 400 == 0" } } },
       { id: "b5", text: "うるう年 = 1" },
-      { id: "b6", text: "うるう年 を表示する" }
+      { id: "b6", text: "表示する(うるう年)" }
     ],
     narratives: {
       b1: (vars) => `変数 西暦 に 2024 を代入する`,
@@ -164,7 +164,7 @@ const problems = [
       b5: (vars) => `変数 うるう年 に 1 を代入する`,
       b6: (vars) => `変数 うるう年 の値 (${vars.うるう年 || 0}) を表示する`
     },
-    explanation: "「うるう年 = 0」で非うるう年を初期状態とします。4の倍数の場合に最初の条件に入り、さらに「100の倍数ではない、または400の倍数である」という条件をネスト（入れ子）で判定し、適合すれば「うるう年 = 1」に変更して最後に表示します。【入れ替え可能な箇所】初期化「うるう年 = 0」は、判定文が始まる前（固定されている 西暦 = 2024 の下など）の任意の位置に配置できます。"
+    explanation: "「うるう年 = 0」で非うるう年を初期状態とします。4の倍数の場合に最初の条件に入り、さらに「西暦 % 100 != 0 or 西暦 % 400 == 0」（100の倍数ではない、または400の倍数である）という条件をネスト（入れ子）で判定し、適合すれば「うるう年 = 1」に変更して最後に表示します。【入れ替え可能な箇所】初期化「うるう年 = 0」は、判定文が始まる前（固定されている 西暦 = 2024 の下など）の任意の位置に配置できます。"
   },
   {
     id: "find_max",
@@ -181,13 +181,13 @@ const problems = [
       { id: "b2", text: "i を 1 から 5 まで 1 ずつ増やしながら繰り返す:", indent: 0 },
       { id: "b3", text: "もし A[i] > 最大値 ならば:", indent: 1 },
       { id: "b4", text: "最大値 = A[i]", indent: 2 },
-      { id: "b5", text: "最大値 を表示する", indent: 0 }
+      { id: "b5", text: "表示する(最大値)", indent: 0 }
     ],
     easyBlocks: [
       { id: "b3", text: "もし A[i] > 最大値 ならば:" },
       { id: "b0", text: "A = [12, 45, 78, 34, 89, 56]", isLocked: true },
       { id: "b1", text: "最大値 = A[0]" },
-      { id: "b5", text: "最大値 を表示する" },
+      { id: "b5", text: "表示する(最大値)" },
       { id: "b4", text: "最大値 = A[i]" },
       { id: "b2", text: "i を 1 から 5 まで 1 ずつ増やしながら繰り返す:" }
     ],
@@ -195,11 +195,11 @@ const problems = [
       { id: "b3", text: "もし A[i] > 最大値 ならば:" },
       { id: "b0", text: "A = [12, 45, 78, 34, 89, 56]", isLocked: true },
       { id: "b1", text: "最大値 = A[0]" },
-      { id: "b5", text: "最大値 を表示する" },
+      { id: "b5", text: "表示する(最大値)" },
       { id: "b4", text: "最大値 = A[i]" },
       { id: "b2", text: "i を 1 から 5 まで 1 ずつ増やしながら繰り返す:" },
       { id: "d1", text: "最大値 = 0", isDummy: true, reason: "初期値を0にすると、配列の要素がすべてマイナスの数値だった場合に正しく最大値を判定できません。配列の最初の要素（A[0]）で初期化するのが鉄則です。" },
-      { id: "d2", text: "もし A[i] < 最大値 ならば:", isDummy: true, reason: "これでは「最大値よりも小さい場合」に中身を更新してしまうため、最小値を求めるプログラム（または意図しない動作）になってしまいます。" }
+      { id: "d2", text: "もし A[i] < 最大値 ならば:", isDummy: true, reason: "これでは「最大値よりも小さい場合」に中身を更新してしまうため、最小値を求めるプログラム（あるいは意図しない動作）になってしまいます。" }
     ],
     hardBlocks: [
       { id: "b0", text: "A = [12, 45, 78, 34, 89, 56]", isLocked: true },
@@ -207,7 +207,7 @@ const problems = [
       { id: "b2", text: "i を 1 から 5 まで 1 ずつ増やしながら繰り返す:" },
       { id: "b3", text: "もし [input_cond] > 最大値 ならば:", inputs: { input_cond: { placeholder: "比較対象", correct: "A[i]" } } },
       { id: "b4", text: "最大値 = A[i]" },
-      { id: "b5", text: "最大値 を表示する" }
+      { id: "b5", text: "表示する(最大値)" }
     ],
     narratives: {
       b0: (vars) => `配列 A に [12, 45, 78, 34, 89, 56] を代入する`,
@@ -244,7 +244,7 @@ const problems = [
       { id: "b4", text: "余り = A % B", indent: 1 },
       { id: "b5", text: "A = B", indent: 1 },
       { id: "b6", text: "B = 余り", indent: 1 },
-      { id: "b7", text: "A を表示する", indent: 0 }
+      { id: "b7", text: "表示する(A)", indent: 0 }
     ],
     easyBlocks: [
       { id: "b5", text: "A = B" },
@@ -253,7 +253,7 @@ const problems = [
       { id: "b3", text: "B > 0 の間、繰り返す:" },
       { id: "b2", text: "B = 18", isLocked: true },
       { id: "b4", text: "余り = A % B" },
-      { id: "b7", text: "A を表示する" }
+      { id: "b7", text: "表示する(A)" }
     ],
     normalBlocks: [
       { id: "b5", text: "A = B" },
@@ -262,7 +262,7 @@ const problems = [
       { id: "b3", text: "B > 0 の間、繰り返す:" },
       { id: "b2", text: "B = 18", isLocked: true },
       { id: "b4", text: "余り = A % B" },
-      { id: "b7", text: "A を表示する" },
+      { id: "b7", text: "表示する(A)" },
       { id: "d1", text: "B = A % B", isDummy: true, reason: "これではAの値が更新される前にBの値を余りで上書きしてしまい、正しい互除計算が行えません。一時変数「余り」を使いましょう。" },
       { id: "d2", text: "A = 余り", isDummy: true, reason: "これではBの値をAに引き継ぐ前に、Aの値を余りで上書きしてしまいます。" }
     ],
@@ -273,7 +273,7 @@ const problems = [
       { id: "b4", text: "余り = A % B" },
       { id: "b5", text: "A = [input_a]", inputs: { input_a: { placeholder: "次のAに入る値", correct: "B" } } },
       { id: "b6", text: "B = [input_b]", inputs: { input_b: { placeholder: "次のBに入る値", correct: "余り" } } },
-      { id: "b7", text: "A を表示する" }
+      { id: "b7", text: "表示する(A)" }
     ],
     narratives: {
       b1: (vars) => `変数 A に 48 を代入する`,
@@ -308,7 +308,7 @@ const problems = [
       { id: "b3", text: "もし A[i] == target ならば:", indent: 1 },
       { id: "b4", text: "位置 = i", indent: 2 },
       { id: "b5", text: "ループを抜ける", indent: 2 },
-      { id: "b6", text: "位置 を表示する", indent: 0 }
+      { id: "b6", text: "表示する(位置)", indent: 0 }
     ],
     easyBlocks: [
       { id: "b4", text: "位置 = i" },
@@ -317,7 +317,7 @@ const problems = [
       { id: "b0_2", text: "target = 9", isLocked: true },
       { id: "b5", text: "ループを抜ける" },
       { id: "b3", text: "もし A[i] == target ならば:" },
-      { id: "b6", text: "位置 を表示する" },
+      { id: "b6", text: "表示する(位置)" },
       { id: "b2", text: "i を 0 から 4 まで 1 ずつ増やしながら繰り返す:" }
     ],
     normalBlocks: [
@@ -327,7 +327,7 @@ const problems = [
       { id: "b0_2", text: "target = 9", isLocked: true },
       { id: "b5", text: "ループを抜ける" },
       { id: "b3", text: "もし A[i] == target ならば:" },
-      { id: "b6", text: "位置 を表示する" },
+      { id: "b6", text: "表示する(位置)" },
       { id: "b2", text: "i を 0 から 4 まで 1 ずつ増やしながら繰り返す:" },
       { id: "d1", text: "位置 = i + 1", isDummy: true, reason: "共通テストの配列の添字（インデックス）は通常0から始まります。見つかった位置は i そのものになります。" },
       { id: "d2", text: "もし A[i] == i ならば:", isDummy: true, reason: "これでは配列の値ではなく、配列のインデックス番号自身と比較してしまいます。" }
@@ -340,7 +340,7 @@ const problems = [
       { id: "b3", text: "もし [input_search] == target ならば:", inputs: { input_search: { placeholder: "探索対象", correct: "A[i]" } } },
       { id: "b4", text: "位置 = i" },
       { id: "b5", text: "ループを抜ける" },
-      { id: "b6", text: "位置 を表示する" }
+      { id: "b6", text: "表示する(位置)" }
     ],
     narratives: {
       b0_1: (vars) => `配列 A に [8, 3, 5, 9, 2] を代入する`,
@@ -362,7 +362,7 @@ const problems = [
   {
     id: "coin_change",
     title: "最小硬貨枚数（お釣り計算）",
-    description: "あらかじめ設定されたお釣り金額 780 円を、500円、100円、50円、10円硬貨を使って、最小の枚数で支払う際、各硬貨の枚数を計算し表示するプログラムを完成させてください。（DNCLでは「商の整数部分」を取り出す際に「の整数部分」を使います）",
+    description: "あらかじめ設定されたお釣り金額 780 円を、500円、100円、50円、10円硬貨を使って、最小の枚数で支払う際、各硬貨の枚数を計算し表示するプログラムを完成させてください。（DNCLでは整数除算に ÷ を使います）",
     difficulty: "上級",
     initialState: {
       金額: 780,
@@ -373,35 +373,35 @@ const problems = [
       { id: "b1", text: "金額 = 780", indent: 0, isLocked: true },
       { id: "b0", text: "硬貨 = [500, 100, 50, 10]", indent: 0, isLocked: true },
       { id: "b2", text: "i を 0 から 3 まで 1 ずつ増やしながら繰り返す:", indent: 0 },
-      { id: "b3", text: "枚数 = 金額 / 硬貨[i] の整数部分", indent: 1 },
+      { id: "b3", text: "枚数 = 金額 ÷ 硬貨[i]", indent: 1 },
       { id: "b4", text: "金額 = 金額 % 硬貨[i]", indent: 1 },
-      { id: "b5", text: "枚数 を表示する", indent: 1 }
+      { id: "b5", text: "表示する(枚数)", indent: 1 }
     ],
     easyBlocks: [
-      { id: "b3", text: "枚数 = 金額 / 硬貨[i] の整数部分" },
+      { id: "b3", text: "枚数 = 金額 ÷ 硬貨[i]" },
       { id: "b1", text: "金額 = 780", isLocked: true },
       { id: "b0", text: "硬貨 = [500, 100, 50, 10]", isLocked: true },
-      { id: "b5", text: "枚数 を表示する" },
+      { id: "b5", text: "表示する(枚数)" },
       { id: "b4", text: "金額 = 金額 % 硬貨[i]" },
       { id: "b2", text: "i を 0 から 3 まで 1 ずつ増やしながら繰り返す:" }
     ],
     normalBlocks: [
-      { id: "b3", text: "枚数 = 金額 / 硬貨[i] の整数部分" },
+      { id: "b3", text: "枚数 = 金額 ÷ 硬貨[i]" },
       { id: "b1", text: "金額 = 780", isLocked: true },
       { id: "b0", text: "硬貨 = [500, 100, 50, 10]", isLocked: true },
-      { id: "b5", text: "枚数 を表示する" },
+      { id: "b5", text: "表示する(枚数)" },
       { id: "b4", text: "金額 = 金額 % 硬貨[i]" },
       { id: "b2", text: "i を 0 から 3 まで 1 ずつ増やしながら繰り返す:" },
-      { id: "d1", text: "枚数 = 金額 / 硬貨[i]", isDummy: true, reason: "整数部分を取らないと、枚数が小数（例: 780 / 500 = 1.56枚）になってしまいます。" },
+      { id: "d1", text: "枚数 = 金額 / 硬貨[i]", isDummy: true, reason: "通常の除算 / を使うと枚数が小数（例: 780 / 500 = 1.56枚）になってしまいます。整数除算には ÷ を使います。" },
       { id: "d2", text: "金額 = 金額 / 硬貨[i]", isDummy: true, reason: "これでは金額が減るのではなく、金額自体が割られた値になってしまいます。残りの金額を計算するには余り（%）を使います。" }
     ],
     hardBlocks: [
       { id: "b1", text: "金額 = 780", isLocked: true },
       { id: "b0", text: "硬貨 = [500, 100, 50, 10]", isLocked: true },
       { id: "b2", text: "i を 0 から 3 まで 1 ずつ増やしながら繰り返す:" },
-      { id: "b3", text: "枚数 = [input_div] の整数部分", inputs: { input_div: { placeholder: "金額を硬貨で割る式 (例: 金額 / 硬貨[i])", correct: "金額 / 硬貨[i]" } } },
+      { id: "b3", text: "枚数 = [input_div]", inputs: { input_div: { placeholder: "金額を硬貨で割る整数除算の式 (例: 金額 ÷ 硬貨[i])", correct: "金額 ÷ 硬貨[i]" } } },
       { id: "b4", text: "金額 = [input_mod]", inputs: { input_mod: { placeholder: "余り金額の式 (例: 金額 % 硬貨[i])", correct: "金額 % 硬貨[i]" } } },
-      { id: "b5", text: "枚数 を表示する" }
+      { id: "b5", text: "表示する(枚数)" }
     ],
     narratives: {
       b1: (vars) => `変数 金額 に 780 を代入する`,
@@ -426,7 +426,7 @@ const problems = [
       },
       b5: (vars) => `変数 枚数 の値 (${vars.枚数 || 0}) を表示する`
     },
-    explanation: "大きい額面の硬貨（500円）から順番に、「金額を硬貨の額面で割った商（の整数部分）」を枚数とし、「割った余り」を次の硬貨で支払う残額とします。ループ内で各硬貨の枚数を順次表示していきます。【入れ替え可能な箇所】この問題は手順が密接に関連しているため、入れ替え可能な箇所はありません。"
+    explanation: "大きい額面の硬貨（500円）から順番に、「金額を硬貨の額面で割った商（整数除算 ÷）」を枚数とし、「割った余り」を次の硬貨で支払う残額とします。ループ内で各硬貨の枚数を順次表示していきます。【入れ替え可能な箇所】この問題は手順が密接に関連しているため、入れ替え可能な箇所はありません。"
   }
 ];
 
@@ -444,14 +444,14 @@ const syntaxLessons = [
       { id: "l1", text: "作業用 = A", indent: 0 },
       { id: "l2", text: "A = B", indent: 0 },
       { id: "l3", text: "B = 作業用", indent: 0 },
-      { id: "l4", text: "A を表示する", indent: 0 },
-      { id: "l5", text: "B を表示する", indent: 0 }
+      { id: "l4", text: "表示する(A)", indent: 0 },
+      { id: "l5", text: "表示する(B)", indent: 0 }
     ],
     blocks: [
       { id: "l3", text: "B = 作業用" },
-      { id: "l5", text: "B を表示する" },
+      { id: "l5", text: "表示する(B)" },
       { id: "l1", text: "作業用 = A" },
-      { id: "l4", text: "A を表示する" },
+      { id: "l4", text: "表示する(A)" },
       { id: "l2", text: "A = B" }
     ],
     narratives: {
@@ -461,7 +461,7 @@ const syntaxLessons = [
       l4: (vars) => `変数 A の値 (${vars.A || 3}) を表示する`,
       l5: (vars) => `変数 B の値 (${vars.B || 5}) を表示する`
     },
-    explanation: "値の入れ替えには、元の値が消えてしまわないよう一時的な退避場所「作業用」が必要です。まず作業用に A を退避し、空いた A に B をコピー、最後に B に退避しておいた作業用の値（元のA）を書き込みます。【入れ替え可能な箇所】出力の「A を表示する」と「B を表示する」は順序を入れ替えても動作します。"
+    explanation: "値の入れ替えには、元の値が消えてしまわないよう一時的な退避場所「作業用」が必要です。まず作業用に A を退避し、空いた A に B をコピー、最後に B に退避しておいた作業用の値（元のA）を書き込みます。【入れ替え可能な箇所】出力の「表示する(A)」と「表示する(B)」は順序を入れ替えても動作します。"
   },
   {
     id: "lesson_branch",
@@ -473,15 +473,15 @@ const syntaxLessons = [
     correctBlocks: [
       { id: "l1", text: "得点 = 85", indent: 0, isLocked: true },
       { id: "l2", text: "もし 得点 >= 80 ならば:", indent: 0 },
-      { id: "l3", text: "\"合格\" を表示する", indent: 1 },
+      { id: "l3", text: "表示する(\"合格\")", indent: 1 },
       { id: "l4", text: "そうでなければ:", indent: 0 },
-      { id: "l5", text: "\"不合格\" を表示する", indent: 1 }
+      { id: "l5", text: "表示する(\"不合格\")", indent: 1 }
     ],
     blocks: [
-      { id: "l3", text: "\"合格\" を表示する" },
+      { id: "l3", text: "表示する(\"合格\")" },
       { id: "l1", text: "得点 = 85", isLocked: true },
       { id: "l4", text: "そうでなければ:" },
-      { id: "l5", text: "\"不合格\" を表示する" },
+      { id: "l5", text: "表示する(\"不合格\")" },
       { id: "l2", text: "もし 得点 >= 80 ならば:" }
     ],
     narratives: {
@@ -502,10 +502,10 @@ const syntaxLessons = [
     },
     correctBlocks: [
       { id: "l1", text: "i を 1 から 5 まで 1 ずつ増やしながら繰り返す:", indent: 0 },
-      { id: "l2", text: "i を表示する", indent: 1 }
+      { id: "l2", text: "表示する(i)", indent: 1 }
     ],
     blocks: [
-      { id: "l2", text: "i を表示する" },
+      { id: "l2", text: "表示する(i)" },
       { id: "l1", text: "i を 1 から 5 まで 1 ずつ増やしながら繰り返す:" }
     ],
     narratives: {
@@ -526,10 +526,10 @@ const syntaxLessons = [
     correctBlocks: [
       { id: "l0", text: "A = [5, 8, 3]", indent: 0, isLocked: true },
       { id: "l1", text: "値 = A[2]", indent: 0 },
-      { id: "l2", text: "値 を表示する", indent: 0 }
+      { id: "l2", text: "表示する(値)", indent: 0 }
     ],
     blocks: [
-      { id: "l2", text: "値 を表示する" },
+      { id: "l2", text: "表示する(値)" },
       { id: "l0", text: "A = [5, 8, 3]", isLocked: true },
       { id: "l1", text: "値 = A[2]" }
     ],
@@ -550,11 +550,11 @@ const syntaxLessons = [
     correctBlocks: [
       { id: "l1", text: "A = 10", indent: 0, isLocked: true },
       { id: "l2", text: "A > 0 の間、繰り返す:", indent: 0 },
-      { id: "l3", text: "A を表示する", indent: 1 },
+      { id: "l3", text: "表示する(A)", indent: 1 },
       { id: "l4", text: "A = A - 3", indent: 1 }
     ],
     blocks: [
-      { id: "l3", text: "A を表示する" },
+      { id: "l3", text: "表示する(A)" },
       { id: "l1", text: "A = 10", isLocked: true },
       { id: "l4", text: "A = A - 3" },
       { id: "l2", text: "A > 0 の間、繰り返す:" }
@@ -565,7 +565,7 @@ const syntaxLessons = [
       l3: (vars) => `変数 A の値 (${vars.A !== undefined ? vars.A : 10}) を表示する`,
       l4: (vars) => `変数 A に、現在の A (${vars.A !== undefined ? vars.A : 10}) から 3 を引いた値 (${(vars.A !== undefined ? vars.A : 10) - 3}) を代入する`
     },
-    explanation: "「A > 0 の間、繰り返す:」は、条件式が成り立つ限りブロック内の処理をループします。ブロック内（インデント1）で「A を表示する」と「A = A - 3」を繰り返すことで、Aが10, 7, 4, 1と減少していき、次に -2 になった時点で条件が不成立（偽）になりループを抜けます。"
+    explanation: "「A > 0 の間、繰り返す:」は、条件式が成り立つ限りブロック内の処理をループします。ブロック内（インデント1）で「表示する(A)」と「A = A - 3」を繰り返すことで、Aが10, 7, 4, 1と減少していき、次に -2 になった時点で条件が不成立（偽）になりループを抜けます。"
   },
   {
     id: "lesson_function",
@@ -578,12 +578,12 @@ const syntaxLessons = [
       { id: "l1", text: "関数 2倍にする(x) を定義する:", indent: 0 },
       { id: "l2", text: "返す x * 2", indent: 1 },
       { id: "l3", text: "結果 = 2倍にする(5)", indent: 0 },
-      { id: "l4", text: "結果 を表示する", indent: 0 }
+      { id: "l4", text: "表示する(結果)", indent: 0 }
     ],
     blocks: [
       { id: "l3", text: "結果 = 2倍にする(5)" },
       { id: "l2", text: "返す x * 2" },
-      { id: "l4", text: "結果 を表示する" },
+      { id: "l4", text: "表示する(結果)" },
       { id: "l1", text: "関数 2倍にする(x) を定義する:" }
     ],
     narratives: {
@@ -605,20 +605,20 @@ const syntaxLessons = [
     },
     correctBlocks: [
       { id: "l0", text: "A = [[10, 20, 30], [40, 50, 60]]", indent: 0, isLocked: true },
-      { id: "l1", text: "値 = A[1][1]", indent: 0 },
-      { id: "l2", text: "値 を表示する", indent: 0 }
+      { id: "l1", text: "値 = A[1,1]", indent: 0 },
+      { id: "l2", text: "表示する(値)", indent: 0 }
     ],
     blocks: [
-      { id: "l2", text: "値 を表示する" },
+      { id: "l2", text: "表示する(値)" },
       { id: "l0", text: "A = [[10, 20, 30], [40, 50, 60]]", isLocked: true },
-      { id: "l1", text: "値 = A[1][1]" }
+      { id: "l1", text: "値 = A[1,1]" }
     ],
     narratives: {
       l0: (vars) => `2次元配列 A に [[10, 20, 30], [40, 50, 60]] を代入する`,
-      l1: (vars) => `変数 値 に A[1][1] の要素の値 (${vars.A ? vars.A[1][1] : 50}) を代入する`,
+      l1: (vars) => `変数 値 に A[1,1] の要素の値 (${vars.A ? vars.A[1][1] : 50}) を代入する`,
       l2: (vars) => `変数 値 の値 (${vars.値 || 50}) を表示する`
     },
-    explanation: "2次元配列（グリッドデータ）は、行と列の2つのインデックス（添字）を指定します。DNCLでは通常0から始まるため、2行目のインデックスは「1」、2番目の列のインデックスは「1」となり、「A[1][1]」でアクセスします。【入れ替え可能な箇所】この手順は順番を変えることができません。"
+    explanation: "2次元配列（グリッドデータ）は、行と列の2つのインデックス（添字）を指定します。DNCLでは通常0から始まるため、2行目のインデックスは「1」、2番目の列のインデックスは「1」となり、「A[1,1]」でアクセスします。【入れ替え可能な箇所】この手順は順番を変えることができません。"
   }
 ];
 
