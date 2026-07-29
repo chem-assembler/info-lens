@@ -13,12 +13,22 @@
 </head>
 <body>
 
-  <!-- ヘッダーエリア -->
+  <!-- ヘッダーエリア (横長リボンに統合) -->
   <header>
     <div class="logo-section">
       <h1><i class="fas fa-graduation-cap"></i> DNCL Playground</h1>
       <span>共通テスト情報I 疑似言語エミュレータ</span>
     </div>
+    
+    <!-- モード切り替えタブをヘッダー内に統合 -->
+    <nav class="mode-tabs" aria-label="学習モードの選択">
+      <button id="mode-exercise-btn" class="mode-tab active" title="問題演習モードに切り替えます">
+        <i class="fas fa-tasks"></i> 問題演習編
+      </button>
+      <button id="mode-syntax-btn" class="mode-tab" title="基本構文の学習モードに切り替えます">
+        <i class="fas fa-book-reader"></i> 構文学習編
+      </button>
+    </nav>
     
     <div class="controls-section">
       <!-- 問題選択ドロップダウン -->
@@ -34,16 +44,6 @@
       </button>
     </div>
   </header>
-
-  <!-- モード切り替えタブ -->
-  <nav class="mode-tabs" aria-label="学習モードの選択">
-    <button id="mode-exercise-btn" class="mode-tab active" title="問題演習モードに切り替えます">
-      <i class="fas fa-tasks"></i> 問題演習編
-    </button>
-    <button id="mode-syntax-btn" class="mode-tab" title="基本構文の学習モードに切り替えます">
-      <i class="fas fa-book-reader"></i> 構文学習編
-    </button>
-  </nav>
 
   <!-- メインコンテンツ -->
   <main>
