@@ -68,8 +68,30 @@
           <div class="diff-tab" data-difficulty="hard" id="tab-hard">ハード</div>
         </nav>
 
+        <!-- 初心者向け基本解説アコーディオン -->
+        <div class="guide-accordion" style="margin: 0.5rem 1rem 0.5rem 1rem;">
+          <div class="guide-header" id="guide-toggle" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+            <span><i class="fas fa-graduation-cap"></i> 🔰 プログラミングのきほん（変数とインデント）</span>
+            <i class="fas fa-chevron-down toggle-icon" id="guide-toggle-icon" style="transition: transform 0.2s;"></i>
+          </div>
+          <div class="guide-body" id="guide-body" style="display: none; padding: 0.75rem 0.5rem 0.2rem 0.5rem;">
+            <div class="guide-item">
+              <h4 style="margin: 0 0 0.3rem 0; font-size: 0.95rem; color: #f59e0b;"><i class="fas fa-box"></i> 1. 変数の定義（初期化）とは？</h4>
+              <p style="margin: 0; font-size: 0.85rem; line-height: 1.5; color: #cbd5e1;">変数は、値を入れておく「箱」です。新しい変数を使う前に、あらかじめ「箱を準備（初期化）」しておく必要があります（例：<code>合計 = 0</code>、<code>個数 = 0</code> など）。<br>もし初期化を忘れたまま計算を始めると、コンピュータは箱の中に何が入っているか分からず、「変数が見つかりません」とエラー（未定義エラー）を出してしまいます。</p>
+            </div>
+            <div class="guide-item" style="margin-top: 0.8rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.8rem;">
+              <h4 style="margin: 0 0 0.3rem 0; font-size: 0.95rem; color: #f59e0b;"><i class="fas fa-indent"></i> 2. インデント（字下げ）とは？</h4>
+              <p style="margin: 0; font-size: 0.85rem; line-height: 1.5; color: #cbd5e1;">「もし〜ならば」や「〜を繰り返す」などの制御文の**中身（その条件の時だけ実行したい処理）**は、カードの左右矢印ボタンを使って右に1段ずらして（インデントして）並べます。<br>インデントを下げることで、コンピュータに「ここがループや条件分岐の中身ですよ」と伝える重要な役割があります。</p>
+            </div>
+          </div>
+        </div>
+
         <!-- 使用可能なカードリスト（トレイ） -->
-        <div id="tray-list" class="card-tray" aria-label="利用可能なコードカード">
+        <div class="operation-guide" style="margin: 0.5rem 1rem 0.5rem 1rem;">
+          <i class="fas fa-lightbulb"></i>
+          <span>💡 カードをダブルクリック（ダブルタップ）すると、中央のエリアへ移動します。</span>
+        </div>
+        <div id="tray-list" class="card-tray" aria-label="利用可能なコードカード" style="margin-top: 0.2rem;">
           <!-- JSでカードを動的配置 -->
         </div>
       </div>
@@ -113,7 +135,10 @@
       </div>
       <div class="pane-content" style="padding: 0;">
         <div id="editor-list" class="editor-workspace" aria-label="組み立てエリア">
-          <!-- 組み立てカードがここに配置される -->
+          <div class="empty-placeholder" id="workspace-placeholder">
+            <i class="fas fa-code"></i>
+            <span>カードをトレイ（左）からドラッグ、またはタップして、中央のエリアに正しい順番とインデント（字下げ）で並べてください。<br>組み立てたら、上の「実行」または「1行ずつ」ボタンを押してプログラムを動かしましょう。</span>
+          </div>
         </div>
       </div>
     </section>

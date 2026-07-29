@@ -120,6 +120,18 @@ class DNCLApp {
     this.modeExerciseBtn.addEventListener("click", () => this.switchMode("exercise"));
     this.modeSyntaxBtn.addEventListener("click", () => this.switchMode("syntax"));
 
+    // 初心者向け基本解説アコーディオンのトグル制御
+    const guideToggle = document.getElementById("guide-toggle");
+    const guideBody = document.getElementById("guide-body");
+    const guideIcon = document.getElementById("guide-toggle-icon");
+    if (guideToggle && guideBody && guideIcon) {
+      guideToggle.addEventListener("click", () => {
+        const isHidden = guideBody.style.display === "none";
+        guideBody.style.display = isHidden ? "block" : "none";
+        guideIcon.style.transform = isHidden ? "rotate(180deg)" : "rotate(0deg)";
+      });
+    }
+
     // SortableJSの初期化 (トレイとエディタの連携、タッチ対応オプション追加)
     new Sortable(this.trayList, {
       group: {
@@ -327,8 +339,6 @@ class DNCLApp {
       textSpan.textContent = displayPattern;
     }
 
-    card.appendChild(textSpan);
-
     // インデント操作用ボタン（エディタに配置された時のみ有効化できるようにイベントは常時バインドし表示はCSSで制御）
     const btnGroup = document.createElement("div");
     btnGroup.className = "indent-btn-group";
@@ -353,16 +363,19 @@ class DNCLApp {
 
     btnGroup.appendChild(decBtn);
     btnGroup.appendChild(incBtn);
+    
+    // インデントボタンを左側、テキストスパンを右側にするため、ボタンを先にアペンドする
     card.appendChild(btnGroup);
+    card.appendChild(textSpan);
 
-    // タッチパッド・スマホ用のタップ簡単配置イベント
-    card.addEventListener("click", (e) => {
-      // インプット要素やインデントボタンのクリック時は何もしない
+    // タッチパッド・スマホ用の簡単配置イベント (誤操作防止のためダブルクリックに変更)
+    card.addEventListener("dblclick", (e) => {
+      // インプット要素やインデントボタンのダブルクリック時は何もしない
       if (e.target.tagName === "INPUT" || e.target.closest(".indent-btn-group")) {
         return;
       }
       
-      // ドラッグ操作中、または直後のクリック誤動作をガード
+      // ドラッグ操作中、または直後のダブルクリック誤動作をガード
       if (this.isDragging) {
         return;
       }
@@ -377,6 +390,7 @@ class DNCLApp {
    * カードタップ時にトレイとエディタ間を自動で移動させる（タッチ操作の補助）
    */
   handleCardTap(card) {
+    if (card.dataset.isLocked === "true") return; // ロックされたカードはタップで移動しない
     const isAtTray = this.trayList.contains(card);
     
     if (isAtTray) {
@@ -621,10 +635,28 @@ class DNCLApp {
 
     // カードのハイライト切り替え
     const cards = this.editorList.querySelectorAll(".block-card");
+    
+    // 既存の解説吹き出しをクリア
+    const oldNarration = this.editorList.querySelector(".step-narration");
+    if (oldNarration) oldNarration.remove();
+
     cards.forEach((c, idx) => {
       if (idx === activeBlockIndex) {
         c.classList.add("active-line");
         c.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+        // 今回のアクティブカードの下に日本語解説（ナレーション）を動的生成して差し込む
+        const blockId = c.dataset.id;
+        const narratives = this.currentProblem.narratives;
+        if (narratives && narratives[blockId]) {
+          const text = narratives[blockId](trace.variables);
+          if (text) {
+            const narDiv = document.createElement("div");
+            narDiv.className = "step-narration";
+            narDiv.innerHTML = `<i class="fas fa-comment-dots"></i><span>${text}</span>`;
+            c.appendChild(narDiv);
+          }
+        }
       } else {
         c.classList.remove("active-line");
       }
@@ -847,6 +879,70 @@ class DNCLApp {
       if (userOutput[i] !== expectedOutput[i]) return false;
     }
 
+    // 6. 初期化カードの順序依存・不適切位置チェック (初期化が制御ブロックより前に完了しているか)
+    const problemId = this.currentProblem.id;
+    const getIndex = (id) => this.editorBlocks.findIndex(b => b.id === id);
+
+    if (problemId === "sum_1_to_n") {
+      const idxN = getIndex("b1");
+      const idxSum = getIndex("b2");
+      const idxLoop = getIndex("b3");
+      if (idxLoop !== -1) {
+        if ((idxN !== -1 && idxN > idxLoop) || (idxSum !== -1 && idxSum > idxLoop)) return false;
+      }
+    } else if (problemId === "count_multiples_of_3") {
+      const idxN = getIndex("b1");
+      const idxCount = getIndex("b2");
+      const idxLoop = getIndex("b3");
+      if (idxLoop !== -1) {
+        if ((idxN !== -1 && idxN > idxLoop) || (idxCount !== -1 && idxCount > idxLoop)) return false;
+      }
+    } else if (problemId === "leap_year") {
+      const idxYear = getIndex("b1");
+      const idxLeap = getIndex("b2");
+      const idxIf = getIndex("b3");
+      if (idxIf !== -1) {
+        if ((idxYear !== -1 && idxYear > idxIf) || (idxLeap !== -1 && idxLeap > idxIf)) return false;
+      }
+    } else if (problemId === "find_max") {
+      const idxArr = getIndex("b0");
+      const idxMax = getIndex("b1");
+      const idxLoop = getIndex("b2");
+      if (idxLoop !== -1) {
+        if ((idxArr !== -1 && idxArr > idxLoop) || (idxMax !== -1 && idxMax > idxLoop)) return false;
+      }
+    } else if (problemId === "euclidean_algorithm") {
+      const idxA = getIndex("b1");
+      const idxB = getIndex("b2");
+      const idxLoop = getIndex("b3");
+      if (idxLoop !== -1) {
+        if ((idxA !== -1 && idxA > idxLoop) || (idxB !== -1 && idxB > idxLoop)) return false;
+      }
+    } else if (problemId === "linear_search") {
+      const idxArr = getIndex("b0_1");
+      const idxTarget = getIndex("b0_2");
+      const idxPos = getIndex("b1");
+      const idxLoop = getIndex("b2");
+      if (idxLoop !== -1) {
+        if ((idxArr !== -1 && idxArr > idxLoop) || (idxTarget !== -1 && idxTarget > idxLoop) || (idxPos !== -1 && idxPos > idxLoop)) return false;
+      }
+    } else if (problemId === "coin_change") {
+      const idxAmount = getIndex("b1");
+      const idxCoins = getIndex("b0");
+      const idxLoop = getIndex("b2");
+      if (idxLoop !== -1) {
+        if ((idxAmount !== -1 && idxAmount > idxLoop) || (idxCoins !== -1 && idxCoins > idxLoop)) return false;
+      }
+    } else if (problemId === "lesson_branch") {
+      const idxScore = getIndex("l1");
+      const idxIf = getIndex("l2");
+      if (idxIf !== -1 && idxScore !== -1 && idxScore > idxIf) return false;
+    } else if (problemId === "lesson_array") {
+      const idxArr = getIndex("l0");
+      const idxVal = getIndex("l1");
+      if (idxVal !== -1 && idxArr !== -1 && idxArr > idxVal) return false;
+    }
+
     return true;
   }
 
@@ -860,14 +956,49 @@ class DNCLApp {
     const getBlock = (id) => blocks.find(b => b.id === id);
     const getIndex = (id) => blocks.findIndex(b => b.id === id);
 
+    // 順序依存のエラーハンドリング
+    if (problemId === "sum_1_to_n") {
+      const idxN = getIndex("b1");
+      const idxInit = getIndex("b2");
+      const idxLoop = getIndex("b3");
+      const idxAdd = getIndex("b4");
+      const idxPrint = getIndex("b5");
+
+      if (idxN === -1 || idxInit === -1 || idxLoop === -1 || idxAdd === -1 || idxPrint === -1) {
+        return "必要なカードが不足しています。すべてのカードを配置してください。";
+      }
+
+      const blockLoop = getBlock("b3");
+      const blockAdd = getBlock("b4");
+      const blockPrint = getBlock("b5");
+
+      // A. 初期設定がループより下にある
+      if (idxN > idxLoop || idxInit > idxLoop) {
+        return "【アドバイス】初期設定「N = 10」や「合計 = 0」が繰り返し（ループ）より下に配置されています。これでは繰り返しが始まる前に変数の準備ができません。初期設定カードを繰り返しの上の位置に移動してください。";
+      }
+      // B. 初期化がループの中にある
+      if (idxInit > idxLoop && blocks[idxInit].indent > blockLoop.indent) {
+        return "【アドバイス】変数を値リセットする「合計 = 0」が繰り返し（ループ）の中に入っています。これでは繰り返すたびに合計がクリアされてしまいます。「合計 = 0」を繰り返しより上に移動し、インデントを外してください。";
+      }
+      // C. 加算処理がループの外
+      if (idxAdd < idxLoop || blockAdd.indent <= blockLoop.indent) {
+        return "【アドバイス】合計に i を足す処理「合計 = 合計 + i」が繰り返しの外にあります。インデントを下げて繰り返しの中に配置してください。";
+      }
+      // D. 出力処理がループの中
+      if (idxPrint > idxLoop && blockPrint.indent > blockLoop.indent) {
+        return "【アドバイス】結果を表示する「合計 を表示する」が繰り返しの中に入っています。すべての処理が終わった最後に1回だけ表示するよう、インデントを外すかカードを一番下に移動してください。";
+      }
+    }
+
     if (problemId === "count_multiples_of_3") {
+      const idxN = getIndex("b1");
+      const idxInit = getIndex("b2");
       const idxLoop = getIndex("b3");
       const idxIf = getIndex("b4");
       const idxAdd = getIndex("b5");
       const idxPrint = getIndex("b6");
-      const idxInit = getIndex("b2");
 
-      if (idxLoop === -1 || idxIf === -1 || idxAdd === -1 || idxPrint === -1 || idxInit === -1) {
+      if (idxN === -1 || idxInit === -1 || idxLoop === -1 || idxIf === -1 || idxAdd === -1 || idxPrint === -1) {
         return "必要なカードが不足しています。すべてのカードを配置してください。";
       }
 
@@ -876,70 +1007,55 @@ class DNCLApp {
       const blockAdd = getBlock("b5");
       const blockPrint = getBlock("b6");
 
-      // 1. 初期化がループの中にある
+      // A. 初期設定がループより下にある
+      if (idxN > idxLoop || idxInit > idxLoop) {
+        return "【アドバイス】初期設定「N = 20」や「個数 = 0」が繰り返し（ループ）より下に配置されています。これでは繰り返しが始まる前に変数の準備ができません。初期設定カードを繰り返しの上の位置に移動してください。";
+      }
+      // B. 初期化がループの中
       if (idxInit > idxLoop && blocks[idxInit].indent > blockLoop.indent) {
-        return "【アドバイス】カウント初期化処理「個数 = 0」が繰り返し（ループ）の中に入っています。これでは繰り返すたびに個数が 0 にクリアされてしまいます。「個数 = 0」を繰り返しより上の位置に移動し、インデントを外してください。";
+        return "【アドバイス】カウント初期化「個数 = 0」が繰り返し（ループ）の中に入っています。これでは繰り返すたびに個数が 0 にクリアされてしまいます。「個数 = 0」を繰り返しより上の位置に移動し、インデントを外してください。";
       }
-
-      // 2. 条件判定がループの外
+      // C. 条件判定がループの外
       if (idxIf < idxLoop || blockIf.indent <= blockLoop.indent) {
-        return "【アドバイス】条件判定「もし i % 3 == 0 ならば:」が繰り返しの外にあります。ループの中で各数値をチェックするために、このカードのインデントを下げて繰り返しの中に配置してください。";
+        return "【アドバイス】条件判定「もし i % 3 == 0 ならば:」が繰り返しの外にあります。インデントを下げて繰り返しの中に配置してください。";
       }
-
-      // 3. カウントアップが条件分岐の外
+      // D. カウントアップが条件分岐の外
       if (idxAdd < idxIf || blockAdd.indent <= blockIf.indent) {
-        return "【アドバイス】個数を増やす処理「個数 = 個数 + 1」が、条件判定「もし i % 3 == 0 ならば:」の範囲に入っていません。このカードのインデントをさらに1段下げて（インデント2）、条件を満たしたときだけカウントされるようにしてください。";
+        return "【アドバイス】個数を増やす「個数 = 個数 + 1」が、条件判定の範囲に入っていません。インデントをさらに1段下げて（インデント2）、条件を満たしたときだけ実行されるようにしてください。";
       }
-
-      // 4. 出力がループの中にある
+      // E. 出力がループの中
       if (idxPrint > idxLoop && blockPrint.indent > blockLoop.indent) {
-        return "【アドバイス】結果を表示する処理「個数 を表示する」が、繰り返し（ループ）の中に入っています。すべてのチェックが終わった最後に1回だけ表示されるよう、カードを一番下に移動し、インデントを外してください。";
+        return "【アドバイス】結果を表示する「個数 を表示する」が繰り返しの中に入っています。繰り返しの最後で1回だけ表示されるよう、インデントを外してカードを一番下に移動してください。";
       }
     }
 
-    if (problemId === "sum_1_to_n") {
-      const idxLoop = getIndex("b3");
-      const idxAdd = getIndex("b4");
-      const idxPrint = getIndex("b5");
-      const idxInit = getIndex("b2");
+    if (problemId === "leap_year") {
+      const idxYear = getIndex("b1");
+      const idxLeap = getIndex("b2");
+      const idxIf1 = getIndex("b3");
+      const idxIf2 = getIndex("b4");
+      const idxSet = getIndex("b5");
+      const idxPrint = getIndex("b6");
 
-      if (idxLoop === -1 || idxAdd === -1 || idxPrint === -1 || idxInit === -1) {
-        return "必要なカードが不足しています。すべてのカードを配置してください。";
+      if (idxYear === -1 || idxLeap === -1 || idxIf1 === -1 || idxIf2 === -1 || idxSet === -1 || idxPrint === -1) {
+        return "必要なカードが不足しています。";
       }
 
-      const blockLoop = getBlock("b3");
-      const blockAdd = getBlock("b4");
-      const blockPrint = getBlock("b5");
-
-      // 1. 初期化がループの中にある
-      if (idxInit > idxLoop && blocks[idxInit].indent > blockLoop.indent) {
-        return "【アドバイス】変数をリセットする初期化処理「合計 = 0」が繰り返し（ループ）の中に入っています。これでは繰り返すたびに合計値が毎回クリアされてしまいます。「合計 = 0」を繰り返しより上の位置に移動し、インデントを外してください。";
-      }
-      
-      // 2. 加算処理がループの外（下）にある
-      if (idxAdd < idxLoop || blockAdd.indent <= blockLoop.indent) {
-        return "【アドバイス】合計に i を足す処理「合計 = 合計 + i」が、繰り返し（ループ）の外にあります。これではループの中で値が加算されません。カードの右矢印ボタンを押してインデントを下げ、繰り返しの中に配置してください。";
-      }
-
-      // 3. 出力処理がループの中にある
-      if (idxPrint > idxLoop && blockPrint.indent > blockLoop.indent) {
-        return "【アドバイス】結果を表示する処理「合計 を表示する」が、繰り返し（ループ）の中に入っています。これでは途中の計算結果が何度も表示されてしまいます。「合計 を表示する」のインデントを減らして繰り返しの外に出すか、カードを一番下に移動してください。";
-      }
-      
-      // 4. 初期化が加算より下（しかしループの外）にある
-      if (idxInit > idxAdd) {
-        return "【アドバイス】「合計 = 0」の初期化処理が、足し算処理「合計 = 合計 + i」より下にあります。計算を始める前に初期化されるように、初期化カードを上に移動してください。";
+      // A. 初期設定が条件判定より下にある
+      if (idxYear > idxIf1 || idxLeap > idxIf1) {
+        return "【アドバイス】前提設定「西暦 = 2024」や初期化「うるう年 = 0」が、判定処理（もし）より下に配置されています。判定を行う前にこれらが初期化されるよう、一番上の位置に配置してください。";
       }
     }
 
     if (problemId === "find_max") {
+      const idxArr = getIndex("b0");
+      const idxInit = getIndex("b1");
       const idxLoop = getIndex("b2");
       const idxIf = getIndex("b3");
       const idxUpdate = getIndex("b4");
       const idxPrint = getIndex("b5");
-      const idxInit = getIndex("b1");
 
-      if (idxLoop === -1 || idxIf === -1 || idxUpdate === -1 || idxPrint === -1 || idxInit === -1) {
+      if (idxLoop === -1 || idxIf === -1 || idxUpdate === -1 || idxPrint === -1 || idxInit === -1 || idxArr === -1) {
         return "必要なカードが不足しています。";
       }
 
@@ -948,28 +1064,42 @@ class DNCLApp {
       const blockUpdate = getBlock("b4");
       const blockPrint = getBlock("b5");
 
-      // 1. 条件分岐がループの外にある
+      // A. 初期化・初期設定がループより下にある
+      if (idxArr > idxLoop || idxInit > idxLoop) {
+        return "【アドバイス】前提設定「A = [12, 45, 78, 34, 89, 56]」や初期化「最大値 = A[0]」が繰り返し（ループ）より下に配置されています。繰り返しに入る前にこれらが完了するよう、一番上に移動してください。";
+      }
+      // B. 条件分岐がループの外
       if (idxIf < idxLoop || blockIf.indent <= blockLoop.indent) {
-        return "【アドバイス】条件判定「もし A[i] > 最大値 ならば:」が繰り返しの外にあります。配列の各要素を順番に調べるために、このカードを繰り返しの中（インデントを下げた位置）に配置してください。";
+        return "【アドバイス】条件判定「もし A[i] > 最大値 ならば:」が繰り返しの外にあります。インデントを下げて繰り返しの中に配置してください。";
       }
-
-      // 2. 更新処理が条件分岐の外にある
+      // C. 更新処理が条件分岐の外
       if (idxUpdate < idxIf || blockUpdate.indent <= blockIf.indent) {
-        return "【アドバイス】最大値を更新する処理「最大値 = A[i]」が、条件判定「もし A[i] > 最大値 ならば:」の範囲に入っていません。このカードのインデントをさらに1段下げて（インデント2）、条件を満たしたときだけ実行されるようにしてください。";
+        return "【アドバイス】最大値を更新する「最大値 = A[i]」が条件判定に入っていません。インデントをさらに1段下げて（インデント2）、条件を満たしたときだけ実行されるようにしてください。";
+      }
+      // D. 出力がループの中
+      if (idxPrint > idxLoop && blockPrint.indent > blockLoop.indent) {
+        return "【アドバイス】結果を表示する「最大値 を表示する」が繰り返しの中に入っています。インデントを外してカードを一番下に移動してください。";
+      }
+    }
+
+    if (problemId === "euclidean_algorithm") {
+      const idxA = getIndex("b1");
+      const idxB = getIndex("b2");
+      const idxLoop = getIndex("b3");
+
+      if (idxA === -1 || idxB === -1 || idxLoop === -1) {
+        return "必要なカードが不足しています。";
       }
 
-      // 3. 出力がループの中にある
-      if (idxPrint > idxLoop && blockPrint.indent > blockLoop.indent) {
-        return "【アドバイス】結果を表示する処理「最大値 を表示する」が繰り返しの中に入っています。すべてのチェックが終わった最後に1回だけ表示されるよう、カードを一番下に移動し、インデントを外してください。";
-      }
-      
-      // 4. 初期化がループの中にある
-      if (idxInit > idxLoop) {
-        return "【アドバイス】初期化「最大値 = A[0]」が繰り返しの中にあります。これでは毎回最大値が先頭の値にリセットされてしまいます。初期化カードを一番上に移動してください。";
+      // A. 初期設定がループより下にある
+      if (idxA > idxLoop || idxB > idxLoop) {
+        return "【アドバイス】前提設定「A = 48」や「B = 18」が、繰り返し（間、繰り返す）より下に配置されています。これでは繰り返しが始まる前に数値の準備ができません。初期設定カードを繰り返しの上の位置に移動してください。";
       }
     }
 
     if (problemId === "linear_search") {
+      const idxArr = getIndex("b0_1");
+      const idxTarget = getIndex("b0_2");
       const idxInit = getIndex("b1");
       const idxLoop = getIndex("b2");
       const idxIf = getIndex("b3");
@@ -977,7 +1107,7 @@ class DNCLApp {
       const idxBreak = getIndex("b5");
       const idxPrint = getIndex("b6");
 
-      if (idxInit === -1 || idxLoop === -1 || idxIf === -1 || idxAssign === -1 || idxBreak === -1 || idxPrint === -1) {
+      if (idxArr === -1 || idxTarget === -1 || idxInit === -1 || idxLoop === -1 || idxIf === -1 || idxAssign === -1 || idxBreak === -1 || idxPrint === -1) {
         return "必要なカードが不足しています。";
       }
 
@@ -987,24 +1117,40 @@ class DNCLApp {
       const blockBreak = getBlock("b5");
       const blockPrint = getBlock("b6");
 
-      // 1. 条件判定がループの外
+      // A. 初期化がループより下にある
+      if (idxArr > idxLoop || idxTarget > idxLoop || idxInit > idxLoop) {
+        return "【アドバイス】前提設定「A = [8, 3, 5, 9, 2]」や「target = 9」、初期設定「位置 = -1」が、繰り返し（ループ）より下に配置されています。これでは繰り返しが始まる前に初期化が完了しません。これらを一番上に配置してください。";
+      }
+      // B. 条件判定がループの外
       if (idxIf < idxLoop || blockIf.indent <= blockLoop.indent) {
-        return "【アドバイス】条件判定「もし A[i] == target ならば:」が繰り返しの外にあります。配列の値を調べるために、繰り返しの中（インデントを下げた位置）に配置してください。";
+        return "【アドバイス】条件判定「もし A[i] == target ならば:」が繰り返しの外にあります。インデントを下げて繰り返しの中に配置してください。";
       }
-
-      // 2. 位置代入が条件分岐の外
+      // C. 位置代入が条件分岐の外
       if (idxAssign < idxIf || blockAssign.indent <= blockIf.indent) {
-        return "【アドバイス】見つかった位置を記録する「位置 = i」が、条件判定「もし A[i] == target ならば:」の外側にあります。値が一致したときだけ記録されるよう、インデントを下げて（インデント2）配置してください。";
+        return "【アドバイス】見つかった位置を記録する「位置 = i」が条件判定の外にあります。インデントを下げて（インデント2）配置してください。";
       }
-
-      // 3. ループを抜けるが条件分岐の外
+      // D. ループを抜けるが条件分岐の外
       if (idxBreak < idxIf || blockBreak.indent <= blockIf.indent) {
-        return "【アドバイス】「ループを抜ける」が条件判定の外側にあります。これでは配列の最初の値を調べた直後に必ずループが終わってしまいます。インデントを下げて、見つかったときだけループを抜けるようにしてください。";
+        return "【アドバイス】「ループを抜ける」が条件判定の外側にあります。インデントを下げて（インデント2）、見つかったときだけループを抜けるようにしてください。";
+      }
+      // E. 出力がループの中
+      if (idxPrint > idxLoop && blockPrint.indent > blockLoop.indent) {
+        return "【アドバイス】出力処理「位置 を表示する」が繰り返しの中に入っています。カードを一番下に移動し、インデントを外してください。";
+      }
+    }
+
+    if (problemId === "coin_change") {
+      const idxAmount = getIndex("b1");
+      const idxCoins = getIndex("b0");
+      const idxLoop = getIndex("b2");
+
+      if (idxAmount === -1 || idxCoins === -1 || idxLoop === -1) {
+        return "必要なカードが不足しています。";
       }
 
-      // 4. 出力がループの中
-      if (idxPrint > idxLoop && blockPrint.indent > blockLoop.indent) {
-        return "【アドバイス】出力処理「位置 を表示する」が繰り返しの中に入っています。探索がすべて終わった最後に表示されるよう、カードを一番下に移動し、インデントを外してください。";
+      // A. 初期設定がループより下にある
+      if (idxAmount > idxLoop || idxCoins > idxLoop) {
+        return "【アドバイス】前提設定「金額 = 780」や「硬貨 = [500, 100, 50, 10]」が、繰り返し（ループ）より下に配置されています。これでは繰り返しが始まる前に変数の初期化ができません。初期設定カードを繰り返しの上の位置に移動してください。";
       }
     }
 
@@ -1020,6 +1166,8 @@ class DNCLApp {
     this.editorList.querySelectorAll(".block-card").forEach(c => {
       c.classList.remove("active-line");
       c.classList.remove("reveal-error");
+      const narration = c.querySelector(".step-narration");
+      if (narration) narration.remove();
     });
     
     // 変数とコンソールの初期化

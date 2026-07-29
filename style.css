@@ -969,3 +969,164 @@ footer {
   transform: translateY(-50%);
   font-size: 0.8rem;
 }
+
+/* ==========================================================================
+   第3期：視認性向上・操作ガイド・ステップ言語化（ナレーション）のオーバーライド
+   ========================================================================== */
+
+/* 左右ペイン・各種文字サイズ拡大（視認性向上） */
+#problem-desc {
+  font-size: 1.05rem !important;
+  line-height: 1.65 !important;
+  color: #f1f5f9 !important; /* よりはっきりした白へ */
+}
+
+.block-text {
+  font-size: 1.05rem !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+/* 変数モニターのバッジ */
+.var-card {
+  font-size: 0.95rem !important;
+  padding: 0.5rem 0.75rem !important;
+}
+.var-name {
+  color: #cbd5e1 !important; /* 明るめのグレー */
+}
+.var-value {
+  color: #38bdf8 !important; /* 明るめの水色 */
+  font-weight: bold !important;
+}
+
+/* コンソール出力 */
+#console-output {
+  font-size: 1rem !important;
+  line-height: 1.6 !important;
+  color: #f1f5f9 !important;
+  padding: 1rem !important;
+}
+
+/* Python変換プレビュー */
+#preview-code {
+  font-size: 0.95rem !important;
+  line-height: 1.5 !important;
+  color: #e2e8f0 !important;
+}
+
+/* 左ペイン（トレイ）内の操作ガイド */
+.operation-guide {
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: #ddd6fe;
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.operation-guide i {
+  color: #a78bfa;
+}
+
+/* 再生時のステップ言語化（ナレーション）吹き出し */
+.step-narration {
+  background: #1e1b4b !important; /* 濃いインディゴ */
+  border: 1px solid #4338ca !important; /* インディゴ境界 */
+  border-radius: 6px !important;
+  padding: 0.5rem 0.75rem !important;
+  margin-top: 0.5rem !important;
+  font-size: 0.85rem !important; /* カード本体よりは一回り小さくして差別化 */
+  color: #e0e7ff !important; /* 薄い青 */
+  line-height: 1.5 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  animation: slideFadeIn 0.2s ease-out forwards !important;
+  white-space: normal !important;
+  text-align: left !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+.step-narration i {
+  color: #818cf8 !important;
+  flex-shrink: 0 !important;
+}
+
+@keyframes slideFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* カードレイアウトを左寄せにし、インデントボタンを左端に置くための調整 */
+.block-card {
+  justify-content: flex-start !important;
+  gap: 0.75rem !important;
+}
+
+.block-card .block-text {
+  flex-grow: 1 !important;
+  text-align: left !important;
+}
+
+.indent-btn-group {
+  flex-shrink: 0 !important;
+  order: -1 !important; /* HTMLの順序に関わらず確実に最左端へ配置する予備策 */
+}
+
+/* きほん解説アコーディオンのプレミアムスタイル */
+.guide-accordion {
+  background: rgba(139, 92, 246, 0.04);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.guide-accordion:hover {
+  background: rgba(139, 92, 246, 0.07);
+  border-color: rgba(139, 92, 246, 0.25);
+}
+
+.guide-header {
+  padding: 0.6rem 0.8rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #ddd6fe;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+
+.guide-header i.fa-graduation-cap {
+  color: #a78bfa;
+  margin-right: 0.3rem;
+}
+
+.guide-body {
+  border-top: 1px solid rgba(139, 92, 246, 0.1);
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.guide-item code {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  color: #f59e0b;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
