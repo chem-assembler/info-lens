@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DNCLビジュアル学習Playground | 共通テスト「情報I」対策</title>
+  <meta name="description" content="大学入学共通テスト「情報I」のプログラミング疑似言語（DNCL）をドラッグ＆ドロップで組み立て、実行・デバッグしながら学べる無料のオンライン学習ツール。">
+  <link rel="stylesheet" href="style.css">
+  <!-- FontAwesome アイコン -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- SortableJS ドラッグ＆ドロップライブラリ -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+</head>
+<body>
+
+  <!-- ヘッダーエリア -->
+  <header>
+    <div class="logo-section">
+      <h1><i class="fas fa-graduation-cap"></i> DNCL Playground</h1>
+      <span>共通テスト情報I 疑似言語エミュレータ</span>
+    </div>
+    
+    <div class="controls-section">
+      <!-- 問題選択ドロップダウン -->
+      <div class="select-wrapper">
+        <select id="problem-select" title="問題を選択してください">
+          <!-- JSで動的生成 -->
+        </select>
+      </div>
+      
+      <!-- AI質問ファイル生成ボタン -->
+      <button id="ai-prompt-btn" class="secondary" title="外部の生成AI（ChatGPT/Gemini等）への質問文を生成します">
+        <i class="fas fa-robot"></i> AIに相談する
+      </button>
+    </div>
+  </header>
+
+  <!-- メインコンテンツ -->
+  <main>
+    
+    <!-- 左ペイン：問題とカードトレイ -->
+    <section class="pane" id="left-pane" aria-labelledby="left-pane-title">
+      <div class="pane-header">
+        <h2 id="left-pane-title"><i class="fas fa-book-open"></i> 問題とカード</h2>
+      </div>
+      <div class="pane-content">
+        <!-- 問題カード -->
+        <article class="problem-card">
+          <h3 id="problem-title">問題タイトル</h3>
+          <p id="problem-desc">問題の説明がここに表示されます。</p>
+          <div id="difficulty-badge" class="difficulty-badge">難易度</div>
+        </article>
+
+        <!-- 難易度切り替えタブ -->
+        <nav class="difficulty-tabs" aria-label="問題の難易度設定">
+          <div class="diff-tab active" data-difficulty="easy" id="tab-easy">イージー</div>
+          <div class="diff-tab" data-difficulty="normal" id="tab-normal">ノーマル</div>
+          <div class="diff-tab" data-difficulty="hard" id="tab-hard">ハード</div>
+        </nav>
+
+        <!-- 使用可能なカードリスト（トレイ） -->
+        <div id="tray-list" class="card-tray" aria-label="利用可能なコードカード">
+          <!-- JSでカードを動的配置 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 中央ペイン：エディタ（組み立てエリア） -->
+    <section class="pane" id="editor-pane" aria-labelledby="editor-pane-title">
+      <div class="pane-header">
+        <h2 id="editor-pane-title"><i class="fas fa-puzzle-piece"></i> プログラム組み立て</h2>
+        <div class="editor-actions">
+          <button id="run-btn" class="primary" title="組み立てたプログラムを自動実行します">
+            <i class="fas fa-play"></i> 実行
+          </button>
+          <button id="step-btn" class="secondary" title="1行ずつプログラムを実行します">
+            <i class="fas fa-shoe-prints"></i> 1行ずつ実行
+          </button>
+          <button id="reset-btn" class="secondary" title="実行状態を初期化します">
+            <i class="fas fa-undo"></i> リセット
+          </button>
+        </div>
+      </div>
+      <div class="pane-content" style="padding: 0;">
+        <div id="editor-list" class="editor-workspace" aria-label="組み立てエリア">
+          <!-- 組み立てカードがここに配置される -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 右ペイン：実行結果と変数モニター -->
+    <section class="pane" id="output-pane" aria-label="実行結果と状態表示">
+      
+      <!-- 実行結果判定ステータスバー -->
+      <div id="status-bar" class="status-bar" role="status">
+        <span id="status-text">判定結果</span>
+      </div>
+
+      <!-- 変数モニターセクション -->
+      <div class="output-pane-section var-monitor-section">
+        <div class="sec-header">
+          <span><i class="fas fa-desktop"></i> 変数モニター</span>
+        </div>
+        <div class="sec-content">
+          <div id="vars-grid" class="vars-grid">
+            <!-- 変数値が動的に入る -->
+          </div>
+          <div id="array-visualizer">
+            <!-- 配列の視覚表現が入る -->
+          </div>
+        </div>
+      </div>
+
+      <!-- コンソール出力セクション -->
+      <div class="output-pane-section console-section">
+        <div class="sec-header">
+          <span><i class="fas fa-terminal"></i> 出力 (コンソール)</span>
+        </div>
+        <div class="sec-content" style="padding: 0.5rem 1rem;">
+          <div id="console-output" class="console-output"></div>
+        </div>
+      </div>
+
+      <!-- Pythonトランスパイルプレビュー -->
+      <div class="output-pane-section preview-section">
+        <div class="sec-header">
+          <span><i class="fab fa-python"></i> Python 変換プレビュー</span>
+        </div>
+        <div class="sec-content" style="padding: 0.5rem 1rem;">
+          <div id="preview-code" class="preview-code"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 解説エリア (正解時のみ表示) -->
+  <section id="explanation-section" class="pane" style="max-width: 1800px; width: 100%; margin: 0 auto 1.5rem auto; display: none;" aria-labelledby="explanation-title">
+    <div class="pane-header">
+      <h2 id="explanation-title" style="color: var(--accent-green);"><i class="fas fa-lightbulb"></i> 正解の解説</h2>
+    </div>
+    <div class="pane-content">
+      <p id="explanation-text" style="font-size: 0.95rem; line-height: 1.6; color: var(--text-primary);"></p>
+    </div>
+  </section>
+
+  <!-- AIプロンプト生成モーダル -->
+  <div id="ai-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title"><i class="fas fa-robot"></i> 生成AI用質問プロンプト</h3>
+        <button id="close-modal" class="close-btn" aria-label="閉じる"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-content">
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.4;">
+          現在の組み立てコードやエラーをまとめた質問プロンプトを生成しました。
+          これをコピーして、お使いのAI（ChatGPT, Gemini, Claudeなど）に貼り付けることで、的確なアドバイスを受けることができます。
+        </p>
+        <textarea id="prompt-textarea" class="prompt-textarea" readonly title="質問プロンプトのテキスト"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button id="copy-prompt-btn" class="primary"><i class="fas fa-copy"></i> プロンプトをコピー</button>
+        <button id="download-prompt-btn" class="secondary"><i class="fas fa-download"></i> ファイル保存 (.md)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- フッター -->
+  <footer>
+    <p>&copy; 2026 DNCL Playground - プログラミング初学者のための学習支援ツール</p>
+  </footer>
+
+  <!-- スクリプトの読み込み -->
+  <script src="problems.js"></script>
+  <script src="dncl-interpreter.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
