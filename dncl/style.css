@@ -1190,3 +1190,34 @@ header .mode-tab {
     margin: 0.2rem 0 !important;
   }
 }
+
+/* ------------------------------------------------------------------
+   情報レンズ（SchoolLenz）への導線
+   ------------------------------------------------------------------ */
+.logo-section .back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  margin-bottom: 0.15rem;
+  transition: color var(--transition-fast);
+}
+.logo-section .back-link:hover {
+  color: var(--accent-purple);
+}
+
+/* h1 はグラデーション文字なので、アイコンだけ色を明示する */
+.logo-section h1 .fas {
+  background-color: #a78bfa;
+}
+
+footer a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+footer a:hover {
+  color: var(--accent-purple);
+}

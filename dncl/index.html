@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1行ずつみるアルゴリズム（DNCL） — 共通テスト「情報I」の疑似言語を動かして学ぶ | 情報レンズ</title>
+  <meta name="description" content="大学入学共通テスト「情報I」のプログラミング疑似言語（DNCL）を、カードで組み立てて1行ずつ実行。変数の中身と処理の流れが同時に見える無料の学習ツール。情報レンズ（SchoolLenz）。">
+  <link rel="canonical" href="https://info.schoollenz.com/dncl/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SchoolLenz">
+  <meta property="og:title" content="1行ずつみるアルゴリズム（DNCL） — 情報レンズ">
+  <meta property="og:description" content="共通テスト「情報I」の疑似言語（DNCL）を、カードで組み立てて1行ずつ実行。変数の中身と処理の流れが同時に見える。無料・広告なし・ログイン不要。">
+  <meta property="og:url" content="https://info.schoollenz.com/dncl/">
+  <link rel="stylesheet" href="icons.css">
+  <link rel="stylesheet" href="style.css">
+  <!-- ドラッグ＆ドロップ（自前実装・外部CDNなし） -->
+  <script src="sortable-lite.js"></script>
+</head>
+<body>
+
+  <!-- ヘッダーエリア (横長リボンに統合) -->
+  <header>
+    <div class="logo-section">
+      <a href="../" class="back-link" title="情報レンズ（アプリ一覧）へ戻る">
+        <i class="fas fa-arrow-left"></i> 情報レンズ
+      </a>
+      <h1><i class="fas fa-graduation-cap"></i> 1行ずつみるアルゴリズム</h1>
+      <span>共通テスト「情報I」の疑似言語（DNCL）</span>
+    </div>
+    
+    <!-- モード切り替えタブをヘッダー内に統合 -->
+    <nav class="mode-tabs" aria-label="学習モードの選択">
+      <button id="mode-exercise-btn" class="mode-tab active" title="問題演習モードに切り替えます">
+        <i class="fas fa-tasks"></i> 問題演習編
+      </button>
+      <button id="mode-syntax-btn" class="mode-tab" title="基本構文の学習モードに切り替えます">
+        <i class="fas fa-book-reader"></i> 構文学習編
+      </button>
+    </nav>
+    
+    <div class="controls-section">
+      <!-- 問題選択ドロップダウン -->
+      <div class="select-wrapper">
+        <select id="problem-select" title="問題を選択してください">
+          <!-- JSで動的生成 -->
+        </select>
+      </div>
+      
+      <!-- AI質問ファイル生成ボタン -->
+      <button id="ai-prompt-btn" class="secondary" title="外部の生成AI（ChatGPT/Gemini等）への質問文を生成します">
+        <i class="fas fa-robot"></i> AIに相談する
+      </button>
+    </div>
+  </header>
+
+  <!-- メインコンテンツ -->
+  <main>
+    
+    <!-- 左ペイン：問題とカードトレイ -->
+    <section class="pane" id="left-pane" aria-labelledby="left-pane-title">
+      <div class="pane-header">
+        <h2 id="left-pane-title"><i class="fas fa-book-open"></i> 問題とカード</h2>
+      </div>
+      <div class="pane-content">
+        <!-- 問題カード -->
+        <article class="problem-card">
+          <h3 id="problem-title">問題タイトル</h3>
+          <p id="problem-desc">問題の説明がここに表示されます。</p>
+          <div id="difficulty-badge" class="difficulty-badge">難易度</div>
+        </article>
+
+        <!-- 難易度切り替えタブ -->
+        <nav class="difficulty-tabs" id="difficulty-tabs" aria-label="問題の難易度設定">
+          <div class="diff-tab active" data-difficulty="easy" id="tab-easy">イージー</div>
+          <div class="diff-tab" data-difficulty="normal" id="tab-normal">ノーマル</div>
+          <div class="diff-tab" data-difficulty="hard" id="tab-hard">ハード</div>
+        </nav>
+
+        <!-- 初心者向け基本解説アコーディオン -->
+        <div class="guide-accordion" style="margin: 0.5rem 1rem 0.5rem 1rem;">
+          <div class="guide-header" id="guide-toggle" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+            <span><i class="fas fa-graduation-cap"></i> 🔰 プログラミングのきほん（変数とインデント）</span>
+            <i class="fas fa-chevron-down toggle-icon" id="guide-toggle-icon" style="transition: transform 0.2s;"></i>
+          </div>
+          <div class="guide-body" id="guide-body" style="display: none; padding: 0.75rem 0.5rem 0.2rem 0.5rem;">
+            <div class="guide-item">
+              <h4 style="margin: 0 0 0.3rem 0; font-size: 0.95rem; color: #f59e0b;"><i class="fas fa-box"></i> 1. 変数の定義（初期化）とは？</h4>
+              <p style="margin: 0; font-size: 0.85rem; line-height: 1.5; color: #cbd5e1;">変数は、値を入れておく「箱」です。新しい変数を使う前に、あらかじめ「箱を準備（初期化）」しておく必要があります（例：<code>合計 = 0</code>、<code>個数 = 0</code> など）。<br>もし初期化を忘れたまま計算を始めると、コンピュータは箱の中に何が入っているか分からず、「変数が見つかりません」とエラー（未定義エラー）を出してしまいます。</p>
+            </div>
+            <div class="guide-item" style="margin-top: 0.8rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.8rem;">
+              <h4 style="margin: 0 0 0.3rem 0; font-size: 0.95rem; color: #f59e0b;"><i class="fas fa-indent"></i> 2. インデント（字下げ）とは？</h4>
+              <p style="margin: 0; font-size: 0.85rem; line-height: 1.5; color: #cbd5e1;">「もし〜ならば」や「〜を繰り返す」などの制御文の**中身（その条件の時だけ実行したい処理）**は、カードの左右矢印ボタンを使って右に1段ずらして（インデントして）並べます。<br>インデントを下げることで、コンピュータに「ここがループや条件分岐の中身ですよ」と伝える重要な役割があります。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 使用可能なカードリスト（トレイ） -->
+        <div class="operation-guide" style="margin: 0.5rem 1rem 0.5rem 1rem;">
+          <i class="fas fa-lightbulb"></i>
+          <span>💡 カードをダブルクリック（ダブルタップ）すると、中央のエリアへ移動します。</span>
+        </div>
+        <div id="tray-list" class="card-tray" aria-label="利用可能なコードカード" style="margin-top: 0.2rem;">
+          <!-- JSでカードを動的配置 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 中央ペイン：エディタ（組み立てエリア） -->
+    <section class="pane" id="editor-pane" aria-labelledby="editor-pane-title">
+      <div class="pane-header">
+        <h2 id="editor-pane-title"><i class="fas fa-puzzle-piece"></i> プログラム組み立て</h2>
+        <div class="editor-actions" style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+          <!-- 実行（自動再生）ボタン -->
+          <button id="run-btn" class="primary" title="プログラムを自動実行します">
+            <i class="fas fa-play"></i> 実行
+          </button>
+          
+          <!-- 手動ステップ制御グループ -->
+          <div class="step-controls-group" style="display: flex; align-items: center; gap: 0.3rem; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.2rem 0.5rem; height: 36px;">
+            <button id="step-back-btn" class="icon-btn" title="1行戻る (◁)" style="background: transparent; border: none; color: var(--text-primary); cursor: pointer; padding: 0 0.3rem; display: flex; align-items: center;" disabled>
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <span id="step-counter" style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary); min-width: 45px; text-align: center; user-select: none;">0/0</span>
+            <button id="step-forward-btn" class="icon-btn" title="1行進む (▷)" style="background: transparent; border: none; color: var(--text-primary); cursor: pointer; padding: 0 0.3rem; display: flex; align-items: center;" disabled>
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+
+          <!-- 再生速度調整 -->
+          <div class="speed-control" style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-color); border-radius: 8px; padding: 0 0.6rem; height: 36px;">
+            <span style="font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.3rem;"><i class="fas fa-tachometer-alt"></i> 速度</span>
+            <input type="range" id="speed-range" min="100" max="2000" step="100" value="400" title="再生速度を調整します" style="width: 70px; accent-color: var(--accent-purple); height: 4px; cursor: pointer; border: none; background: rgba(255,255,255,0.1); border-radius: 2px;">
+            <span id="speed-val" style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); min-width: 45px;">400ms</span>
+          </div>
+
+          <button id="show-answer-btn" class="secondary" title="この問題の正しい解答と解説を表示します">
+            <i class="fas fa-lightbulb"></i> 模範解答
+          </button>
+          <button id="reset-btn" class="secondary" title="実行状態を初期化します">
+            <i class="fas fa-undo"></i> リセット
+          </button>
+        </div>
+      </div>
+      <div class="pane-content" style="padding: 0;">
+        <div id="editor-list" class="editor-workspace" aria-label="組み立てエリア">
+          <div class="empty-placeholder" id="workspace-placeholder">
+            <i class="fas fa-code"></i>
+            <span>カードをトレイ（左）からドラッグ、またはタップして、中央のエリアに正しい順番とインデント（字下げ）で並べてください。<br>組み立てたら、上の「実行」または「1行ずつ」ボタンを押してプログラムを動かしましょう。</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 右ペイン：実行結果と変数モニター -->
+    <section class="pane" id="output-pane" aria-label="実行結果と状態表示">
+      
+      <!-- 実行結果判定ステータスバー -->
+      <div id="status-bar" class="status-bar" role="status">
+        <span id="status-text">判定結果</span>
+      </div>
+
+      <!-- 変数モニターセクション -->
+      <div class="output-pane-section var-monitor-section">
+        <div class="sec-header">
+          <span><i class="fas fa-desktop"></i> 変数モニター</span>
+        </div>
+        <div class="sec-content">
+          <div id="vars-grid" class="vars-grid">
+            <!-- 変数値が動的に入る -->
+          </div>
+          <div id="array-visualizer">
+            <!-- 配列の視覚表現が入る -->
+          </div>
+        </div>
+      </div>
+
+      <!-- コンソール出力セクション -->
+      <div class="output-pane-section console-section">
+        <div class="sec-header">
+          <span><i class="fas fa-terminal"></i> 出力 (コンソール)</span>
+        </div>
+        <div class="sec-content" style="padding: 0.5rem 1rem;">
+          <div id="console-output" class="console-output"></div>
+        </div>
+      </div>
+
+      <!-- 組み立てたプログラムのプレビュー -->
+      <div class="output-pane-section preview-section">
+        <div class="sec-header">
+          <span><i class="fas fa-file-code"></i> 組み立てたプログラム</span>
+        </div>
+        <div class="sec-content" style="padding: 0.5rem 1rem;">
+          <div id="preview-code" class="preview-code"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 解説エリア (正解時のみ表示) -->
+  <section id="explanation-section" class="pane" style="max-width: 1800px; width: 100%; margin: 0 auto 1.5rem auto; display: none;" aria-labelledby="explanation-title">
+    <div class="pane-header">
+      <h2 id="explanation-title" style="color: var(--accent-green);"><i class="fas fa-lightbulb"></i> 正解の解説</h2>
+    </div>
+    <div class="pane-content">
+      <p id="explanation-text" style="font-size: 0.95rem; line-height: 1.6; color: var(--text-primary);"></p>
+    </div>
+  </section>
+
+  <!-- AIプロンプト生成モーダル -->
+  <div id="ai-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title"><i class="fas fa-robot"></i> 生成AI用質問プロンプト</h3>
+        <button id="close-modal" class="close-btn" aria-label="閉じる"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-content">
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.4;">
+          現在の組み立てコードやエラーをまとめた質問プロンプトを生成しました。
+          これをコピーして、お使いのAI（ChatGPT, Gemini, Claudeなど）に貼り付けることで、的確なアドバイスを受けることができます。
+        </p>
+        <textarea id="prompt-textarea" class="prompt-textarea" readonly title="質問プロンプトのテキスト"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button id="copy-prompt-btn" class="primary"><i class="fas fa-copy"></i> プロンプトをコピー</button>
+        <button id="download-prompt-btn" class="secondary"><i class="fas fa-download"></i> ファイル保存 (.md)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 模範解答モーダル -->
+  <div id="answer-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="answer-modal-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="answer-modal-title"><i class="fas fa-lightbulb"></i> 模範解答 (正解のコード)</h3>
+        <button id="close-answer-modal" class="close-btn" aria-label="閉じる"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-content">
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.2rem;">
+          この問題の正しい配置とインデント構造は以下の通りです。
+        </p>
+        <pre id="answer-code-preview" style="font-family: var(--font-mono); font-size: 0.85rem; color: #34d399; background: #05060a; border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; white-space: pre-wrap; margin-bottom: 1.2rem;"></pre>
+        <div id="answer-explanation-text" style="font-size: 0.85rem; line-height: 1.6; color: var(--text-primary); border-top: 1px solid var(--border-color); padding-top: 1rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- フッター -->
+  <footer>
+    <p>1行ずつみるアルゴリズム（DNCL） — <a href="../">情報レンズ</a> / <a href="https://schoollenz.com/">SchoolLenz</a> &copy; 2026</p>
+  </footer>
+
+  <!-- スクリプトの読み込み -->
+  <script src="problems.js"></script>
+  <script src="dncl-interpreter.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
