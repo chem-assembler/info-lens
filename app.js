@@ -585,23 +585,38 @@ class DNCLApp {
   }
 
   checkSolution() {
-    // 1. ブロック数の確認
+    if (!this.traceResults || !this.traceResults.success) return false;
+
     const correct = this.currentProblem.correctBlocks;
+    
+    // 1. ダミーカードを使用していないかチェック
+    if (this.editorBlocks.some(b => b.isDummy)) return false;
+
+    // 2. 使用しているカードの総数と、IDの構成セットが一致しているかチェック（本質的でない順序違いを許容するため）
     if (this.editorBlocks.length !== correct.length) return false;
+    
+    const userIds = this.editorBlocks.map(b => b.id).sort();
+    const correctIds = correct.map(b => b.id).sort();
+    for (let i = 0; i < correctIds.length; i++) {
+      if (userIds[i] !== correctIds[i]) return false;
+    }
 
-    // 2. 各ブロックのIDとインデントの確認
-    for (let i = 0; i < correct.length; i++) {
+    // 3. インデント構造の論理的チェック
+    // 制御構文の親子関係が模範解答と同じであるかをチェック
+    // （例えば、ループの中に合計加算が入っているかなど、インデント差分の構造を比較）
+    // 順序が異なる場合もあるが、対応するブロックIDのインデント値自体は正解と一致している必要がある
+    for (let i = 0; i < this.editorBlocks.length; i++) {
       const userBlock = this.editorBlocks[i];
-      const correctBlock = correct[i];
+      const correctBlock = correct.find(b => b.id === userBlock.id);
+      if (correctBlock && userBlock.indent !== correctBlock.indent) {
+        return false;
+      }
+    }
 
-      // IDの一致（同じコードブロックか）
-      if (userBlock.id !== correctBlock.id) return false;
-      
-      // インデントの一致
-      if (userBlock.indent !== correctBlock.indent) return false;
-
-      // ハードモードでの穴埋め入力値のチェック
-      if (this.currentDifficulty === "hard") {
+    // 4. ハードモードでの穴埋め入力値のチェック
+    if (this.currentDifficulty === "hard") {
+      for (let i = 0; i < this.editorBlocks.length; i++) {
+        const userBlock = this.editorBlocks[i];
         const originalBlock = this.currentProblem.hardBlocks.find(b => b.id === userBlock.id);
         if (originalBlock && originalBlock.inputs) {
           // 入力キーごとに正解と比較
@@ -620,6 +635,21 @@ class DNCLApp {
           }
         }
       }
+    }
+
+    // 5. 実行結果（コンソール出力）が期待値と完全に一致しているかチェック
+    // 模範解答を同じ初期値で実行した期待される出力を取得
+    const initialVars = this.getCurrentVariablesState();
+    const expectedResult = this.interpreter.run(correct, initialVars);
+    
+    if (!expectedResult.success) return false;
+
+    const userOutput = this.traceResults.output;
+    const expectedOutput = expectedResult.output;
+
+    if (userOutput.length !== expectedOutput.length) return false;
+    for (let i = 0; i < expectedOutput.length; i++) {
+      if (userOutput[i] !== expectedOutput[i]) return false;
     }
 
     return true;
