@@ -570,6 +570,11 @@ class DNCLApp {
         const dummySpec = this.currentProblem.normalBlocks.find(b => b.id === dummyUsed.id);
         if (dummySpec && dummySpec.reason) {
           failMessage = `【ヒント】使用している「${dummyUsed.text}」カードに問題があります。<br>${dummySpec.reason}`;
+          // ダミーカードを赤くハイライト
+          const cardEl = this.editorList.querySelector(`.block-card[data-id="${dummyUsed.id}"]`);
+          if (cardEl) {
+            cardEl.classList.add("reveal-error");
+          }
         }
       } else if (this.editorBlocks.length < this.currentProblem.correctBlocks.length) {
         failMessage = "プログラムの行数が足りないようです。必要なカードがすべて配置されているか確認してください。";
@@ -629,7 +634,10 @@ class DNCLApp {
     this.traceResults = null;
 
     // ハイライトを消す
-    this.editorList.querySelectorAll(".block-card").forEach(c => c.classList.remove("active-line"));
+    this.editorList.querySelectorAll(".block-card").forEach(c => {
+      c.classList.remove("active-line");
+      c.classList.remove("reveal-error");
+    });
     
     // 変数とコンソールの初期化
     this.consoleOutput.innerHTML = "";

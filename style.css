@@ -325,7 +325,12 @@ main {
 }
 
 .block-card.dummy-card {
-  border-left: 3px solid var(--accent-red);
+  border-left: 1px solid var(--border-color);
+}
+
+.block-card.dummy-card.reveal-error {
+  border-left: 3px solid var(--accent-red) !important;
+  box-shadow: 0 0 12px var(--accent-red-glow);
 }
 
 .block-card.active-line {
