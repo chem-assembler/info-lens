@@ -51,10 +51,17 @@ class DNCLInterpreter {
     let js = text.trim();
 
     // 1. 表示する
-    // 例: 合計 を表示する -> _print(合計)
+    // 例1: 合計 を表示する -> _print(合計)
     if (js.endsWith("を表示する")) {
       const expr = js.substring(0, js.length - 5).trim();
       return `_print(${this.translateExpression(expr)});`;
+    }
+
+    // 例2: 表示する("こんにちは") / 表示する("計は", x)
+    const printFuncMatch = js.match(/^表示する\s*\((.*)\)$/);
+    if (printFuncMatch) {
+      const args = printFuncMatch[1].trim();
+      return `_print(${this.translateExpression(args)});`;
     }
 
     // 2. ループを抜ける -> break;
@@ -74,9 +81,10 @@ class DNCLInterpreter {
       return "} else {";
     }
 
-    // 5. そうではなくもし 〜 ならば：
-    if (js.startsWith("そうではなくもし") && js.endsWith("ならば:")) {
-      const cond = js.substring(8, js.length - 4).trim();
+    // 5. そうではなくもし / そうでなくもし 〜 ならば：
+    if ((js.startsWith("そうではなくもし") || js.startsWith("そうでなくもし")) && js.endsWith("ならば:")) {
+      const isSorede = js.startsWith("そうでなくもし");
+      const cond = js.substring(isSorede ? 7 : 8, js.length - 4).trim();
       return `} else if (${this.translateExpression(cond)}) {`;
     }
 
@@ -123,11 +131,11 @@ class DNCLInterpreter {
 
     // 8. 普通の代入文
     // 例: 最大値 = A[0] -> 最大値 = A[0];
-    if (js.includes("=") && !js.includes("==") && !js.includes(">=") && !js.includes("<=")) {
+    if (js.includes("=") && !js.includes("==") && !js.includes(">=") && !js.includes("<=") && !js.includes("!=")) {
       const parts = js.split("=");
       const left = parts[0].trim();
       const right = parts.slice(1).join("=").trim();
-      return `${left} = ${this.translateExpression(right)};`;
+      return `${this.translateExpression(left)} = ${this.translateExpression(right)};`;
     }
 
     // 変換できない場合はそのままJSとして出力（エラーハンドリングは実行時に委ねる）
@@ -136,18 +144,36 @@ class DNCLInterpreter {
 
   /**
    * DNCL特有の表記をJS式に翻訳
-   * - 「かつ」「または」などの論理演算子の変換
-   * - 「!=」「==」などは適宜調整
+   * - 「かつ」「または」「and」「or」「not」などの論理演算子の変換
+   * - カンマ添字2次元配列 A[i,j] -> A[i][j]
+   * - 整数除算 ÷ の変換
    */
   translateExpression(expr) {
     let result = expr;
-    // 論理演算子
+
+    // 2次元配列 A[i, j] -> A[i][j] (配列リテラル [1, 2] と区別するため直前に識別子)
+    result = result.replace(/([a-zA-Z\u30a0-\u30ff\u3040-\u309f\u4e00-\u9faf_0-9]+)\[([^\]]+?),\s*([^\]]+?)\]/g, "$1[$2][$3]");
+
+    // 整数除算 ÷ (例: 7 ÷ 2 -> Math.floor((7) / (2)))
+    while (result.includes("÷")) {
+      const next = result.replace(/((?:\([^()]*\)|[a-zA-Z\u30a0-\u30ff\u3040-\u309f\u4e00-\u9faf_0-9\.\[\]]+))\s*÷\s*((?:\([^()]*\)|[a-zA-Z\u30a0-\u30ff\u3040-\u309f\u4e00-\u9faf_0-9\.\[\]]+))/g, "Math.floor(($1) / ($2))");
+      if (next === result) break;
+      result = next;
+    }
+
+    // 論理演算子 (公式: and / or / not)
+    result = result.replace(/\bnot\b/gi, " !");
+    result = result.replace(/\band\b/gi, " && ");
+    result = result.replace(/\bor\b/gi, " || ");
     result = result.replace(/\s+かつ\s+/g, " && ");
     result = result.replace(/\s+または\s+/g, " || ");
+
     // 商の整数部分 (例: A / B の整数部分 -> Math.floor(A / B))
     result = result.replace(/(.+?)\s*の整数部分/g, "Math.floor($1)");
+
     // 数字始まりの関数呼び出しを安全な識別子に変換 (例: 2倍にする(5) -> _2倍にする(5))
     result = result.replace(/\b([0-9][a-zA-Z\u30a0-\u30ff\u3040-\u309f\u4e00-\u9faf_0-9]*)\s*\(/g, '_$1(');
+
     return result;
   }
 
@@ -194,7 +220,7 @@ class DNCLInterpreter {
       // 現在の行を処理する前に、インデントの減少をチェックして } を補完する
       let closeBracesCode = "";
       const textTrim = currentBlock.text.trim();
-      const isElse = textTrim.startsWith("そうでなければ:") || textTrim.startsWith("そうではなくもし");
+      const isElse = textTrim.startsWith("そうでなければ:") || textTrim.startsWith("そうではなくもし") || textTrim.startsWith("そうでなくもし");
       
       // else系のときは、対応する if ブロックと同じインデントなので、スタック上の if (curIndent) はまだ閉じない。
       // 通常の行のときは、スタック内の curIndent 以上のブロックをすべて閉じる。
@@ -240,6 +266,8 @@ class DNCLInterpreter {
   translateError(errMsg) {
     if (!errMsg) return "プログラムの実行中に未知のエラーが発生しました。";
 
+    const errLower = errMsg.toLowerCase();
+
     // 1. ReferenceError (変数未定義)
     const refMatch = errMsg.match(/([a-zA-Z\u30a0-\u30ff\u3040-\u309f\u4e00-\u9faf_]+)\s+is\s+not\s+defined/);
     if (refMatch) {
@@ -247,17 +275,24 @@ class DNCLInterpreter {
     }
 
     // 2. TypeError (未定義オブジェクト・配列へのアクセス)
-    if (errMsg.includes("Cannot read properties of undefined") || errMsg.includes("is undefined")) {
+    if (errLower.includes("cannot read properties") || errLower.includes("is undefined")) {
       return "エラー: 未定義の変数、または存在しない配列の要素（インデックスが範囲外など）を参照しようとしています。";
     }
 
-    // 3. SyntaxError (インデント崩れや括弧の不整合など)
-    if (errMsg.includes("Missing catch or finally") || errMsg.includes("Unexpected token") || errMsg.includes("Unexpected end of input")) {
-      return "構文エラー: プログラムの組み立て（もし、繰り返し、インデントの対応関係）に誤りがあります。カードの並び順とインデントを調整してください。";
+    // 3. SyntaxError (インデント崩れや使えない記号など)
+    if (
+      errLower.includes("invalid or unexpected token") ||
+      errLower.includes("unexpected token") ||
+      errLower.includes("unexpected identifier") ||
+      errLower.includes("missing catch or finally") ||
+      errLower.includes("unexpected end of input") ||
+      errLower.includes("missing ) after argument list")
+    ) {
+      return "構文エラー: 使えない記号が含まれているか、プログラムの組み立て（もし、繰り返し、インデントの対応関係）に誤りがあります。全角記号（× や ≠ など）やスペース、カードの並び順を確認してください。";
     }
 
     // 4. その他の関数呼び出しエラー
-    if (errMsg.includes("is not a function")) {
+    if (errLower.includes("is not a function")) {
       return "エラー: 関数ではないオブジェクトを関数として呼び出そうとしています。記述ミスがないか確認してください。";
     }
 
@@ -304,8 +339,13 @@ class DNCLInterpreter {
           });
         }
 
-        function _print(value) {
-          const formatted = Array.isArray(value) ? "[" + value.join(", ") + "]" : String(value);
+        function _print(...values) {
+          const formatted = values.map(v => {
+            if (Array.isArray(v)) {
+              return "[" + v.join(", ") + "]";
+            }
+            return String(v);
+          }).join("");
           _printBuffer.push(formatted);
         }
 
