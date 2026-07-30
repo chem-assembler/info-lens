@@ -134,11 +134,16 @@ class DNCLApp {
     this.modeExerciseBtn.addEventListener("click", () => this.switchMode("exercise"));
     this.modeSyntaxBtn.addEventListener("click", () => this.switchMode("syntax"));
 
+    // Python のコピー（実習環境に貼り付けて動かせるように）
+    this.copyPythonBtn = document.getElementById("copy-python-btn");
+    this.copyPythonBtn.addEventListener("click", () => this.copyPythonToClipboard());
+
     // コード表示の切り替え（対照 / DNCL / Python）
     if (!this.toPython) {
       // 変換器が無いときは、実装が無い機能の名前を画面に出さない
       const tabs = document.querySelector(".code-view-tabs");
       if (tabs) tabs.style.display = "none";
+      this.copyPythonBtn.style.display = "none";
     }
     document.querySelectorAll(".code-view-btn").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -1373,6 +1378,53 @@ ${consoleText}
 
   closeAIModal() {
     this.aiModal.classList.remove("open");
+  }
+
+  /**
+   * 組み立てたプログラムを Python として書き出してコピーする。
+   * 表示の切り替え（対照 / DNCL / Python）に関わらず、コピーされるのは常に Python。
+   * ボタンのラベルもそう書いてある
+   */
+  copyPythonToClipboard() {
+    if (!this.toPython || this.editorBlocks.length === 0) return;
+    const source = this.toPython.toSource(this.editorBlocks);
+
+    const done = (ok) => {
+      const original = this.copyPythonBtn.innerHTML;
+      this.copyPythonBtn.innerHTML = ok
+        ? '<i class="fas fa-check"></i>'
+        : '<i class="fas fa-times"></i>';
+      this.copyPythonBtn.classList.add(ok ? "copied" : "copy-failed");
+      setTimeout(() => {
+        this.copyPythonBtn.innerHTML = original;
+        this.copyPythonBtn.classList.remove("copied", "copy-failed");
+      }, 1600);
+    };
+
+    // http:// で開いた学校端末などでは navigator.clipboard が無い。
+    // その場合も黙って失敗させず、選択用のテキストエリアを経由して試みる
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(source).then(() => done(true), () => done(this.copyByTextarea(source)));
+    } else {
+      done(this.copyByTextarea(source));
+    }
+  }
+
+  copyByTextarea(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.cssText = "position:fixed; top:-1000px; opacity:0;";
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try {
+      ok = document.execCommand("copy");
+    } catch (e) {
+      ok = false;
+    }
+    document.body.removeChild(ta);
+    return ok;
   }
 
   copyPromptToClipboard() {

@@ -625,6 +625,35 @@ main {
   color: #fff;
 }
 
+/* Python のコピー。見出しが狭いのでアイコンだけ（title と aria-label で意味を出す） */
+.copy-python-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text-muted);
+}
+
+.copy-python-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--border-active);
+}
+
+.copy-python-btn.copied {
+  color: var(--accent-green);
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.copy-python-btn.copy-failed {
+  color: var(--accent-red);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
 /* 対照表示: 1行の DNCL と 1行の Python を組にして縦に並べる */
 .preview-code.paired { white-space: normal; }
 
@@ -1418,12 +1447,15 @@ footer a:hover {
   }
 
   .code-view-btn { min-width: 44px; padding: 0 0.5rem; }
+  .copy-python-btn { width: 44px; height: 44px; }
 
-  /* 切り替えが44pxになると見出しが窮屈なので、見出しごと縦に積む */
+  /* 切り替えとコピーが44pxになると1行に収まらないので、見出しを1行目に逃がして
+     操作を2行目にまとめる（放っておくとコピーだけが3行目に落ちて間延びする） */
   .preview-section .sec-header {
     flex-wrap: wrap;
     gap: 0.4rem;
   }
+  .preview-section .sec-header > span { flex: 1 0 100%; }
 
   .diff-tab {
     display: flex;
