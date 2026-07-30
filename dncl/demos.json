@@ -74,5 +74,169 @@
         "hold": 1400
       }
     ]
+  },
+  {
+    "id": "syntax-swap",
+    "title": "変数の入れ替え — なぜ3つめの箱が要るのか",
+    "note": "構文学習編の1本目。カードが5枚・インデントなしなので、空から組み立てる流れをそのまま見せられる。所要 35秒前後（speed=1）",
+    "state": { "mode": "syntax", "problem": "lesson_swap" },
+    "steps": [
+      {
+        "caption": "A と B の中身を入れ替えたい。",
+        "actions": [
+          { "type": "scroll", "selector": "#problem-desc" },
+          { "type": "wait", "ms": 900 }
+        ]
+      },
+      {
+        "caption": "まず A を「作業用」に避難させます。",
+        "actions": [
+          { "type": "scroll", "selector": "#tray-list" },
+          { "type": "wait", "ms": 400 },
+          { "type": "card", "id": "l1" }
+        ]
+      },
+      {
+        "caption": "空いた A に B を入れて……",
+        "actions": [
+          { "type": "card", "id": "l2" }
+        ]
+      },
+      {
+        "caption": "避難させておいた値を B に戻す。",
+        "actions": [
+          { "type": "card", "id": "l3" }
+        ]
+      },
+      {
+        "caption": "確かめてみましょう。",
+        "actions": [
+          { "type": "card", "id": "l4" },
+          { "type": "card", "id": "l5" },
+          { "type": "wait", "ms": 500 }
+        ]
+      },
+      {
+        "caption": "1行ずつ進めると、箱の中身が動くのが見えます。",
+        "actions": [
+          { "type": "scroll", "selector": "#editor-list" },
+          { "type": "step", "times": 3, "pause": 1300 }
+        ]
+      },
+      {
+        "caption": "作業用を使わないと、A を上書きした時点で元の値が消えます。",
+        "actions": [
+          { "type": "speed", "ms": 500 },
+          { "type": "run" }
+        ],
+        "hold": 1500
+      },
+      {
+        "caption": "5 と 3 が入れ替わりました。",
+        "actions": [
+          { "type": "wait", "ms": 1200 }
+        ],
+        "hold": 1400
+      }
+    ]
+  },
+  {
+    "id": "sort-bubble",
+    "title": "バブルソート — 並べ替えが起きる瞬間を見る",
+    "note": "整列アルゴリズム。カード8枚・インデント3段まであり空から組むと長いので、state.place で組み上げた状態から始めて『動き』に尺を使う。44ステップあるので speed で詰める。所要 40秒前後",
+    "state": {
+      "mode": "exercise",
+      "difficulty": "easy",
+      "problem": "bubble_sort",
+      "place": ["b1", "b2", "b3", "b4", "b5", "b6", "b7"]
+    },
+    "steps": [
+      {
+        "caption": "並べ替えのアルゴリズム、手順を読んでも動きが浮かばない。",
+        "actions": [
+          { "type": "scroll", "selector": "#editor-list" },
+          { "type": "wait", "ms": 1100 }
+        ]
+      },
+      {
+        "caption": "隣どうしを比べて、大きいほうを右へ送るだけ。",
+        "actions": [
+          { "type": "step", "times": 5, "pause": 1100 }
+        ]
+      },
+      {
+        "caption": "入れ替えの3行。作業用を経由するのがコツです。",
+        "actions": [
+          { "type": "step", "times": 4, "pause": 1000 }
+        ]
+      },
+      {
+        "caption": "あとは同じことの繰り返し。配列を見ていてください。",
+        "actions": [
+          { "type": "speed", "ms": 260 },
+          { "type": "run" }
+        ],
+        "hold": 1600
+      },
+      {
+        "caption": "[5,3,8,4,1] が昇順に並びました。",
+        "actions": [
+          { "type": "wait", "ms": 1300 }
+        ],
+        "hold": 1500
+      }
+    ]
+  },
+  {
+    "id": "python-compare",
+    "title": "共通テストの疑似言語は、Python とほぼ同じ",
+    "note": "Python 対照表示の紹介。showPreview で「組み立てたプログラム」ペインを出す唯一の台本。組み立ては state.place で済ませ、対照そのものに尺を使う。所要 30秒前後",
+    "showPreview": true,
+    "state": {
+      "mode": "exercise",
+      "difficulty": "easy",
+      "problem": "sum_1_to_n",
+      "place": ["b2", "b3", "b4", "b5"]
+    },
+    "steps": [
+      {
+        "caption": "共通テストの疑似言語（DNCL）。授業で使う Python とは別物に見える。",
+        "actions": [
+          { "type": "scroll", "selector": "#editor-list" },
+          { "type": "wait", "ms": 1100 }
+        ]
+      },
+      {
+        "caption": "並べてみると、ほとんどの行はそのままです。",
+        "actions": [
+          { "type": "scroll", "selector": ".preview-section" },
+          { "type": "wait", "ms": 1600 }
+        ],
+        "hold": 1500
+      },
+      {
+        "caption": "違うのは繰り返しと表示の書き方くらい。",
+        "actions": [
+          { "type": "wait", "ms": 1400 }
+        ],
+        "hold": 1400
+      },
+      {
+        "caption": "Python だけで見ることもできます。",
+        "actions": [
+          { "type": "click", "selector": ".code-view-btn[data-view=\"python\"]" },
+          { "type": "wait", "ms": 1600 }
+        ],
+        "hold": 1600
+      },
+      {
+        "caption": "コピーして、そのまま実習環境に貼れます。",
+        "actions": [
+          { "type": "click", "selector": "#copy-python-btn" },
+          { "type": "wait", "ms": 1400 }
+        ],
+        "hold": 1600
+      }
+    ]
   }
 ]

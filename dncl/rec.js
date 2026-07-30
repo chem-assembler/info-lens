@@ -27,6 +27,7 @@
  *   {type:'click',  selector}            任意の要素をタップ
  *   {type:'select', selector, value}     セレクトの値を変える
  *   {type:'step',   times, pause}        「1行ずつ」を times 回
+ *   {type:'speed',  ms}                  自動再生の間隔（既定400ms）を変える
  *   {type:'run',    stall}               「実行」を押して再生の完了まで待つ
  *                                        （stall=進まなくなったと判断する ms。既定 20000）
  *   {type:'scroll', selector}            要素が見えるところまでスクロール
@@ -234,6 +235,15 @@
                     }
                     break;
                 }
+                case 'speed': {
+                    // 自動再生の間隔。整列のようにステップ数の多い問題を
+                    // 短尺に収めるために台本から指定できるようにしてある
+                    const ms = Math.max(50, Math.min(2000, a.ms || 400));
+                    this.app.playbackSpeed = ms;
+                    if (this.app.speedRange) this.app.speedRange.value = ms;
+                    if (this.app.speedVal) this.app.speedVal.textContent = `${ms}ms`;
+                    break;
+                }
                 case 'run': {
                     await this.tap(this.query('#run-btn'), 300);
                     await this.waitForPlaybackEnd(a.stall || 20000);
@@ -309,6 +319,9 @@
         }
 
         async play(demo) {
+            // 既定のクリーン画面では「組み立てたプログラム」を隠している（上のカード列と
+            // 同じ内容なので）。Python 対照そのものを見せる台本だけ、明示的に出す
+            if (demo.showPreview) document.documentElement.classList.add('rec-show-preview');
             this.applyState(demo.state);
             await this.sleep(400);
             for (const step of demo.steps || []) {

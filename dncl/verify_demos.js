@@ -16,7 +16,7 @@ const { problems, syntaxLessons } = require("./problems.js");
 const demosPath = path.join(__dirname, "demos.json");
 const indexHtml = fs.readFileSync(path.join(__dirname, "index.html"), "utf8");
 
-const ACTION_TYPES = ["wait", "card", "indent", "click", "select", "step", "run", "scroll"];
+const ACTION_TYPES = ["wait", "card", "indent", "click", "select", "step", "run", "scroll", "speed"];
 
 let errors = 0;
 let checks = 0;

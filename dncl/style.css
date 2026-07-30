@@ -1632,10 +1632,23 @@ footer a:hover {
 .recording .speed-control,
 .recording #show-answer-btn,
 .recording #reset-btn,
+.recording #explanation-section,
 .recording .preview-section { display: none !important; }
+/* 解説は短尺では誰も読まないうえ、正解した瞬間に現れて字幕の下敷きになる */
 /* 「組み立てたプログラム」は上のカード列と同じ内容。画面を食ううえ字幕の下敷きになる */
 
 .recording main { padding-top: 1rem; }
+
+/* Python 対照そのものを見せる台本（demos.json の showPreview）だけ、ペインを出す。
+   実行中に隠す規則（body.stepping）より強くする必要があるので !important */
+.recording.rec-show-preview .preview-section { display: flex !important; }
+
+/* この台本では見せたいコードが画面の一番下にあるので、字幕は上へ逃がす
+   （下に置くと Python の最後の数行を隠してしまう） */
+.recording.rec-show-preview #rec-caption {
+  top: 20px;
+  bottom: auto;
+}
 
 /* hover の無い収録環境ではインデント操作が見えないので、常に出す */
 .recording #editor-list .indent-btn-group { opacity: 1 !important; }
