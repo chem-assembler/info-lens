@@ -3,8 +3,10 @@
 class DNCLApp {
   constructor() {
     this.interpreter = new DNCLInterpreter();
-    this.toPython = new DNCLToPython();
-    this.previewMode = "pair"; // pair（対照）/ dncl / python
+    // Python 対照は付加機能。変換器が読めなかったときに
+    // アプリ全体（問題の読み込みやカード操作）まで巻き添えで死なせない
+    this.toPython = (typeof DNCLToPython !== "undefined") ? new DNCLToPython() : null;
+    this.previewMode = this.toPython ? "pair" : "dncl"; // pair（対照）/ dncl / python
     this.currentProblem = null;
     this.currentDifficulty = "easy"; // easy, normal, hard
     
@@ -133,6 +135,11 @@ class DNCLApp {
     this.modeSyntaxBtn.addEventListener("click", () => this.switchMode("syntax"));
 
     // コード表示の切り替え（対照 / DNCL / Python）
+    if (!this.toPython) {
+      // 変換器が無いときは、実装が無い機能の名前を画面に出さない
+      const tabs = document.querySelector(".code-view-tabs");
+      if (tabs) tabs.style.display = "none";
+    }
     document.querySelectorAll(".code-view-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         document.querySelectorAll(".code-view-btn").forEach(b => b.classList.remove("active"));
@@ -577,7 +584,7 @@ class DNCLApp {
       return;
     }
 
-    if (this.previewMode === "dncl") {
+    if (this.previewMode === "dncl" || !this.toPython) {
       this.previewCode.classList.remove("paired");
       this.previewCode.textContent = this.editorBlocks
         .map(b => "  ".repeat(b.indent) + b.text)
