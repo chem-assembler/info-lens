@@ -26,14 +26,19 @@ SchoolLenz の情報系サブブランド。公開URL: https://info.schoollenz.c
 | `problems.js` | 演習問題7問＋構文学習7ユニットのデータ |
 | `dncl-interpreter.js` | DNCLの解析・実行エンジン |
 | `app.js` | UI制御・ステップ実行・変数可視化 |
+| `rec.js` / `demos.json` | 録画モード（`?rec=` があるときだけ動くSNS素材収録用の自動再生層と台本） |
 | `verify_problems.js` | 全問題の模範解答を実行して検証するCLIスクリプト |
+| `verify_demos.js` | 録画台本が問題データと整合しているか検証するCLIスクリプト |
 
 ## 重要ルール
 
 - **外部アセットゼロ**。CDN・ウェブフォント・解析タグを入れない（オフラインで動く／閲覧者のIPを第三者に渡さない）。
   アイコンとドラッグ＆ドロップを自前に置き換えたのはこのため。復活させないこと
 - 全ファイル **UTF-8（BOMなし）**
-- 問題データを触ったら `node dncl/verify_problems.js` を実行し、全件成功を確認してからコミット
+- 問題データを触ったら `node dncl/verify_problems.js` を実行し、全件成功を確認してからコミット。
+  問題データや UI のセレクタを変えたときは `node dncl/verify_demos.js` も通す（録画台本が追随できているか）
+- **録画モードは `?rec=` が無ければ完全に不活性であること**が絶対条件。
+  通常利用・テストに影響を与えない（詳細は `docs/NEXT_dncl_recording.md`、設計の正は chem 側 `DESIGN_recording_mode.md`）
 - 公開名は **「1行ずつみるアルゴリズム」**（副題に DNCL を添える）。SchoolLenz の
   「〈X〉でみる〈Y〉」命名規約に沿う。コードネーム "DNCL Playground" は旧称
 - ローカル確認: リポジトリルートで `python -m http.server 8128` → http://localhost:8128/

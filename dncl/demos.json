@@ -1,0 +1,78 @@
+[
+  {
+    "id": "intro-sum",
+    "title": "1行ずつみるアルゴリズム — カードで組んで、1行ずつ動かす",
+    "note": "V1台本。カードを並べる → インデントを下げる → 1行ずつ実行して変数が動くのを見せる → 最後まで自動再生。所要 40秒前後（speed=1）",
+    "state": { "mode": "exercise", "difficulty": "easy", "problem": "sum_1_to_n" },
+    "steps": [
+      {
+        "caption": "共通テスト「情報I」の疑似言語、読むだけだと動きが見えない。",
+        "actions": [
+          { "type": "scroll", "selector": "#problem-desc" },
+          { "type": "wait", "ms": 900 }
+        ]
+      },
+      {
+        "caption": "1からNまでの合計。カードを並べて作ります。",
+        "actions": [
+          { "type": "scroll", "selector": "#tray-list" },
+          { "type": "wait", "ms": 500 },
+          { "type": "card", "id": "b2" }
+        ]
+      },
+      {
+        "caption": "「合計 = 0」で入れ物を用意して……",
+        "actions": [
+          { "type": "card", "id": "b3" }
+        ]
+      },
+      {
+        "caption": "1からNまで繰り返す。この中身が字下げになります。",
+        "actions": [
+          { "type": "card", "id": "b4" },
+          { "type": "indent", "id": "b4", "delta": 1 }
+        ]
+      },
+      {
+        "caption": "字下げが「繰り返しの中身ですよ」の合図。",
+        "actions": [
+          { "type": "card", "id": "b5" },
+          { "type": "wait", "ms": 600 }
+        ]
+      },
+      {
+        "caption": "組み上がり。ここからが本題です。",
+        "actions": [
+          { "type": "scroll", "selector": "#editor-list" },
+          { "type": "wait", "ms": 700 }
+        ]
+      },
+      {
+        "caption": "1行ずつ進めると、変数の中身が同時に動く。",
+        "actions": [
+          { "type": "step", "times": 5, "pause": 1000 }
+        ]
+      },
+      {
+        "caption": "合計に i が足されて、i がひとつ増える。この繰り返し。",
+        "actions": [
+          { "type": "step", "times": 4, "pause": 900 }
+        ]
+      },
+      {
+        "caption": "あとは最後まで。",
+        "actions": [
+          { "type": "run" }
+        ],
+        "hold": 1600
+      },
+      {
+        "caption": "55。動かして確かめられます。",
+        "actions": [
+          { "type": "wait", "ms": 1200 }
+        ],
+        "hold": 1400
+      }
+    ]
+  }
+]

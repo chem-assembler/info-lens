@@ -1512,6 +1512,101 @@ footer a:hover {
   #editor-list .block-card:not(.locked-card)::after { content: none; }
 }
 
+/* ==========================================================================
+   録画モード（?rec= のときだけ付く .recording / rec-* クラス）
+   設計は chem 側 DESIGN_recording_mode.md。通常利用ではここは一切当たらない
+   ========================================================================== */
+
+/* 画面に映したくないものを消して、問題・カード・組み立て・変数を主役にする */
+.recording header,
+.recording footer,
+.recording .guide-accordion,
+.recording .operation-guide,
+.recording #difficulty-tabs,
+.recording .speed-control,
+.recording #show-answer-btn,
+.recording #reset-btn,
+.recording .preview-section { display: none !important; }
+/* 「組み立てたプログラム」は上のカード列と同じ内容。画面を食ううえ字幕の下敷きになる */
+
+.recording main { padding-top: 1rem; }
+
+/* hover の無い収録環境ではインデント操作が見えないので、常に出す */
+.recording #editor-list .indent-btn-group { opacity: 1 !important; }
+
+#rec-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3000;
+}
+
+#rec-cursor {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(167, 139, 250, 0.35);
+  border: 2px solid #a78bfa;
+  box-shadow: 0 0 14px rgba(167, 139, 250, 0.8);
+  z-index: 3002;
+}
+#rec-cursor.touch { width: 34px; height: 34px; }
+.rec-no-cursor #rec-cursor { display: none; }
+
+#rec-caption {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  width: calc(100% - 40px);
+  max-width: 680px;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  background: rgba(10, 11, 16, 0.94);
+  border: 1px solid var(--border-active);
+  color: #f1f5f9;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  text-align: left;
+  z-index: 3003;
+}
+#rec-caption.empty { display: none; }
+.rec-no-caption #rec-caption { display: none; }
+
+/* 縦型（9:16）はSNSで音無し再生される前提。大きく太く、中央に置く */
+.rec-short #rec-caption {
+  bottom: 8%;
+  max-width: none;
+  width: calc(100% - 32px);
+  padding: 0.8rem 1rem;
+  background: rgba(10, 11, 16, 0.9);
+  border: none;
+  border-radius: 14px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.45;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+}
+
+/* 実行シートが下部を占めるので、字幕はその上へ逃がす。
+   シートの高さは中身しだいなので、rec.js が実測値を --rec-sheet-h に入れる */
+.recording #rec-caption { bottom: calc(var(--rec-sheet-h, 0px) + 26px); }
+.rec-short #rec-caption { bottom: calc(var(--rec-sheet-h, 0px) + 32px); }
+
+/* 全部のカードを置き終えたら、空になったトレイの枠は畳む（尺の無駄・構図の間延び対策） */
+.recording #tray-list:empty {
+  display: none !important;
+  min-height: 0;
+  padding: 0;
+  border: none;
+}
+
 /* 横持ちは縦が足りず、下に固定すると変数モニターが潰れる。
    代わりに幅の余っている右側へ立てて、左にコード・右に変数という配置にする */
 @media (max-width: 992px) and (orientation: landscape) {
