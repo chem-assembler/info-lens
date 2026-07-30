@@ -1076,6 +1076,9 @@ footer {
 .block-card {
   justify-content: flex-start !important;
   gap: 0.75rem !important;
+  /* ナレーション（width:100%）をカード内の次の行へ折り返す。
+     折り返さないと1行に押し込まれ、狭い画面では縦に細長い柱になってしまう */
+  flex-wrap: wrap !important;
 }
 
 .block-card .block-text {
@@ -1221,4 +1224,268 @@ footer a {
 }
 footer a:hover {
   color: var(--accent-purple);
+}
+
+/* ==========================================================================
+   第5期：小画面レイアウトの立て直し
+   1カラムに積んだだけでは縦2画面分になり、コードと変数が同時に見えず
+   「1行ずつみる」が成立していなかった。実行中は右ペインを下部に固定する
+   ========================================================================== */
+
+/* つまみは小画面の実行中だけ現れる（PC幅では右ペインは通常の3カラムのまま） */
+.sheet-bar { display: none; }
+
+.desc-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  color: #a78bfa;
+  font-size: 0.85rem;
+  padding: 0.4rem 0;
+  text-decoration: underline;
+}
+
+@media (max-width: 992px) {
+
+  /* ------------------------------------------------------------------
+     1. 実行シート（最重要）：コードを見ながら変数と出力を追えるようにする
+     ------------------------------------------------------------------ */
+  body.stepping #output-pane {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    gap: 0.5rem;
+    padding: 0.5rem 0.6rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
+    max-height: 46vh;
+    overflow-y: auto;
+    background: rgba(8, 9, 14, 0.97);
+    backdrop-filter: blur(14px);
+    border: none;
+    border-top: 1px solid var(--border-active);
+    border-radius: 14px 14px 0 0;
+    box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.65);
+  }
+
+  body.stepping .sheet-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    margin: -0.5rem -0.6rem 0;
+    padding: 0.35rem 0.6rem;
+    background: rgba(8, 9, 14, 0.97);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .sheet-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+  }
+
+  /* シートに移した「実行」ボタンは幅を切り詰める（横に並べきるため） */
+  .sheet-controls #run-btn {
+    padding: 0.5rem 0.7rem;
+    white-space: nowrap;
+  }
+
+  .sheet-toggle {
+    flex: 0 0 auto;
+    justify-content: center;
+    width: 44px;
+    min-height: 44px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0;
+  }
+
+  .sheet-toggle i { transition: transform var(--transition-fast); }
+
+  /* たたんだ状態ではつまみだけを残す（画面を広く使いたいとき用） */
+  body.stepping.sheet-collapsed #output-pane {
+    max-height: none;
+    overflow: visible;
+  }
+  body.stepping.sheet-collapsed #output-pane > *:not(.sheet-bar) { display: none; }
+  body.stepping.sheet-collapsed .sheet-toggle i { transform: rotate(180deg); }
+
+  /* 実行中は「組み立てたプログラム」を隠す：同じ内容が上のカード列に見えている */
+  body.stepping .preview-section { display: none; }
+
+  /* シートに隠れる分の余白。実行中の行がシートの下に潜らないようにもする */
+  body.stepping { padding-bottom: 48vh; }
+  body.stepping.sheet-collapsed { padding-bottom: 5rem; }
+  body.stepping #editor-list .block-card { scroll-margin-bottom: 50vh; }
+
+  /* ページ自体がスクロールするので、組み立てエリアの内側スクロールはやめる
+     （二重スクロールだと現在行の自動スクロールが噛み合わない） */
+  #editor-list {
+    height: auto;
+    overflow-y: visible;
+  }
+
+  /* コンソールは節と中身で高さが二重指定されていたのを揃える */
+  .console-section { height: auto; }
+  #console-output { height: 110px; }
+  body.stepping #console-output { height: 88px; }
+
+  /* ------------------------------------------------------------------
+     2. タップ領域：最低 44px（Apple 44pt / Google 48dp の下限）
+     ------------------------------------------------------------------ */
+  header button,
+  header select,
+  .mode-tab,
+  .diff-tab,
+  .editor-actions button,
+  .icon-btn,
+  .close-btn,
+  .modal-footer button {
+    min-height: 44px;
+  }
+
+  .diff-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* インラインの height="36px" 指定を上書きする */
+  .step-controls-group,
+  .speed-control { height: 44px !important; }
+
+  .step-controls-group .icon-btn {
+    min-width: 44px;
+    justify-content: center;
+  }
+
+  /* タッチ端末には hover がないため、インデント操作は常時表示にする
+     （従来は .block-card:hover でしか見えず、事実上そこにあると分からなかった） */
+  #editor-list .indent-btn-group { opacity: 1; }
+
+  /* 逆にトレイ上のインデント操作は adjustIndent が弾くので、幅だけ食っていた */
+  #tray-list .indent-btn-group { display: none; }
+
+  .indent-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
+    justify-content: center;
+  }
+
+  /* ハードモードの穴埋め入力欄。16px 未満だと iOS Safari が
+     フォーカス時に勝手にズームするので、文字も 1rem まで上げる */
+  .block-card input {
+    min-height: 44px;
+    font-size: 1rem;
+  }
+
+  /* 速度スライダーは実体が4pxしかなく指では掴めない。
+     見た目の線は細いまま、当たり判定だけ広げる */
+  #speed-range {
+    height: 44px !important;
+    background: transparent !important;
+  }
+  #speed-range::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+  #speed-range::-moz-range-track {
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  /* 二次的なリンクもタップできる大きさにする */
+  .logo-section .back-link {
+    min-height: 44px;
+    padding-right: 0.4rem;
+    margin-bottom: 0;
+  }
+
+  footer { padding: 0.3rem 0.75rem; }
+  footer p { line-height: 2.6; }
+  footer a {
+    display: inline-block;
+    padding: 0.75rem 0.3rem;
+  }
+
+  /* ------------------------------------------------------------------
+     3. 本題に入るまでのスクロールを詰める
+     ------------------------------------------------------------------ */
+  header {
+    padding: 0.5rem 0.75rem !important;
+    gap: 0.4rem !important;
+  }
+
+  .logo-section h1 { font-size: 1.15rem; }
+  .logo-section span { display: none; }  /* 副題はページタイトルと重複 */
+
+  .controls-section {
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .controls-section .select-wrapper { flex: 1; min-width: 0; }
+  #problem-select { width: 100%; }
+
+  .pane-header { padding: 0.6rem 0.8rem; }
+  .problem-card { margin-bottom: 0.4rem; }
+  .guide-accordion { margin-top: 0.4rem !important; margin-bottom: 0.4rem !important; }
+  .operation-guide { margin-bottom: 0.4rem !important; }
+
+  /* 問題文は既定で3行まで。続きは「続きを読む」で開く */
+  #problem-desc {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+  }
+  body.desc-expanded #problem-desc {
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    overflow: visible;
+  }
+  body.desc-clipped .desc-toggle {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
+
+/* 横持ちは縦が足りず、下に固定すると変数モニターが潰れる。
+   代わりに幅の余っている右側へ立てて、左にコード・右に変数という配置にする */
+@media (max-width: 992px) and (orientation: landscape) {
+  body.stepping #output-pane {
+    top: 0;
+    left: auto;
+    width: min(46vw, 340px);
+    height: 100%;
+    max-height: none;
+    padding: 0.5rem 0.6rem;
+    border-top: none;
+    border-left: 1px solid var(--border-active);
+    border-radius: 0;
+    box-shadow: -12px 0 32px rgba(0, 0, 0, 0.65);
+  }
+
+  body.stepping {
+    padding-bottom: 0;
+    padding-right: min(46vw, 340px);
+  }
+
+  body.stepping #editor-list .block-card { scroll-margin-bottom: 0; }
+  body.stepping #console-output { height: 110px; }
+
+  /* たたんだときは右下の小さな操作帯になる */
+  body.stepping.sheet-collapsed #output-pane {
+    top: auto;
+    height: auto;
+  }
+  body.stepping.sheet-collapsed { padding-bottom: 0; }
 }

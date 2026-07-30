@@ -66,6 +66,8 @@
         <article class="problem-card">
           <h3 id="problem-title">問題タイトル</h3>
           <p id="problem-desc">問題の説明がここに表示されます。</p>
+          <!-- 小画面では問題文を3行に畳む（長い問題文でカードまでのスクロールが伸びるのを防ぐ） -->
+          <button id="desc-toggle" class="desc-toggle" aria-expanded="false" aria-controls="problem-desc">続きを読む</button>
           <div id="difficulty-badge" class="difficulty-badge">難易度</div>
         </article>
 
@@ -153,7 +155,16 @@
 
     <!-- 右ペイン：実行結果と変数モニター -->
     <section class="pane" id="output-pane" aria-label="実行結果と状態表示">
-      
+
+      <!-- 小画面用：実行中はこのペインを画面下に固定し、そのつまみとしてこの行を出す。
+           「実行」とステップ操作は app.js が #sheet-controls へ移して、コードを見ながら動かせるようにする -->
+      <div class="sheet-bar" id="sheet-bar">
+        <div class="sheet-controls" id="sheet-controls"></div>
+        <button id="sheet-toggle" class="sheet-toggle" title="変数と出力の表示を切り替えます" aria-expanded="true" aria-controls="output-pane">
+          <i class="fas fa-chevron-down"></i>
+        </button>
+      </div>
+
       <!-- 実行結果判定ステータスバー -->
       <div id="status-bar" class="status-bar" role="status">
         <span id="status-text">判定結果</span>

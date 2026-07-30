@@ -56,6 +56,16 @@ class DNCLApp {
     this.answerCodePreview = document.getElementById("answer-code-preview");
     this.answerExplanationText = document.getElementById("answer-explanation-text");
 
+    // 小画面用：実行シート（実行中に右ペインを画面下へ固定する）
+    this.sheetBar = document.getElementById("sheet-bar");
+    this.sheetControls = document.getElementById("sheet-controls");
+    this.sheetToggle = document.getElementById("sheet-toggle");
+    this.editorActions = document.querySelector(".editor-actions");
+    this.speedControl = document.querySelector(".speed-control");
+    this.stepControlsGroup = document.querySelector(".step-controls-group");
+    this.descToggle = document.getElementById("desc-toggle");
+    this.smallScreen = window.matchMedia("(max-width: 992px)");
+
     // モード切り替え用DOM & 状態変数
     this.currentMode = "exercise"; // exercise (問題演習) or syntax (構文学習)
     this.modeExerciseBtn = document.getElementById("mode-exercise-btn");
@@ -120,6 +130,28 @@ class DNCLApp {
     this.modeExerciseBtn.addEventListener("click", () => this.switchMode("exercise"));
     this.modeSyntaxBtn.addEventListener("click", () => this.switchMode("syntax"));
 
+    // 実行シートの開閉（小画面）
+    this.sheetToggle.addEventListener("click", () => {
+      const collapsed = document.body.classList.toggle("sheet-collapsed");
+      this.sheetToggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+    });
+
+    // 画面の回転やウィンドウ幅の変更で、操作ボタンの置き場所（ヘッダー／シート）を選び直す
+    window.addEventListener("resize", () => {
+      clearTimeout(this.resizeTimer);
+      this.resizeTimer = setTimeout(() => {
+        this.syncSheetControls();
+        this.updateDescToggle();
+      }, 150);
+    });
+
+    // 問題文の折りたたみ（小画面）
+    this.descToggle.addEventListener("click", () => {
+      const expanded = document.body.classList.toggle("desc-expanded");
+      this.descToggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+      this.descToggle.textContent = expanded ? "とじる" : "続きを読む";
+    });
+
     // 初心者向け基本解説アコーディオンのトグル制御
     const guideToggle = document.getElementById("guide-toggle");
     const guideBody = document.getElementById("guide-body");
@@ -172,6 +204,49 @@ class DNCLApp {
         this.onBlocksChanged();
       }
     });
+  }
+
+  /**
+   * 小画面の実行中は「実行」ボタンとステップ操作を画面下のシートへ移す。
+   * ヘッダー側に置いたままだと、コードをスクロールした時点で操作系が画面外に出てしまい
+   * 「1行ずつみる」ができなくなるため。PC幅ではヘッダーへ戻す
+   */
+  syncSheetControls() {
+    const toSheet = this.smallScreen.matches && document.body.classList.contains("stepping");
+
+    if (toSheet) {
+      if (this.sheetControls.contains(this.runBtn)) return;
+      this.sheetControls.appendChild(this.runBtn);
+      this.sheetControls.appendChild(this.stepControlsGroup);
+    } else {
+      if (this.editorActions.contains(this.runBtn)) return;
+      // 元の並び（実行 → ステップ操作 → 速度 → …）に戻す
+      this.editorActions.insertBefore(this.runBtn, this.speedControl);
+      this.editorActions.insertBefore(this.stepControlsGroup, this.speedControl);
+    }
+  }
+
+  enterSteppingMode() {
+    document.body.classList.add("stepping");
+    document.body.classList.remove("sheet-collapsed");
+    this.sheetToggle.setAttribute("aria-expanded", "true");
+    this.syncSheetControls();
+  }
+
+  exitSteppingMode() {
+    document.body.classList.remove("stepping", "sheet-collapsed");
+    this.syncSheetControls();
+  }
+
+  /**
+   * 問題文が3行に収まらないときだけ「続きを読む」を出す（小画面のみ有効なCSS）
+   */
+  updateDescToggle() {
+    document.body.classList.remove("desc-expanded");
+    this.descToggle.textContent = "続きを読む";
+    this.descToggle.setAttribute("aria-expanded", "false");
+    const clipped = this.problemDesc.scrollHeight - this.problemDesc.clientHeight > 2;
+    document.body.classList.toggle("desc-clipped", clipped);
   }
 
   switchMode(mode) {
@@ -228,6 +303,7 @@ class DNCLApp {
     }
 
     this.resetWorkspace();
+    this.updateDescToggle();
   }
 
   resetWorkspace() {
@@ -563,10 +639,12 @@ class DNCLApp {
       this.statusText.innerHTML = `<i class="fas fa-times-circle"></i> 実行エラーが発生しました。カードの順序や穴埋めを確認してください。`;
       this.statusBar.style.display = "flex";
       this.updateStepControls();
+      this.enterSteppingMode(); // エラー文もシート内のコンソールに出るので、シートは開く
       return false;
     }
 
     this.currentStepIndex = 0;
+    this.enterSteppingMode();
     this.renderStep(this.currentStepIndex);
     this.updateStepControls();
     return true;
@@ -1174,6 +1252,7 @@ class DNCLApp {
 
   resetExecution() {
     this.pauseCode();
+    this.exitSteppingMode();
     this.currentStepIndex = -1;
     this.traceResults = null;
 
