@@ -3,6 +3,8 @@
 class DNCLApp {
   constructor() {
     this.interpreter = new DNCLInterpreter();
+    this.toPython = new DNCLToPython();
+    this.previewMode = "pair"; // pair（対照）/ dncl / python
     this.currentProblem = null;
     this.currentDifficulty = "easy"; // easy, normal, hard
     
@@ -129,6 +131,16 @@ class DNCLApp {
     // モード切り替えタブ
     this.modeExerciseBtn.addEventListener("click", () => this.switchMode("exercise"));
     this.modeSyntaxBtn.addEventListener("click", () => this.switchMode("syntax"));
+
+    // コード表示の切り替え（対照 / DNCL / Python）
+    document.querySelectorAll(".code-view-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".code-view-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        this.previewMode = btn.dataset.view;
+        this.updatePreview();
+      });
+    });
 
     // 実行シートの開閉（小画面）
     this.sheetToggle.addEventListener("click", () => {
@@ -561,15 +573,45 @@ class DNCLApp {
   updatePreview() {
     if (this.editorBlocks.length === 0) {
       this.previewCode.textContent = "// 組み立てられたプログラムがここに表示されます";
+      this.previewCode.classList.remove("paired");
       return;
     }
 
-    const lines = this.editorBlocks.map(b => {
-      const space = "  ".repeat(b.indent);
-      return space + b.text;
-    });
+    if (this.previewMode === "dncl") {
+      this.previewCode.classList.remove("paired");
+      this.previewCode.textContent = this.editorBlocks
+        .map(b => "  ".repeat(b.indent) + b.text)
+        .join("\n");
+      return;
+    }
 
-    this.previewCode.textContent = lines.join("\n");
+    if (this.previewMode === "python") {
+      this.previewCode.classList.remove("paired");
+      this.previewCode.textContent = this.toPython.toSource(this.editorBlocks);
+      return;
+    }
+
+    // 対照表示: DNCL の1行と Python の1行を上下に並べる。
+    // 右ペインは狭いので左右2カラムにはせず、行ごとの組にする
+    this.previewCode.classList.add("paired");
+    this.previewCode.innerHTML = "";
+    this.toPython.convertBlocks(this.editorBlocks).forEach(row => {
+      const pair = document.createElement("div");
+      pair.className = "code-pair";
+      pair.style.paddingLeft = `${row.indent * 1.2}em`;
+
+      const dncl = document.createElement("div");
+      dncl.className = "code-dncl";
+      dncl.textContent = row.dncl;
+
+      const py = document.createElement("div");
+      py.className = "code-py" + (row.same ? " same" : "");
+      py.textContent = row.python;
+
+      pair.appendChild(dncl);
+      pair.appendChild(py);
+      this.previewCode.appendChild(pair);
+    });
   }
 
   getCurrentVariablesState() {

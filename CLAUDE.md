@@ -23,12 +23,14 @@ SchoolLenz の情報系サブブランド。公開URL: https://info.schoollenz.c
 | `style.css` | スタイル（ダークテーマ・モバイル対応） |
 | `icons.css` | アイコン（CSSマスク＋インラインSVG。FontAwesome CDN の置き換え） |
 | `sortable-lite.js` | ドラッグ＆ドロップ（SortableJS CDN の置き換え・自前実装） |
-| `problems.js` | 演習問題7問＋構文学習7ユニットのデータ |
-| `dncl-interpreter.js` | DNCLの解析・実行エンジン |
+| `problems.js` | 演習問題15問＋構文学習12ユニットのデータ |
+| `dncl-interpreter.js` | DNCLの解析・実行エンジン（DNCL→JS。実行はこちら） |
+| `dncl-to-python.js` | DNCL→Python 変換（対照表示のための1行1行の対応。実行には使わない） |
 | `app.js` | UI制御・ステップ実行・変数可視化 |
 | `rec.js` / `demos.json` | 録画モード（`?rec=` があるときだけ動くSNS素材収録用の自動再生層と台本） |
 | `verify_problems.js` | 全問題の模範解答を実行して検証するCLIスクリプト |
 | `verify_demos.js` | 録画台本が問題データと整合しているか検証するCLIスクリプト |
+| `verify_python.js` | 変換した Python を実際に走らせ、DNCL と同じ出力になるか検証するCLIスクリプト |
 
 ## 重要ルール
 
@@ -36,7 +38,9 @@ SchoolLenz の情報系サブブランド。公開URL: https://info.schoollenz.c
   アイコンとドラッグ＆ドロップを自前に置き換えたのはこのため。復活させないこと
 - 全ファイル **UTF-8（BOMなし）**
 - 問題データを触ったら `node dncl/verify_problems.js` を実行し、全件成功を確認してからコミット。
-  問題データや UI のセレクタを変えたときは `node dncl/verify_demos.js` も通す（録画台本が追随できているか）
+  問題データや UI のセレクタを変えたときは `node dncl/verify_demos.js` も通す（録画台本が追随できているか）。
+  DNCL の文法や `dncl-to-python.js` を触ったときは `node dncl/verify_python.js`
+  （変換した Python を実際に走らせて DNCL と出力を突き合わせる）
 - **録画モードは `?rec=` が無ければ完全に不活性であること**が絶対条件。
   通常利用・テストに影響を与えない（詳細は `docs/NEXT_dncl_recording.md`、設計の正は chem 側 `DESIGN_recording_mode.md`）
 - 公開名は **「1行ずつみるアルゴリズム」**（副題に DNCL を添える）。SchoolLenz の
@@ -66,7 +70,9 @@ SchoolLenz の情報系サブブランド。公開URL: https://info.schoollenz.c
 
 ## これから
 
-- 整列（ソート）アルゴリズムの問題追加
-- 「組み立てたプログラム」ペインを **Python 対照表示** にする（DNCL→Python は
-  ほぼ1:1。情報Iの実習言語がPythonの学校が多く、価値が高い。現状は組み立てたDNCLをそのまま表示）
+- 「組み立てたプログラム」ペインの **Python コピーボタン**（生徒が実習環境に貼れるように）
+- 録画台本（`demos.json`）の追加。構文学習編・整列アルゴリズムなど
 - 情報Iの他領域（情報デザイン／ネットワーク／データの活用）のレンズ
+
+済んだもの: 整列アルゴリズムの問題追加（`bubble_sort` ほか。演習15問・構文学習12項目）、
+Python 対照表示（`dncl-to-python.js`）、小画面レイアウトの立て直し、録画モード（P13-4）

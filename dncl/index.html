@@ -195,10 +195,15 @@
         </div>
       </div>
 
-      <!-- 組み立てたプログラムのプレビュー -->
+      <!-- 組み立てたプログラムのプレビュー（DNCL と Python の対照表示） -->
       <div class="output-pane-section preview-section">
         <div class="sec-header">
           <span><i class="fas fa-file-code"></i> 組み立てたプログラム</span>
+          <div class="code-view-tabs" role="group" aria-label="コードの表示を切り替える">
+            <button type="button" class="code-view-btn active" data-view="pair" title="DNCL と Python を並べて見る">対照</button>
+            <button type="button" class="code-view-btn" data-view="dncl" title="DNCL だけを見る">DNCL</button>
+            <button type="button" class="code-view-btn" data-view="python" title="Python だけを見る">Python</button>
+          </div>
         </div>
         <div class="sec-content" style="padding: 0.5rem 1rem;">
           <div id="preview-code" class="preview-code"></div>
@@ -264,6 +269,8 @@
   <!-- スクリプトの読み込み -->
   <script src="problems.js"></script>
   <script src="dncl-interpreter.js"></script>
+  <!-- dncl-interpreter.js より後に読む（2次元添字の解釈を共有するため） -->
+  <script src="dncl-to-python.js"></script>
   <script src="app.js"></script>
   <!-- 録画モード（?rec= があるときだけ動く。無ければ完全に不活性） -->
   <script src="rec.js"></script>

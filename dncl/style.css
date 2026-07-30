@@ -578,9 +578,9 @@ main {
   padding-left: 0.5rem;
 }
 
-/* トランスパイルプレビュー */
+/* 組み立てたプログラム（DNCL / Python の対照表示） */
 .preview-section {
-  height: 140px;
+  height: 200px;
 }
 
 .preview-code {
@@ -591,9 +591,71 @@ main {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 0.75rem;
-  height: 100px;
+  height: 160px;
   overflow-y: auto;
   white-space: pre-wrap;
+}
+
+/* 表示の切り替えタブ */
+.code-view-tabs {
+  display: flex;
+  gap: 0.15rem;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.1rem;
+}
+
+.code-view-btn {
+  padding: 0.15rem 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.code-view-btn:hover { color: var(--text-primary); }
+
+.code-view-btn.active {
+  background: var(--accent-purple);
+  color: #fff;
+}
+
+/* 対照表示: 1行の DNCL と 1行の Python を組にして縦に並べる */
+.preview-code.paired { white-space: normal; }
+
+.code-pair {
+  margin-bottom: 0.5rem;
+  border-left: 2px solid rgba(255, 255, 255, 0.07);
+  padding-left: 0.5rem;
+}
+
+.code-pair .code-dncl {
+  color: #e2e8f0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.code-pair .code-py {
+  color: #34d399;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-top: 0.1rem;
+}
+
+.code-pair .code-py::before {
+  content: "→ ";
+  color: var(--text-muted);
+}
+
+/* DNCL と Python が同じ文字列になる行（代入など）は控えめに出す。
+   「ほとんどの行はそのまま」が伝わるのが対照表示の狙い */
+.code-pair .code-py.same {
+  color: var(--text-muted);
 }
 
 /* 操作パネル・判定表示 */
@@ -1337,6 +1399,9 @@ footer a:hover {
   #console-output { height: 110px; }
   body.stepping #console-output { height: 88px; }
 
+  .preview-section { height: auto; }
+  #preview-code { height: 150px; }
+
   /* ------------------------------------------------------------------
      2. タップ領域：最低 44px（Apple 44pt / Google 48dp の下限）
      ------------------------------------------------------------------ */
@@ -1345,10 +1410,19 @@ footer a:hover {
   .mode-tab,
   .diff-tab,
   .editor-actions button,
+  .code-view-btn,
   .icon-btn,
   .close-btn,
   .modal-footer button {
     min-height: 44px;
+  }
+
+  .code-view-btn { min-width: 44px; padding: 0 0.5rem; }
+
+  /* 切り替えが44pxになると見出しが窮屈なので、見出しごと縦に積む */
+  .preview-section .sec-header {
+    flex-wrap: wrap;
+    gap: 0.4rem;
   }
 
   .diff-tab {
