@@ -54,7 +54,7 @@ chem の `assembler/rec.js` は既存の TutorialPlayer を駆動するだけの
 **DNCL にはチュートリアル機構が無い**ので、`rec.js` の中に最小の再生器を持たせている。
 外から見えるインターフェースは chem と同一。
 
-アクションDSL も chem（SVG座標ベース・14種）とは別物で、DNCL の操作に合わせた8種:
+アクションDSL も chem（SVG座標ベース・14種）とは別物で、DNCL の操作に合わせた9種:
 
 | type | 意味 |
 |---|---|
@@ -64,11 +64,13 @@ chem の `assembler/rec.js` は既存の TutorialPlayer を駆動するだけの
 | `click {selector}` | 任意の要素をタップ |
 | `select {selector, value}` | セレクトの値を変える |
 | `step {times, pause}` | 「1行ずつ」を times 回 |
+| `speed {ms}` | 自動再生の間隔（既定400ms）を変える |
 | `run {stall}` | 「実行」を押して再生完了まで待つ |
 | `scroll {selector}` | 要素が見えるところまでスクロール |
 
 `state`（開始状態）は `{mode, problem, difficulty, place:[カードID…]}`。
 `place` は演技を始める前にエディタへ置いておくカードで、chem の `state`（作図状態）にあたる。
+台本直下の `showPreview: true` で「組み立てたプログラム」ペインを出す（既定は隠す）。
 
 ## 実装で判明したこと
 
@@ -101,7 +103,6 @@ chem の `assembler/rec.js` は既存の TutorialPlayer を駆動するだけの
 - **chem 側 `DEVELOPMENT.md` のフェーズ13 P13-4 に InfoLens ぶんを記録する**。
   今回は chem リポジトリに別セッションの未コミット変更があったため触っていない
   （作業ツリー共有の事故を避けるため）。chem 側が clean になったときに追記する
-- 台本の追加（構文学習編の1本、整列アルゴリズムの1本など）
 - ナレーション文字数からのステップ尺自動算出は chem 側 P13-3 の残りに乗る話。
   DNCL の台本にも `narration` を持たせるのはそれが入ってから
 - 合成音声（VOICEVOX）での仮ナレーションも chem 側の仕組みに相乗りする
