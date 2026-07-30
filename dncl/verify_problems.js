@@ -44,10 +44,10 @@ function runValidation(targetList, modeName) {
 }
 
 // 1. 問題演習の検証
-runValidation(problems, "問題演習 (6問)");
+runValidation(problems, `問題演習 (${problems.length}問)`);
 
 // 2. 構文学習の検証
-runValidation(syntaxLessons, "構文学習 (4ユニット)");
+runValidation(syntaxLessons, `構文学習 (${syntaxLessons.length}ユニット)`);
 
 console.log("\n==============================");
 console.log(`検証結果サマリー:`);

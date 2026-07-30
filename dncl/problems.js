@@ -427,6 +427,476 @@ const problems = [
       b5: (vars) => `変数 枚数 の値 (${vars.枚数 || 0}) を表示する`
     },
     explanation: "大きい額面の硬貨（500円）から順番に、「金額を硬貨の額面で割った商（整数除算 ÷）」を枚数とし、「割った余り」を次の硬貨で支払う残額とします。ループ内で各硬貨の枚数を順次表示していきます。【入れ替え可能な箇所】この問題は手順が密接に関連しているため、入れ替え可能な箇所はありません。"
+  },
+  {
+    id: "array_sum_avg",
+    title: "配列の合計と平均",
+    description: "配列 A に格納された5つの数値（[10, 20, 30, 40, 50]）の合計と平均を計算し、表示するプログラムを完成させてください。",
+    difficulty: "初級",
+    initialState: {
+      A: [10, 20, 30, 40, 50],
+      合計: 0,
+      平均: 0,
+      arrayData: { name: "A", values: [10, 20, 30, 40, 50] }
+    },
+    correctBlocks: [
+      { id: "b0", text: "A = [10, 20, 30, 40, 50]", indent: 0, isLocked: true },
+      { id: "b1", text: "合計 = 0", indent: 0 },
+      { id: "b2", text: "i を 0 から 4 まで 1 ずつ増やしながら繰り返す:", indent: 0 },
+      { id: "b3", text: "合計 = 合計 + A[i]", indent: 1 },
+      { id: "b4", text: "平均 = 合計 / 5", indent: 0 },
+      { id: "b5", text: "表示する(\"平均は\", 平均)", indent: 0 }
+    ],
+    easyBlocks: [
+      { id: "b3", text: "合計 = 合計 + A[i]" },
+      { id: "b0", text: "A = [10, 20, 30, 40, 50]", isLocked: true },
+      { id: "b4", text: "平均 = 合計 / 5" },
+      { id: "b5", text: "表示する(\"平均は\", 平均)" },
+      { id: "b2", text: "i を 0 から 4 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "b1", text: "合計 = 0" }
+    ],
+    normalBlocks: [
+      { id: "b3", text: "合計 = 合計 + A[i]" },
+      { id: "b0", text: "A = [10, 20, 30, 40, 50]", isLocked: true },
+      { id: "b4", text: "平均 = 合計 / 5" },
+      { id: "b5", text: "表示する(\"平均は\", 平均)" },
+      { id: "b2", text: "i を 0 から 4 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "b1", text: "合計 = 0" },
+      { id: "d1", text: "平均 = 合計 ÷ 5", isDummy: true, reason: "平均値は小数になる可能性があるため、整数除算 ÷ ではなく通常の除算 / を使います。" },
+      { id: "d2", text: "合計 = 合計 + i", isDummy: true, reason: "これではインデックス番号 i を足してしまい、配列の数値の合計になりません。" }
+    ],
+    hardBlocks: [
+      { id: "b0", text: "A = [10, 20, 30, 40, 50]", isLocked: true },
+      { id: "b1", text: "合計 = 0" },
+      { id: "b2", text: "i を 0 から 4 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "b3", text: "合計 = 合計 + [input_add]", inputs: { input_add: { placeholder: "加算する要素", correct: "A[i]" } } },
+      { id: "b4", text: "平均 = [input_avg]", inputs: { input_avg: { placeholder: "平均の計算式", correct: "合計 / 5" } } },
+      { id: "b5", text: "表示する(\"平均は\", 平均)" }
+    ],
+    narratives: {
+      b0: (vars) => `配列 A に [10, 20, 30, 40, 50] を代入する`,
+      b1: (vars) => `変数 合計 に 0 を代入する`,
+      b2: (vars) => `変数 i の値を 0 から 4 まで 1 ずつ増やしながら繰り返す`,
+      b3: (vars) => `変数 合計 に A[${vars.i || 0}] の値 (${vars.A ? vars.A[vars.i || 0] : 0}) を足した値 (${vars.合計}) を代入する`,
+      b4: (vars) => `変数 平均 に 合計 (${vars.合計 || 150}) を 5 で割った値 (${vars.平均}) を代入する`,
+      b5: (vars) => `文字列 '平均は' と変数 平均 の値 (${vars.平均 || 30}) を表示する`
+    },
+    explanation: "配列の要素をループで順に走査し、「合計 = 合計 + A[i]」で総和を求めます。ループ終了後に要素数（5）で割って平均を求め、表示する関数形式「表示する(\"平均は\", 平均)」で出力します。"
+  },
+  {
+    id: "even_odd_count",
+    title: "偶数・奇数の判定と個数",
+    description: "配列 A（[1, 2, 3, 4, 5, 6]）に含まれる偶数の個数を数えて表示するプログラムを完成させてください。",
+    difficulty: "初級",
+    initialState: {
+      A: [1, 2, 3, 4, 5, 6],
+      偶数個数: 0,
+      arrayData: { name: "A", values: [1, 2, 3, 4, 5, 6] }
+    },
+    correctBlocks: [
+      { id: "b0", text: "A = [1, 2, 3, 4, 5, 6]", indent: 0, isLocked: true },
+      { id: "b1", text: "偶数個数 = 0", indent: 0 },
+      { id: "b2", text: "i を 0 から 5 まで 1 ずつ増やしながら繰り返す:", indent: 0 },
+      { id: "b3", text: "もし A[i] % 2 == 0 ならば:", indent: 1 },
+      { id: "b4", text: "偶数個数 = 偶数個数 + 1", indent: 2 },
+      { id: "b5", text: "表示する(偶数個数)", indent: 0 }
+    ],
+    easyBlocks: [
+      { id: "b4", text: "偶数個数 = 偶数個数 + 1" },
+      { id: "b0", text: "A = [1, 2, 3, 4, 5, 6]", isLocked: true },
+      { id: "b5", text: "表示する(偶数個数)" },
+      { id: "b3", text: "もし A[i] % 2 == 0 ならば:" },
+      { id: "b1", text: "偶数個数 = 0" },
+      { id: "b2", text: "i を 0 から 5 まで 1 ずつ増やしながら繰り返す:" }
+    ],
+    normalBlocks: [
+      { id: "b4", text: "偶数個数 = 偶数個数 + 1" },
+      { id: "b0", text: "A = [1, 2, 3, 4, 5, 6]", isLocked: true },
+      { id: "b5", text: "表示する(偶数個数)" },
+      { id: "b3", text: "もし A[i] % 2 == 0 ならば:" },
+      { id: "b1", text: "偶数個数 = 0" },
+      { id: "b2", text: "i を 0 から 5 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "d1", text: "もし A[i] % 2 == 1 ならば:", isDummy: true, reason: "2で割った余りが1の条件は奇数の判定になります。偶数を数えるには余りが0である「A[i] % 2 == 0」を使います。" }
+    ],
+    hardBlocks: [
+      { id: "b0", text: "A = [1, 2, 3, 4, 5, 6]", isLocked: true },
+      { id: "b1", text: "偶数個数 = 0" },
+      { id: "b2", text: "i を 0 から 5 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "b3", text: "もし [input_cond] == 0 ならば:", inputs: { input_cond: { placeholder: "偶数判定の式", correct: "A[i] % 2" } } },
+      { id: "b4", text: "偶数個数 = 偶数個数 + 1" },
+      { id: "b5", text: "表示する(偶数個数)" }
+    ],
+    narratives: {
+      b0: (vars) => `配列 A に [1, 2, 3, 4, 5, 6] を代入する`,
+      b1: (vars) => `変数 偶数個数 に 0 を代入する`,
+      b2: (vars) => `変数 i の値を 0 から 5 まで 1 ずつ増やしながら繰り返す`,
+      b3: (vars) => `もし A[${vars.i || 0}] の値 (${vars.A ? vars.A[vars.i || 0] : 0}) を 2 で割った余りが 0 ならば: [判定: ${(vars.A ? vars.A[vars.i || 0] : 0) % 2 === 0 ? '真' : '偽'}]`,
+      b4: (vars) => `変数 偶数個数 に 1 を足して ${vars.偶数個数} に更新する`,
+      b5: (vars) => `変数 偶数個数 の値 (${vars.偶数個数 || 0}) を表示する`
+    },
+    explanation: "偶数であるかどうかの判定には「A[i] % 2 == 0」（2で割った余りが0）を使用します。条件が成立したときのみ「偶数個数 = 偶数個数 + 1」でカウントを増やします。"
+  },
+  {
+    id: "find_min",
+    title: "最小値を見つける",
+    description: "配列 A（[45, 12, 78, 34, 89, 56]）の中から、最も小さい値（最小値）を見つけて表示するプログラムを完成させてください。",
+    difficulty: "中級",
+    initialState: {
+      A: [45, 12, 78, 34, 89, 56],
+      arrayData: { name: "A", values: [45, 12, 78, 34, 89, 56] }
+    },
+    correctBlocks: [
+      { id: "b0", text: "A = [45, 12, 78, 34, 89, 56]", indent: 0, isLocked: true },
+      { id: "b1", text: "最小値 = A[0]", indent: 0 },
+      { id: "b2", text: "i を 1 から 5 まで 1 ずつ増やしながら繰り返す:", indent: 0 },
+      { id: "b3", text: "もし A[i] < 最小値 ならば:", indent: 1 },
+      { id: "b4", text: "最小値 = A[i]", indent: 2 },
+      { id: "b5", text: "表示する(最小値)", indent: 0 }
+    ],
+    easyBlocks: [
+      { id: "b3", text: "もし A[i] < 最小値 ならば:" },
+      { id: "b0", text: "A = [45, 12, 78, 34, 89, 56]", isLocked: true },
+      { id: "b1", text: "最小値 = A[0]" },
+      { id: "b5", text: "表示する(最小値)" },
+      { id: "b4", text: "最小値 = A[i]" },
+      { id: "b2", text: "i を 1 から 5 まで 1 ずつ増やしながら繰り返す:" }
+    ],
+    normalBlocks: [
+      { id: "b3", text: "もし A[i] < 最小値 ならば:" },
+      { id: "b0", text: "A = [45, 12, 78, 34, 89, 56]", isLocked: true },
+      { id: "b1", text: "最小値 = A[0]" },
+      { id: "b5", text: "表示する(最小値)" },
+      { id: "b4", text: "最小値 = A[i]" },
+      { id: "b2", text: "i を 1 から 5 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "d1", text: "最小値 = 0", isDummy: true, reason: "初期値を0にすると、正の数のみの配列では0より小さい要素が存在しないため、正しく最小値を見つけられません。配列の先頭要素 A[0] で初期化します。" }
+    ],
+    hardBlocks: [
+      { id: "b0", text: "A = [45, 12, 78, 34, 89, 56]", isLocked: true },
+      { id: "b1", text: "最小値 = [input_init]", inputs: { input_init: { placeholder: "初期値", correct: "A[0]" } } },
+      { id: "b2", text: "i を 1 から 5 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "b3", text: "もし [input_cond] < 最小値 ならば:", inputs: { input_cond: { placeholder: "比較対象", correct: "A[i]" } } },
+      { id: "b4", text: "最小値 = A[i]" },
+      { id: "b5", text: "表示する(最小値)" }
+    ],
+    narratives: {
+      b0: (vars) => `配列 A に [45, 12, 78, 34, 89, 56] を代入する`,
+      b1: (vars) => `変数 最小値 に A[0] の値 (${vars.A ? vars.A[0] : 45}) を代入する`,
+      b2: (vars) => `変数 i の値を 1 から 5 まで 1 ずつ増やしながら繰り返す`,
+      b3: (vars) => `もし A[${vars.i || 1}] の値 (${vars.A ? vars.A[vars.i || 1] : 0}) が 最小値 (${vars.最小値}) より小さければ: [判定: ${(vars.A ? vars.A[vars.i || 1] : 0) < vars.最小値 ? '真' : '偽'}]`,
+      b4: (vars) => `変数 最小値 に A[${vars.i || 1}] の値 (${vars.最小値}) を代入する`,
+      b5: (vars) => `変数 最小値 の値 (${vars.最小値 || 0}) を表示する`
+    },
+    explanation: "仮の最小値として先頭の要素 A[0] を設定し、2番目の要素 A[1] から順に比較していきます。より小さな要素が見つかったら「最小値 = A[i]」で更新します。"
+  },
+  {
+    id: "reverse_print",
+    title: "逆順に表示する",
+    description: "配列 A（[10, 20, 30, 40, 50]）の要素を末尾（インデックス 4）から先頭（インデックス 0）に向かって逆順に表示するプログラムを完成させてください。",
+    difficulty: "中級",
+    initialState: {
+      A: [10, 20, 30, 40, 50],
+      arrayData: { name: "A", values: [10, 20, 30, 40, 50] }
+    },
+    correctBlocks: [
+      { id: "b0", text: "A = [10, 20, 30, 40, 50]", indent: 0, isLocked: true },
+      { id: "b1", text: "i を 4 から 0 まで 1 ずつ減らしながら繰り返す:", indent: 0 },
+      { id: "b2", text: "表示する(A[i])", indent: 1 }
+    ],
+    easyBlocks: [
+      { id: "b2", text: "表示する(A[i])" },
+      { id: "b0", text: "A = [10, 20, 30, 40, 50]", isLocked: true },
+      { id: "b1", text: "i を 4 から 0 まで 1 ずつ減らしながら繰り返す:" }
+    ],
+    normalBlocks: [
+      { id: "b2", text: "表示する(A[i])" },
+      { id: "b0", text: "A = [10, 20, 30, 40, 50]", isLocked: true },
+      { id: "b1", text: "i を 4 から 0 まで 1 ずつ減らしながら繰り返す:" },
+      { id: "d1", text: "i を 4 から 0 まで 1 ずつ増やしながら繰り返す:", isDummy: true, reason: "4から0へカウントダウンする場合は「1ずつ減らしながら繰り返す」にする必要があります。" }
+    ],
+    hardBlocks: [
+      { id: "b0", text: "A = [10, 20, 30, 40, 50]", isLocked: true },
+      { id: "b1", text: "i を 4 から 0 まで 1 ずつ[input_step]ながら繰り返す:", inputs: { input_step: { placeholder: "増減指定 (増やし/減らし)", correct: "減らし" } } },
+      { id: "b2", text: "表示する(A[i])" }
+    ],
+    narratives: {
+      b0: (vars) => `配列 A に [10, 20, 30, 40, 50] を代入する`,
+      b1: (vars) => `変数 i の値を 4 から 0 まで 1 ずつ減らしながら繰り返す (現在の i: ${vars.i !== undefined ? vars.i : 4})`,
+      b2: (vars) => `A[${vars.i !== undefined ? vars.i : 4}] の値 (${vars.A ? vars.A[vars.i !== undefined ? vars.i : 4] : 50}) を表示する`
+    },
+    explanation: "「i を 4 から 0 まで 1 ずつ減らしながら繰り返す:」を使うことで、末尾のインデックス 4 から 3, 2, 1, 0 へと逆順にアクセスして表示できます。"
+  },
+  {
+    id: "binary_search",
+    title: "二分探索",
+    description: "昇順に並んだ配列 A から、target（40）のインデックスを二分探索で探すプログラムを完成させてください。見つかればそのインデックス、見つからなければ -1 を表示します。",
+    difficulty: "上級",
+    initialState: {
+      A: [10, 20, 30, 40, 50, 60, 70],
+      target: 40,
+      左: 0,
+      右: 6,
+      位置: -1,
+      arrayData: { name: "A", values: [10, 20, 30, 40, 50, 60, 70] }
+    },
+    correctBlocks: [
+      { id: "b0", text: "A = [10, 20, 30, 40, 50, 60, 70]", indent: 0, isLocked: true },
+      { id: "b1", text: "target = 40", indent: 0, isLocked: true },
+      { id: "b2", text: "左 = 0", indent: 0 },
+      { id: "b3", text: "右 = 6", indent: 0 },
+      { id: "b4", text: "位置 = -1", indent: 0 },
+      { id: "b5", text: "左 <= 右 の間、繰り返す:", indent: 0 },
+      { id: "b6", text: "中央 = (左 + 右) ÷ 2", indent: 1 },
+      { id: "b7", text: "もし A[中央] == target ならば:", indent: 1 },
+      { id: "b8", text: "位置 = 中央", indent: 2 },
+      { id: "b9", text: "ループを抜ける", indent: 2 },
+      { id: "b10", text: "そうでなくもし A[中央] < target ならば:", indent: 1 },
+      { id: "b11", text: "左 = 中央 + 1", indent: 2 },
+      { id: "b12", text: "そうでなければ:", indent: 1 },
+      { id: "b13", text: "右 = 中央 - 1", indent: 2 },
+      { id: "b14", text: "表示する(位置)", indent: 0 }
+    ],
+    easyBlocks: [
+      { id: "b6", text: "中央 = (左 + 右) ÷ 2" },
+      { id: "b0", text: "A = [10, 20, 30, 40, 50, 60, 70]", isLocked: true },
+      { id: "b1", text: "target = 40", isLocked: true },
+      { id: "b8", text: "位置 = 中央" },
+      { id: "b14", text: "表示する(位置)" },
+      { id: "b5", text: "左 <= 右 の間、繰り返す:" },
+      { id: "b11", text: "左 = 中央 + 1" },
+      { id: "b7", text: "もし A[中央] == target ならば:" },
+      { id: "b10", text: "そうでなくもし A[中央] < target ならば:" },
+      { id: "b12", text: "そうでなければ:" },
+      { id: "b13", text: "右 = 中央 - 1" },
+      { id: "b2", text: "左 = 0" },
+      { id: "b3", text: "右 = 6" },
+      { id: "b4", text: "位置 = -1" },
+      { id: "b9", text: "ループを抜ける" }
+    ],
+    normalBlocks: [
+      { id: "b6", text: "中央 = (左 + 右) ÷ 2" },
+      { id: "b0", text: "A = [10, 20, 30, 40, 50, 60, 70]", isLocked: true },
+      { id: "b1", text: "target = 40", isLocked: true },
+      { id: "b8", text: "位置 = 中央" },
+      { id: "b14", text: "表示する(位置)" },
+      { id: "b5", text: "左 <= 右 の間、繰り返す:" },
+      { id: "b11", text: "左 = 中央 + 1" },
+      { id: "b7", text: "もし A[中央] == target ならば:" },
+      { id: "b10", text: "そうでなくもし A[中央] < target ならば:" },
+      { id: "b12", text: "そうでなければ:" },
+      { id: "b13", text: "右 = 中央 - 1" },
+      { id: "b2", text: "左 = 0" },
+      { id: "b3", text: "右 = 6" },
+      { id: "b4", text: "位置 = -1" },
+      { id: "b9", text: "ループを抜ける" },
+      { id: "d1", text: "中央 = (左 + 右) / 2", isDummy: true, reason: "インデックスは整数である必要があるため、端数を切り捨てる整数除算 ÷ を使います。" }
+    ],
+    hardBlocks: [
+      { id: "b0", text: "A = [10, 20, 30, 40, 50, 60, 70]", isLocked: true },
+      { id: "b1", text: "target = 40", isLocked: true },
+      { id: "b2", text: "左 = 0" },
+      { id: "b3", text: "右 = 6" },
+      { id: "b4", text: "位置 = -1" },
+      { id: "b5", text: "左 <= 右 の間、繰り返す:" },
+      { id: "b6", text: "中央 = [input_mid]", inputs: { input_mid: { placeholder: "中央位置の計算式", correct: "(左 + 右) ÷ 2" } } },
+      { id: "b7", text: "もし A[中央] == target ならば:" },
+      { id: "b8", text: "位置 = 中央" },
+      { id: "b9", text: "ループを抜ける" },
+      { id: "b10", text: "そうでなくもし A[中央] < target ならば:" },
+      { id: "b11", text: "左 = 中央 + 1" },
+      { id: "b12", text: "そうでなければ:" },
+      { id: "b13", text: "右 = 中央 - 1" },
+      { id: "b14", text: "表示する(位置)" }
+    ],
+    narratives: {
+      b0: (vars) => `配列 A にソート済みデータを代入する`,
+      b1: (vars) => `探索ターゲット target に 40 を代入する`,
+      b2: (vars) => `探索範囲の左端 左 に 0 を代入する`,
+      b3: (vars) => `探索範囲の右端 右 に 6 を代入する`,
+      b4: (vars) => `変数 位置 に初期値 -1 を代入する`,
+      b5: (vars) => `左 (${vars.左}) <= 右 (${vars.右}) の間、繰り返す`,
+      b6: (vars) => `中央位置 中央 に (${vars.左} + ${vars.右}) ÷ 2 = ${vars.中央} を計算して代入する`,
+      b7: (vars) => `もし A[${vars.中央}] (${vars.A ? vars.A[vars.中央] : 0}) が target (${vars.target}) と等しければ`,
+      b8: (vars) => `変数 位置 に ${vars.中央} を代入する`,
+      b9: (vars) => `ループを抜ける`,
+      b10: (vars) => `そうでなくもし A[${vars.中央}] (${vars.A ? vars.A[vars.中央] : 0}) < target (${vars.target}) ならば`,
+      b11: (vars) => `探索範囲の左端 左 を ${vars.中央 + 1} に更新する`,
+      b12: (vars) => `そうでなければ（targetの方が小さい場合）:`,
+      b13: (vars) => `探索範囲の右端 右 を ${vars.中央 - 1} に更新する`,
+      b14: (vars) => `変数 位置 の値 (${vars.位置}) を表示する`
+    },
+    explanation: "二分探索では、中央の要素 A[中央] と探したい値 target を比較し、target の方が大きければ左端を「中央 + 1」に、小さければ右端を「中央 - 1」に狭めていくことで高速に検索します。"
+  },
+  {
+    id: "bubble_sort",
+    title: "交換法による並べ替え（バブルソート）",
+    description: "配列 A（[5, 3, 8, 4, 1]）の要素を隣り合う要素と比較・交換しながら昇順に並べ替え、結果を表示するプログラムを完成させてください。",
+    difficulty: "上級",
+    initialState: {
+      A: [5, 3, 8, 4, 1],
+      作業用: undefined,
+      arrayData: { name: "A", values: [5, 3, 8, 4, 1] }
+    },
+    correctBlocks: [
+      { id: "b0", text: "A = [5, 3, 8, 4, 1]", indent: 0, isLocked: true },
+      { id: "b1", text: "i を 0 から 3 まで 1 ずつ増やしながら繰り返す:", indent: 0 },
+      { id: "b2", text: "j を 0 から 3 - i まで 1 ずつ増やしながら繰り返す:", indent: 1 },
+      { id: "b3", text: "もし A[j] > A[j + 1] ならば:", indent: 2 },
+      { id: "b4", text: "作業用 = A[j]", indent: 3 },
+      { id: "b5", text: "A[j] = A[j + 1]", indent: 3 },
+      { id: "b6", text: "A[j + 1] = 作業用", indent: 3 },
+      { id: "b7", text: "表示する(A)", indent: 0 }
+    ],
+    easyBlocks: [
+      { id: "b4", text: "作業用 = A[j]" },
+      { id: "b0", text: "A = [5, 3, 8, 4, 1]", isLocked: true },
+      { id: "b7", text: "表示する(A)" },
+      { id: "b1", text: "i を 0 から 3 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "b5", text: "A[j] = A[j + 1]" },
+      { id: "b3", text: "もし A[j] > A[j + 1] ならば:" },
+      { id: "b6", text: "A[j + 1] = 作業用" },
+      { id: "b2", text: "j を 0 から 3 - i まで 1 ずつ増やしながら繰り返す:" }
+    ],
+    normalBlocks: [
+      { id: "b4", text: "作業用 = A[j]" },
+      { id: "b0", text: "A = [5, 3, 8, 4, 1]", isLocked: true },
+      { id: "b7", text: "表示する(A)" },
+      { id: "b1", text: "i を 0 から 3 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "b5", text: "A[j] = A[j + 1]" },
+      { id: "b3", text: "もし A[j] > A[j + 1] ならば:" },
+      { id: "b6", text: "A[j + 1] = 作業用" },
+      { id: "b2", text: "j を 0 から 3 - i まで 1 ずつ増やしながら繰り返す:" },
+      { id: "d1", text: "A[j] = A[j + 1]", isDummy: true, reason: "一時変数「作業用」に退避させずに直接代入すると、A[j] の元の値が消えてしまい、正しい交換ができません。" }
+    ],
+    hardBlocks: [
+      { id: "b0", text: "A = [5, 3, 8, 4, 1]", isLocked: true },
+      { id: "b1", text: "i を 0 から 3 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "b2", text: "j を 0 から 3 - i まで 1 ずつ増やしながら繰り返す:" },
+      { id: "b3", text: "もし [input_cond] ならば:", inputs: { input_cond: { placeholder: "隣接要素の比較式", correct: "A[j] > A[j + 1]" } } },
+      { id: "b4", text: "作業用 = A[j]" },
+      { id: "b5", text: "A[j] = A[j + 1]" },
+      { id: "b6", text: "A[j + 1] = 作業用" },
+      { id: "b7", text: "表示する(A)" }
+    ],
+    narratives: {
+      b0: (vars) => `配列 A に未ソートデータ [5, 3, 8, 4, 1] を代入する`,
+      b1: (vars) => `外側ループ i (${vars.i || 0}) 回目のパスを開始`,
+      b2: (vars) => `内側ループ j の値を 0 から ${3 - (vars.i || 0)} まで進める (現在 j: ${vars.j || 0})`,
+      b3: (vars) => `もし A[${vars.j || 0}] (${vars.A ? vars.A[vars.j || 0] : 0}) > A[${(vars.j || 0) + 1}] (${vars.A ? vars.A[(vars.j || 0) + 1] : 0}) ならば`,
+      b4: (vars) => `変数 作業用 に A[${vars.j || 0}] の値を退避する`,
+      b5: (vars) => `A[${vars.j || 0}] に A[${(vars.j || 0) + 1}] の値をコピーする`,
+      b6: (vars) => `A[${(vars.j || 0) + 1}] に退避しておいた作業用の値を書き込み、交換を完了する`,
+      b7: (vars) => `ソート完了した配列 A (${JSON.stringify(vars.A)}) を表示する`
+    },
+    explanation: "バブルソート（交換法）は、隣り合う要素 A[j] と A[j+1] を比較し、左側の方が大きければ「作業用」変数を用いて要素の交換を繰り返します。外側ループが1回終わるごとに最大値が右端に確定していきます。"
+  },
+  {
+    id: "matrix_row_sum",
+    title: "2次元配列の行ごとの合計",
+    description: "2行3列の2次元配列 A（[[1, 2, 3], [4, 5, 6]]）の各行の要素の合計を計算し、行ごとに順に表示するプログラムを完成させてください。",
+    difficulty: "上級",
+    initialState: {
+      A: [[1, 2, 3], [4, 5, 6]],
+      arrayData: { name: "A", values: [[1, 2, 3], [4, 5, 6]] }
+    },
+    correctBlocks: [
+      { id: "b0", text: "A = [[1, 2, 3], [4, 5, 6]]", indent: 0, isLocked: true },
+      { id: "b1", text: "i を 0 から 1 まで 1 ずつ増やしながら繰り返す:", indent: 0 },
+      { id: "b2", text: "行合計 = 0", indent: 1 },
+      { id: "b3", text: "j を 0 から 2 まで 1 ずつ増やしながら繰り返す:", indent: 1 },
+      { id: "b4", text: "行合計 = 行合計 + A[i,j]", indent: 2 },
+      { id: "b5", text: "表示する(行合計)", indent: 1 }
+    ],
+    easyBlocks: [
+      { id: "b4", text: "行合計 = 行合計 + A[i,j]" },
+      { id: "b0", text: "A = [[1, 2, 3], [4, 5, 6]]", isLocked: true },
+      { id: "b2", text: "行合計 = 0" },
+      { id: "b5", text: "表示する(行合計)" },
+      { id: "b1", text: "i を 0 から 1 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "b3", text: "j を 0 から 2 まで 1 ずつ増やしながら繰り返す:" }
+    ],
+    normalBlocks: [
+      { id: "b4", text: "行合計 = 行合計 + A[i,j]" },
+      { id: "b0", text: "A = [[1, 2, 3], [4, 5, 6]]", isLocked: true },
+      { id: "b2", text: "行合計 = 0" },
+      { id: "b5", text: "表示する(行合計)" },
+      { id: "b1", text: "i を 0 から 1 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "b3", text: "j を 0 から 2 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "d1", text: "行合計 = 行合計 + A[j,i]", isDummy: true, reason: "A[j,i] にすると行と列の指定が逆になります。新DNCLの2次元配列添字は A[行,列] すなわち A[i,j] と書きます。" }
+    ],
+    hardBlocks: [
+      { id: "b0", text: "A = [[1, 2, 3], [4, 5, 6]]", isLocked: true },
+      { id: "b1", text: "i を 0 から 1 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "b2", text: "行合計 = 0" },
+      { id: "b3", text: "j を 0 から 2 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "b4", text: "行合計 = 行合計 + [input_elem]", inputs: { input_elem: { placeholder: "2次元配列のアクセス", correct: "A[i,j]" } } },
+      { id: "b5", text: "表示する(行合計)" }
+    ],
+    narratives: {
+      b0: (vars) => `2次元配列 A に [[1, 2, 3], [4, 5, 6]] を代入する`,
+      b1: (vars) => `行ループ i (${vars.i || 0}) 行目の処理を開始する`,
+      b2: (vars) => `変数 行合計 に 0 をセットする`,
+      b3: (vars) => `列ループ j の値を 0 から 2 まで進める (現在 j: ${vars.j || 0})`,
+      b4: (vars) => `行合計 に A[${vars.i || 0},${vars.j || 0}] の値 (${vars.A ? vars.A[vars.i || 0][vars.j || 0] : 0}) を足して ${vars.行合計} に更新する`,
+      b5: (vars) => `第 ${vars.i || 0} 行の合計値 (${vars.行合計}) を表示する`
+    },
+    explanation: "2次元配列のアクセスには A[行,列] 表記（公式新DNCL）を使用します。行ループ i の中で「行合計 = 0」とリセットしてから列ループ j で加算することで、行ごとの集計を行います。"
+  },
+  {
+    id: "prime_check",
+    title: "素数判定",
+    description: "あらかじめ設定された数値 N（ここでは 13）が素数であるかを判定するプログラムを完成させてください。素数なら 1、素数でなければ 0 を表示します。",
+    difficulty: "上級",
+    initialState: {
+      N: 13,
+      フラグ: 1
+    },
+    correctBlocks: [
+      { id: "b1", text: "N = 13", indent: 0, isLocked: true },
+      { id: "b2", text: "フラグ = 1", indent: 0 },
+      { id: "b3", text: "i を 2 から N - 1 まで 1 ずつ増やしながら繰り返す:", indent: 0 },
+      { id: "b4", text: "もし N % i == 0 ならば:", indent: 1 },
+      { id: "b5", text: "フラグ = 0", indent: 2 },
+      { id: "b6", text: "ループを抜ける", indent: 2 },
+      { id: "b7", text: "表示する(フラグ)", indent: 0 }
+    ],
+    easyBlocks: [
+      { id: "b5", text: "フラグ = 0" },
+      { id: "b1", text: "N = 13", isLocked: true },
+      { id: "b7", text: "表示する(フラグ)" },
+      { id: "b3", text: "i を 2 から N - 1 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "b6", text: "ループを抜ける" },
+      { id: "b2", text: "フラグ = 1" },
+      { id: "b4", text: "もし N % i == 0 ならば:" }
+    ],
+    normalBlocks: [
+      { id: "b5", text: "フラグ = 0" },
+      { id: "b1", text: "N = 13", isLocked: true },
+      { id: "b7", text: "表示する(フラグ)" },
+      { id: "b3", text: "i を 2 から N - 1 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "b6", text: "ループを抜ける" },
+      { id: "b2", text: "フラグ = 1" },
+      { id: "b4", text: "もし N % i == 0 ならば:" },
+      { id: "d1", text: "もし N % i != 0 ならば:", isDummy: true, reason: "割り切れない場合にフラグを0にしてしまうと、正しく割り切れる（約数がある）ことの判定になりません。" }
+    ],
+    hardBlocks: [
+      { id: "b1", text: "N = 13", isLocked: true },
+      { id: "b2", text: "フラグ = 1" },
+      { id: "b3", text: "i を 2 から N - 1 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "b4", text: "もし [input_mod] == 0 ならば:", inputs: { input_mod: { placeholder: "割り切れ判定の式", correct: "N % i" } } },
+      { id: "b5", text: "フラグ = 0" },
+      { id: "b6", text: "ループを抜ける" },
+      { id: "b7", text: "表示する(フラグ)" }
+    ],
+    narratives: {
+      b1: (vars) => `変数 N に 13 を代入する`,
+      b2: (vars) => `素数フラグ「フラグ」に初期値 1 (素数と仮定) を代入する`,
+      b3: (vars) => `i の値を 2 から ${vars.N - 1} まで進めて約数があるか確認する (現在 i: ${vars.i || 2})`,
+      b4: (vars) => `もし N (${vars.N}) を i (${vars.i || 2}) で割った余りが 0 ならば: [判定: ${vars.N % (vars.i || 2) === 0 ? '真（割り切れた）' : '偽'}]`,
+      b5: (vars) => `約数が見つかったため、フラグ を 0 (素数ではない) に変更する`,
+      b6: (vars) => `ループを抜ける`,
+      b7: (vars) => `判定結果の フラグ (${vars.フラグ}) を表示する`
+    },
+    explanation: "2 から N - 1 までの範囲で割った余り「N % i」を判定し、一度でも余りが 0（割り切れる）になれば素数ではないため「フラグ = 0」にして早期にループを抜けます。"
   }
 ];
 
@@ -619,6 +1089,125 @@ const syntaxLessons = [
       l2: (vars) => `変数 値 の値 (${vars.値 || 50}) を表示する`
     },
     explanation: "2次元配列（グリッドデータ）は、行と列の2つのインデックス（添字）を指定します。DNCLでは通常0から始まるため、2行目のインデックスは「1」、2番目の列のインデックスは「1」となり、「A[1,1]」でアクセスします。【入れ替え可能な箇所】この手順は順番を変えることができません。"
+  },
+  {
+    id: "lesson_multi_print",
+    title: "8. 表示する(複数の値)",
+    description: "新DNCLでは「表示する(\"合計は\", 合計)」のように、複数の値や文字列をカンマで区切って一度に表示できます。合計 15 の結果を表示するプログラムを完成させてください。",
+    initialState: {
+      合計: 15
+    },
+    correctBlocks: [
+      { id: "l1", text: "合計 = 15", indent: 0, isLocked: true },
+      { id: "l2", text: "表示する(\"合計は\", 合計)", indent: 0 }
+    ],
+    blocks: [
+      { id: "l2", text: "表示する(\"合計は\", 合計)" },
+      { id: "l1", text: "合計 = 15", isLocked: true }
+    ],
+    narratives: {
+      l1: (vars) => `変数 合計 に 15 を代入する`,
+      l2: (vars) => `文字列 '合計は' と変数 合計 の値 (${vars.合計 || 15}) を連結して表示する`
+    },
+    explanation: "「表示する(値1, 値2, ...)」とカンマで区切ることで、メッセージと変数の値を1行にまとめて出力できます。"
+  },
+  {
+    id: "lesson_logic_ops",
+    title: "9. 論理演算子 and / or / not",
+    description: "新DNCLでは「かつ」「または」「でない」を and, or, not で表します。変数 x の値が 0 より大きくかつ 10 より小さいかを判定するプログラムを完成させてください。",
+    initialState: {
+      x: 5
+    },
+    correctBlocks: [
+      { id: "l1", text: "x = 5", indent: 0, isLocked: true },
+      { id: "l2", text: "もし x > 0 and x < 10 ならば:", indent: 0 },
+      { id: "l3", text: "表示する(\"範囲内\")", indent: 1 }
+    ],
+    blocks: [
+      { id: "l3", text: "表示する(\"範囲内\")" },
+      { id: "l1", text: "x = 5", isLocked: true },
+      { id: "l2", text: "もし x > 0 and x < 10 ならば:" }
+    ],
+    narratives: {
+      l1: (vars) => `変数 x に 5 を代入する`,
+      l2: (vars) => `もし x > 0 かつ x < 10 ならば: [判定: ${(vars.x || 5) > 0 && (vars.x || 5) < 10 ? '真' : '偽'}]`,
+      l3: (vars) => `文字列 '範囲内' を表示する`
+    },
+    explanation: "and は両方の条件が成り立つとき真、or はどちらかが成り立つとき真、not は条件の真偽を反転させます。"
+  },
+  {
+    id: "lesson_div_mod",
+    title: "10. 整数除算 ÷ と剰余 %",
+    description: "17 を 5 で割ったときの「商の整数部分（÷）」と「余り（%）」をそれぞれ計算して表示するプログラムを完成させてください。",
+    initialState: {
+      商: undefined,
+      余り: undefined
+    },
+    correctBlocks: [
+      { id: "l1", text: "商 = 17 ÷ 5", indent: 0 },
+      { id: "l2", text: "余り = 17 % 5", indent: 0 },
+      { id: "l3", text: "表示する(商)", indent: 0 },
+      { id: "l4", text: "表示する(余り)", indent: 0 }
+    ],
+    blocks: [
+      { id: "l3", text: "表示する(商)" },
+      { id: "l1", text: "商 = 17 ÷ 5" },
+      { id: "l4", text: "表示する(余り)" },
+      { id: "l2", text: "余り = 17 % 5" }
+    ],
+    narratives: {
+      l1: (vars) => `17 ÷ 5 の商の整数部分 (3) を変数 商 に代入する`,
+      l2: (vars) => `17 % 5 の余り (2) を変数 余り に代入する`,
+      l3: (vars) => `変数 商 の値 (${vars.商 !== undefined ? vars.商 : 3}) を表示する`,
+      l4: (vars) => `変数 余り の値 (${vars.余り !== undefined ? vars.余り : 2}) を表示する`
+    },
+    explanation: "通常の割算 / は結果が小数になりますが、整数除算 ÷ を使うと端数が切り捨てられた整数の商が得られます。余りは % で求めます。"
+  },
+  {
+    id: "lesson_step_decrease",
+    title: "11. 減らしながら繰り返す",
+    description: "変数 i の値を 5 から 1 まで 1 ずつ減らしながら（カウントダウン）、その値を順に表示するプログラムを完成させてください。",
+    initialState: {
+      i: undefined
+    },
+    correctBlocks: [
+      { id: "l1", text: "i を 5 から 1 まで 1 ずつ減らしながら繰り返す:", indent: 0 },
+      { id: "l2", text: "表示する(i)", indent: 1 }
+    ],
+    blocks: [
+      { id: "l2", text: "表示する(i)" },
+      { id: "l1", text: "i を 5 から 1 まで 1 ずつ減らしながら繰り返す:" }
+    ],
+    narratives: {
+      l1: (vars) => `変数 i の値を 5 から 1 まで 1 ずつ減らしながら繰り返す (現在の i: ${vars.i !== undefined ? vars.i : 5})`,
+      l2: (vars) => `変数 i の値 (${vars.i !== undefined ? vars.i : 5}) を表示する`
+    },
+    explanation: "「1 ずつ減らしながら繰り返す」を使うことで、カウントダウン型のループ処理を簡単に記述できます。"
+  },
+  {
+    id: "lesson_nested_loop",
+    title: "12. 二重ループ",
+    description: "外側のループ（i = 1〜2）と内側のループ（j = 1〜3）を組み合わせた二重ループで、i * j の結果を表示するプログラムを完成させてください。",
+    initialState: {
+      i: undefined,
+      j: undefined
+    },
+    correctBlocks: [
+      { id: "l1", text: "i を 1 から 2 まで 1 ずつ増やしながら繰り返す:", indent: 0 },
+      { id: "l2", text: "j を 1 から 3 まで 1 ずつ増やしながら繰り返す:", indent: 1 },
+      { id: "l3", text: "表示する(i * j)", indent: 2 }
+    ],
+    blocks: [
+      { id: "l3", text: "表示する(i * j)" },
+      { id: "l1", text: "i を 1 から 2 まで 1 ずつ増やしながら繰り返す:" },
+      { id: "l2", text: "j を 1 から 3 まで 1 ずつ増やしながら繰り返す:" }
+    ],
+    narratives: {
+      l1: (vars) => `外側ループ: i の値を 1 から 2 まで増やしながら繰り返す (現在 i: ${vars.i || 1})`,
+      l2: (vars) => `内側ループ: j の値を 1 から 3 まで増やしながら繰り返す (現在 j: ${vars.j || 1})`,
+      l3: (vars) => `i * j の計算結果 (${(vars.i || 1) * (vars.j || 1)}) を表示する`
+    },
+    explanation: "ループの中に別のループを配置する「二重ループ」では、外側のループが1回進むごとに、内側のループが最初から最後まで全回数実行されます。"
   }
 ];
 
