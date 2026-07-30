@@ -958,17 +958,19 @@ footer {
   display: none !important; /* インデント操作を非表示に */
 }
 
-/* ロックカードの鍵アイコン表示 */
+/* ロックカードの鍵表示。
+   以前は FontAwesome の \f023 を使っていたが、CDN をやめた時点でフォントが無く
+   豆腐（□）になっていた。素の文字にして外部アセットなしで出す */
 .block-card.locked-card::after {
-  content: "\f023"; /* FontAwesomeのlockアイコン */
-  font-family: "Font Awesome 6 Free";
-  font-weight: 900;
+  content: "🔒";
+  font-family: var(--font-sans);
   color: #64748b;
   position: absolute;
   right: 1rem;
   top: 50%;
   transform: translateY(-50%);
   font-size: 0.8rem;
+  opacity: 0.7;
 }
 
 /* ==========================================================================
@@ -1292,6 +1294,7 @@ footer a:hover {
   /* シートに移した「実行」ボタンは幅を切り詰める（横に並べきるため） */
   .sheet-controls #run-btn {
     padding: 0.5rem 0.7rem;
+    min-height: 44px;
     white-space: nowrap;
   }
 
@@ -1377,6 +1380,7 @@ footer a:hover {
     justify-content: center;
   }
 
+
   /* ハードモードの穴埋め入力欄。16px 未満だと iOS Safari が
      フォーカス時に勝手にズームするので、文字も 1rem まで上げる */
   .block-card input {
@@ -1456,6 +1460,56 @@ footer a:hover {
     align-items: center;
     min-height: 44px;
   }
+}
+
+/* --------------------------------------------------------------------------
+   カードがタップで動くことを、カード自身に持たせる目印
+   （文章の案内だけでは伝わらず、ドラッグできないスマホでは手詰まりになっていた）
+   -------------------------------------------------------------------------- */
+#tray-list .block-card::after,
+#editor-list .block-card:not(.locked-card)::after {
+  order: 1; /* 本文の右、ナレーション吹き出しより前 */
+  flex: 0 0 auto;
+  width: 1.6rem;
+  height: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.95rem;
+  line-height: 1;
+  font-family: var(--font-sans);
+  pointer-events: none; /* タップはカード本体に通す */
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+/* トレイ側は「組み立てエリアへ入れる」 */
+#tray-list .block-card::after {
+  content: "＋";
+  background: rgba(139, 92, 246, 0.18);
+  color: #c4b5fd;
+}
+
+/* エディタ側は「トレイへ戻す」 */
+#editor-list .block-card:not(.locked-card)::after {
+  content: "↩";
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+}
+
+.block-card:hover::after {
+  background: rgba(139, 92, 246, 0.35);
+  color: #ede9fe;
+}
+
+/* 吹き出しは目印より後ろの行へ回す */
+.step-narration { order: 2 !important; }
+
+/* 小画面のエディタ側では「↩」を出さない。44px×2のインデントボタンと同じ行に並べると
+   本文に100pxほどしか残らずコードが折り返し、カードが倍の高さになってしまう。
+   目印が要るのは「トレイから入れられる」ほうで、戻せることは案内文で伝える */
+@media (max-width: 992px) {
+  #editor-list .block-card:not(.locked-card)::after { content: none; }
 }
 
 /* 横持ちは縦が足りず、下に固定すると変数モニターが潰れる。

@@ -348,7 +348,7 @@ class DNCLApp {
       this.editorList.innerHTML = `
         <div class="empty-placeholder" id="workspace-placeholder">
           <i class="fas fa-code"></i>
-          <span>ここにカードをドラッグ＆ドロップしてプログラムを組み立ててください</span>
+          <span>トレイのカードをタップすると、ここに並びます</span>
         </div>
       `;
     }
@@ -444,14 +444,16 @@ class DNCLApp {
     card.appendChild(btnGroup);
     card.appendChild(textSpan);
 
-    // タッチパッド・スマホ用の簡単配置イベント (誤操作防止のためダブルクリックに変更)
-    card.addEventListener("dblclick", (e) => {
-      // インプット要素やインデントボタンのダブルクリック時は何もしない
+    // タップ（シングルクリック）でトレイ⇔エディタを行き来させる。
+    // 以前はダブルクリックだったが、スマホではダブルタップがブラウザのズーム操作と
+    // 衝突して安定せず、そもそも「タップで動く」と伝わっていなかった
+    card.addEventListener("click", (e) => {
+      // インプット要素やインデントボタンのタップ時は何もしない
       if (e.target.tagName === "INPUT" || e.target.closest(".indent-btn-group")) {
         return;
       }
-      
-      // ドラッグ操作中、または直後のダブルクリック誤動作をガード
+
+      // ドラッグ操作中、または直後のクリック誤動作をガード
       if (this.isDragging) {
         return;
       }
@@ -512,7 +514,7 @@ class DNCLApp {
         this.editorList.innerHTML = `
           <div class="empty-placeholder" id="workspace-placeholder">
             <i class="fas fa-code"></i>
-            <span>ここにカードをドラッグ＆ドロップしてプログラムを組み立ててください</span>
+            <span>トレイのカードをタップすると、ここに並びます</span>
           </div>
         `;
       }
