@@ -432,23 +432,33 @@ class DNCLApp {
     const textSpan = document.createElement("span");
     textSpan.className = "block-text";
 
-    // ハードモードの穴埋め入力欄のレンダリング
+    // ハードモードの穴埋め入力欄のレンダリング。
+    // カードの文には「もし A[i] < 最小値 ならば:」のように < や > が入る。
+    // 文字列を組み立てて innerHTML に入れると、空白の入り方しだいでタグとして解釈され、
+    // カードの文が消える。テキストと入力欄を要素として組み立てる
     if (block.inputs && this.currentDifficulty === "hard" && this.currentMode === "exercise") {
-      let html = block.text;
-      Object.keys(block.inputs).forEach(key => {
-        const inputSpec = block.inputs[key];
-        html = html.replace(`[${key}]`, `<input type="text" class="block-input" data-input-key="${key}" placeholder="${inputSpec.placeholder}">`);
-      });
-      textSpan.innerHTML = html;
-      
-      // 入力変更時にもプレビュー更新
-      setTimeout(() => {
-        card.querySelectorAll("input").forEach(input => {
-          input.addEventListener("input", () => this.updatePreview());
-          // ドラッグ開始時にテキストボックスがフォーカスされてキー入力イベントが奪われるのを防ぐ
-          input.addEventListener("mousedown", (e) => e.stopPropagation());
-        });
-      }, 0);
+      const placeholder = /\[([a-zA-Z0-9_]+)\]/g;
+      let cursor = 0;
+      let found;
+      while ((found = placeholder.exec(block.text)) !== null) {
+        const spec = block.inputs[found[1]];
+        if (!spec) continue; // 配列の添字 A[i] などは穴埋めではないので、そのまま文字として出す
+        textSpan.appendChild(document.createTextNode(block.text.slice(cursor, found.index)));
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "block-input";
+        input.dataset.inputKey = found[1];
+        input.placeholder = spec.placeholder;
+        input.setAttribute("aria-label", spec.placeholder);
+        input.addEventListener("input", () => this.updatePreview());
+        // ドラッグ開始時にテキストボックスがフォーカスされてキー入力イベントが奪われるのを防ぐ
+        input.addEventListener("mousedown", (e) => e.stopPropagation());
+        textSpan.appendChild(input);
+
+        cursor = found.index + found[0].length;
+      }
+      textSpan.appendChild(document.createTextNode(block.text.slice(cursor)));
     } else {
       // 穴埋めなし、またはハードモード以外
       // ハードモード用テキストのプレースホルダーを「???」や本来の値に戻す
@@ -773,7 +783,15 @@ class DNCLApp {
     this.traceResults = this.interpreter.run(this.editorBlocks, initialVars);
 
     if (!this.traceResults.success) {
-      this.consoleOutput.innerHTML = `<div class="console-line" style="border-left-color: var(--accent-red); color: var(--accent-red);">${this.traceResults.error}</div>`;
+      // エラー文には、ハードモードで生徒が打った文字がそのまま混ざる。
+      // innerHTML に入れず、文字として出す
+      this.consoleOutput.innerHTML = "";
+      const errLine = document.createElement("div");
+      errLine.className = "console-line";
+      errLine.style.borderLeftColor = "var(--accent-red)";
+      errLine.style.color = "var(--accent-red)";
+      errLine.textContent = this.traceResults.error;
+      this.consoleOutput.appendChild(errLine);
       this.statusBar.className = "status-bar fail";
       this.statusText.innerHTML = `<i class="fas fa-times-circle"></i> 実行エラーが発生しました。カードの順序や穴埋めを確認してください。`;
       this.statusBar.style.display = "flex";
@@ -868,9 +886,16 @@ class DNCLApp {
         if (narratives && narratives[blockId]) {
           const text = narratives[blockId](trace.variables);
           if (text) {
+            // ナレーションには変数の中身が入る＝ハードモードでは生徒が打った文字が混ざる。
+            // 文字として出す
             const narDiv = document.createElement("div");
             narDiv.className = "step-narration";
-            narDiv.innerHTML = `<i class="fas fa-comment-dots"></i><span>${text}</span>`;
+            const icon = document.createElement("i");
+            icon.className = "fas fa-comment-dots";
+            const label = document.createElement("span");
+            label.textContent = text;
+            narDiv.appendChild(icon);
+            narDiv.appendChild(label);
             c.appendChild(narDiv);
           }
         }
@@ -1008,7 +1033,7 @@ class DNCLApp {
       if (dummyUsed) {
         const dummySpec = this.currentProblem.normalBlocks.find(b => b.id === dummyUsed.id);
         if (dummySpec && dummySpec.reason) {
-          failMessage = `【ヒント】使用している「${dummyUsed.text}」カードに問題があります。<br>${dummySpec.reason}`;
+          failMessage = `【ヒント】使用している「${this.escapeText(dummyUsed.text)}」カードに問題があります。<br>${dummySpec.reason}`;
           // ダミーカードを赤くハイライト
           const cardEl = this.editorList.querySelector(`.block-card[data-id="${dummyUsed.id}"]`);
           if (cardEl) {
@@ -1024,6 +1049,18 @@ class DNCLApp {
       
       this.statusText.innerHTML = `<i class="fas fa-times-circle"></i> ${failMessage}`;
     }
+  }
+
+  /**
+   * 判定メッセージにカードの文を差し込むときに通す。
+   * ハードモードのカードの文には生徒が打った文字が入るので、記号をそのまま
+   * innerHTML に流すと表示が壊れる
+   */
+  escapeText(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
   }
 
   checkSolution() {
@@ -1327,7 +1364,7 @@ class DNCLApp {
       : null;
     if (mismatch && mismatch.placedId) {
       const placed = getBlock(mismatch.placedId);
-      return `【アドバイス】カードの並び順が正しくありません。上から ${mismatch.index + 1} 枚目（いま「${placed ? placed.text : mismatch.placedId}」があるところ）には、別のカードが来ます。実行の結果がたまたま同じでも、処理の順番が違うプログラムになっています。`;
+      return `【アドバイス】カードの並び順が正しくありません。上から ${mismatch.index + 1} 枚目（いま「${this.escapeText(placed ? placed.text : mismatch.placedId)}」があるところ）には、別のカードが来ます。実行の結果がたまたま同じでも、処理の順番が違うプログラムになっています。`;
     }
 
     return "プログラムの結果が期待と異なります。カードの並び順やインデント、穴埋めの値を確認してください。";
