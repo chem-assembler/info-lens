@@ -924,6 +924,14 @@ class DNCLApp {
    * 入れ子（A[B[0]]）と2次元のカンマ（A[i, j]）に対応し、2次元は行の側（第1添字）を返す
    */
   indexExpressions(text, arrayName) {
+    return this.indexExpressionPairs(text, arrayName).map(pair => pair[0]);
+  }
+
+  /**
+   * 添字を [行, 列] の組で取り出す。1次元なら列は null。
+   * A[i, j] のカンマ区切り（公式表記）と、入れ子（A[B[0]]）に対応する
+   */
+  indexExpressionPairs(text, arrayName) {
     const found = [];
     const src = String(text || "");
     const isNameChar = (ch) => /[a-zA-Z0-9゠-ヿ぀-ゟ一-龯_]/.test(ch);
@@ -948,7 +956,10 @@ class DNCLApp {
         } else if (ch === "," && depth === 1) comma = k;
       }
       if (close === -1) break;
-      found.push(src.slice(open + 1, comma === -1 ? close : comma).trim());
+      found.push([
+        src.slice(open + 1, comma === -1 ? close : comma).trim(),
+        comma === -1 ? null : src.slice(comma + 1, close).trim()
+      ]);
       at = close + 1;
     }
     return found;
@@ -988,6 +999,62 @@ class DNCLApp {
       if (inRange(n)) return [n];
     }
     return [];
+  }
+
+  /**
+   * 2次元配列で、いま実行している行が触っているマスを [行, 列] で返す。
+   * 列が決まらないとき（A[i] のように行だけ指しているとき）は列を null にして行ごと示す
+   */
+  activeCellsFor(arrayName, activeText, variables, rows) {
+    const cells = [];
+    const add = (r, c) => {
+      if (!Number.isInteger(r) || r < 0 || r >= rows.length) return;
+      const width = Array.isArray(rows[r]) ? rows[r].length : 0;
+      const col = Number.isInteger(c) && c >= 0 && c < width ? c : null;
+      if (!cells.some(x => x.row === r && x.col === col)) cells.push({ row: r, col });
+    };
+
+    this.indexExpressionPairs(activeText, arrayName).forEach(([first, second]) => {
+      add(this.evalIndex(first, variables), second === null ? null : this.evalIndex(second, variables));
+    });
+    if (cells.length > 0) return cells;
+
+    const loop = String(activeText || "").match(/^([a-zA-Z゠-ヿ぀-ゟ一-龯_]+)\s*を\s.*から.*繰り返す:$/);
+    if (loop) add(this.evalIndex(loop[1], variables), null);
+    return cells;
+  }
+
+  /**
+   * 2次元配列の、行と列それぞれの目印。
+   * A[i, j] の i は行の側、j は列の側に出す
+   */
+  dimensionMarkersFor(arrayName, variables, rows) {
+    const rowNames = new Set();
+    const colNames = new Set();
+    const pick = (expr, into) => {
+      (String(expr || "").match(/[a-zA-Z゠-ヿ぀-ゟ一-龯_][a-zA-Z0-9゠-ヿ぀-ゟ一-龯_]*/g) || [])
+        .forEach(n => into.add(n));
+    };
+
+    this.editorBlocks.forEach(b => {
+      this.indexExpressionPairs(b.text, arrayName).forEach(([first, second]) => {
+        pick(first, rowNames);
+        if (second !== null) pick(second, colNames);
+      });
+    });
+
+    const width = rows.reduce((max, r) => Math.max(max, Array.isArray(r) ? r.length : 0), 0);
+    const collect = (names, limit) => {
+      const markers = {};
+      names.forEach(name => {
+        const value = variables[name];
+        if (Number.isInteger(value) && value >= 0 && value < limit) {
+          (markers[value] = markers[value] || []).push(name);
+        }
+      });
+      return markers;
+    };
+    return { rows: collect(rowNames, rows.length), cols: collect(colNames, width) };
   }
 
   /**
@@ -1032,12 +1099,23 @@ class DNCLApp {
       if (Array.isArray(val)) {
         hasArray = true;
         // 配列ビジュアライザへレンダリング（光らせる場所は実行中の行から決める）
-        this.renderArrayVisualizer(
-          name,
-          val,
-          this.activeIndicesFor(name, activeText, variables, val.length),
-          this.indexMarkersFor(name, variables, val.length)
-        );
+        if (val.length > 0 && val.every(row => Array.isArray(row))) {
+          const markers = this.dimensionMarkersFor(name, variables, val);
+          this.render2DArrayVisualizer(
+            name,
+            val,
+            this.activeCellsFor(name, activeText, variables, val),
+            markers.rows,
+            markers.cols
+          );
+        } else {
+          this.renderArrayVisualizer(
+            name,
+            val,
+            this.activeIndicesFor(name, activeText, variables, val.length),
+            this.indexMarkersFor(name, variables, val.length)
+          );
+        }
       } else if (name !== "arrayData" && typeof val !== "object") {
         // 通常の変数
         const badge = document.createElement("div");
@@ -1115,6 +1193,79 @@ class DNCLApp {
     });
 
     container.appendChild(boxList);
+    this.arrayVisualizer.appendChild(container);
+  }
+
+  /**
+   * 2次元配列は行×列のマス目で描く。
+   * 1マスに「1,2,3」と行ごと押し込むと、行の中のどこを見ているかが出せない
+   */
+  render2DArrayVisualizer(arrayName, rows, activeCells = [], rowMarkers = {}, colMarkers = {}) {
+    const container = document.createElement("div");
+    container.className = "array-container";
+
+    const label = document.createElement("div");
+    label.className = "array-label";
+    label.textContent = `配列 ${arrayName} の状態:`;
+    container.appendChild(label);
+
+    const grid = document.createElement("div");
+    grid.className = "array-grid";
+
+    rows.forEach((row, r) => {
+      const rowEl = document.createElement("div");
+      rowEl.className = "array-row";
+
+      const head = document.createElement("div");
+      head.className = "array-rowlabel";
+      head.textContent = (rowMarkers[r] || []).length > 0 ? `${r} ${rowMarkers[r].join(" ")}` : `${r}`;
+      if ((rowMarkers[r] || []).length > 0) head.classList.add("marked");
+      rowEl.appendChild(head);
+
+      row.forEach((val, c) => {
+        const box = document.createElement("div");
+        box.className = "array-box";
+        // 行だけ指しているとき（A[i]）は、その行をまるごと示す
+        if (activeCells.some(cell => cell.row === r && (cell.col === null || cell.col === c))) {
+          box.classList.add("highlight");
+        }
+
+        const valEl = document.createElement("span");
+        valEl.className = "val";
+        valEl.textContent = val;
+
+        const idxEl = document.createElement("span");
+        idxEl.className = "idx";
+        idxEl.textContent = c;
+
+        box.appendChild(valEl);
+        box.appendChild(idxEl);
+        rowEl.appendChild(box);
+      });
+
+      grid.appendChild(rowEl);
+    });
+
+    // 列の目印は、繰り返しになるので下に1行だけ出す
+    const width = rows.reduce((max, row) => Math.max(max, row.length), 0);
+    if (Object.keys(colMarkers).length > 0) {
+      const ptrRow = document.createElement("div");
+      ptrRow.className = "array-row";
+
+      const pad = document.createElement("div");
+      pad.className = "array-rowlabel";
+      ptrRow.appendChild(pad);
+
+      for (let c = 0; c < width; c++) {
+        const ptr = document.createElement("div");
+        ptr.className = "array-ptr array-colptr";
+        ptr.textContent = (colMarkers[c] || []).join(" ");
+        ptrRow.appendChild(ptr);
+      }
+      grid.appendChild(ptrRow);
+    }
+
+    container.appendChild(grid);
     this.arrayVisualizer.appendChild(container);
   }
 

@@ -562,6 +562,39 @@ textarea:focus-visible,
   white-space: nowrap;
 }
 
+/* 2次元配列は行×列で描く */
+.array-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.array-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.array-rowlabel {
+  width: 3.2rem;
+  flex: 0 0 auto;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.array-rowlabel.marked {
+  color: var(--accent-purple);
+}
+
+.array-colptr {
+  width: 38px;
+  flex: 0 0 auto;
+  text-align: center;
+}
+
 .array-box {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--border-color);
