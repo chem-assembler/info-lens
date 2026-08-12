@@ -1016,7 +1016,15 @@ class DNCLApp {
     // 6. カードの並び順が模範解答（＋ problems.js の swappable で宣言した入れ替え）と一致しているか。
     // 出力の一致（5）だけでは足りない: 初期値が initialState に入っているため、初期化カードを
     // ループの後ろに置いても出力が同じになる問題がある（例: array_sum_avg の「合計 = 0」）
-    if (!DNCLOrder.isAllowed(this.currentProblem, this.editorBlocks.map(b => b.id))) return false;
+    //
+    // 公開直後は index.html だけ先に配られて order-rules.js が 404 になる瞬間がある
+    // （キャッシュバスターが無いので伝播のずれがそのまま出る）。そのときは並び順の判定を
+    // 見送る。ここで例外にすると、実行し終えても判定が出ないアプリになってしまう
+    if (typeof DNCLOrder === "undefined") {
+      console.error("order-rules.js が読み込めていないため、並び順の判定を省きました。ページを再読み込みしてください。");
+    } else if (!DNCLOrder.isAllowed(this.currentProblem, this.editorBlocks.map(b => b.id))) {
+      return false;
+    }
 
     return true;
   }
@@ -1231,7 +1239,9 @@ class DNCLApp {
 
     // 問題ごとの助言に当てはまらなかったときは、並び順のどこで模範解答から外れたかを指す。
     // 出力がたまたま合っていても、処理の順番が違えば別のプログラムになっている
-    const mismatch = DNCLOrder.firstMismatch(this.currentProblem, blocks.map(b => b.id));
+    const mismatch = (typeof DNCLOrder !== "undefined")
+      ? DNCLOrder.firstMismatch(this.currentProblem, blocks.map(b => b.id))
+      : null;
     if (mismatch && mismatch.placedId) {
       const placed = getBlock(mismatch.placedId);
       return `【アドバイス】カードの並び順が正しくありません。上から ${mismatch.index + 1} 枚目（いま「${placed ? placed.text : mismatch.placedId}」があるところ）には、別のカードが来ます。実行の結果がたまたま同じでも、処理の順番が違うプログラムになっています。`;

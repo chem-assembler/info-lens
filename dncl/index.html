@@ -271,8 +271,10 @@
 
   <!-- スクリプトの読み込み -->
   <script src="problems.js"></script>
-  <!-- 並び順の判定規則（app.js の checkSolution と verify_problems.js が共有する） -->
-  <script src="order-rules.js"></script>
+  <!-- 並び順の判定規則（app.js の checkSolution と verify_problems.js が共有する）。
+       ?v=1 は付け足しではなく必要: 公開前に一度でも 404 を引かせると、GitHub Pages の CDN が
+       その 404 を max-age=14400（4時間）で持ち続ける。新しい URL にすればそれを避けられる -->
+  <script src="order-rules.js?v=1"></script>
   <script src="dncl-interpreter.js"></script>
   <!-- dncl-interpreter.js より後に読む（2次元添字の解釈を共有するため） -->
   <script src="dncl-to-python.js"></script>
