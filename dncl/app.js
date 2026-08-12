@@ -130,6 +130,20 @@ class DNCLApp {
       if (e.target === this.answerModal) this.closeAnswerModal();
     });
 
+    // モーダルは Escape で閉じ、開いている間は Tab を中に閉じ込める。
+    // 閉じられない・後ろの画面へ出ていってしまうと、キーボードだけでは戻れなくなる
+    document.addEventListener("keydown", (e) => {
+      const modal = this.openModal();
+      if (!modal) return;
+      if (e.key === "Escape") {
+        e.preventDefault();
+        if (modal === this.aiModal) this.closeAIModal();
+        else this.closeAnswerModal();
+      } else if (e.key === "Tab") {
+        this.trapFocus(e, modal);
+      }
+    });
+
     // モード切り替えタブ
     this.modeExerciseBtn.addEventListener("click", () => this.switchMode("exercise"));
     this.modeSyntaxBtn.addEventListener("click", () => this.switchMode("syntax"));
@@ -185,6 +199,7 @@ class DNCLApp {
         const isHidden = guideBody.style.display === "none";
         guideBody.style.display = isHidden ? "block" : "none";
         guideIcon.style.transform = isHidden ? "rotate(180deg)" : "rotate(0deg)";
+        guideToggle.setAttribute("aria-expanded", isHidden ? "true" : "false");
       });
     }
 
@@ -397,6 +412,13 @@ class DNCLApp {
     card.dataset.id = block.id;
     card.dataset.indent = "0";
 
+    // マウスやタッチが使えなくてもカードを並べられるようにする。
+    // 固定カード（isLocked）は動かせないので、素通りさせてタブ移動の邪魔をしない
+    if (!block.isLocked) {
+      card.tabIndex = 0;
+      card.setAttribute("role", "button");
+    }
+
     if (block.isDummy) {
       card.classList.add("dummy-card");
       card.dataset.isDummy = "true";
@@ -447,6 +469,8 @@ class DNCLApp {
     decBtn.className = "indent-btn dec-indent";
     decBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
     decBtn.title = "インデントを減らす";
+    decBtn.type = "button";
+    decBtn.setAttribute("aria-label", "インデントを減らす");
     decBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       this.adjustIndent(card, -1);
@@ -456,6 +480,8 @@ class DNCLApp {
     incBtn.className = "indent-btn inc-indent";
     incBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
     incBtn.title = "インデントを増やす";
+    incBtn.type = "button";
+    incBtn.setAttribute("aria-label", "インデントを増やす");
     incBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       this.adjustIndent(card, 1);
@@ -485,7 +511,62 @@ class DNCLApp {
       this.handleCardTap(card);
     });
 
+    // キーボードだけで並べられるようにする（学校のPC教室やマウスを使いにくい生徒のため）。
+    // Enter/Space でトレイ⇔エディタ、←→ でインデント、↑↓ でエディタ内の入れ替え
+    card.addEventListener("keydown", (e) => this.handleCardKey(e, card));
+
+    this.updateCardLabel(card);
     return card;
+  }
+
+  /**
+   * 読み上げ用のラベル。カードの文字だけでは字下げが伝わらないので段数を添える
+   */
+  updateCardLabel(card) {
+    const textSpan = card.querySelector(".block-text");
+    if (!textSpan) return;
+    const indent = parseInt(card.dataset.indent || "0", 10);
+    const where = this.editorList.contains(card) ? "組み立てエリア" : "カードトレイ";
+    card.setAttribute("aria-label", `${textSpan.textContent}（${where}・字下げ ${indent} 段）`);
+  }
+
+  /**
+   * カードの上でのキー操作。マウスでできることは全部キーボードでもできるようにする
+   */
+  handleCardKey(e, card) {
+    if (e.target.tagName === "INPUT") return; // 穴埋めの入力中は横取りしない
+    const inEditor = this.editorList.contains(card);
+
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      this.handleCardTap(card);
+      card.focus();
+      this.updateCardLabel(card);
+    } else if (inEditor && (e.key === "ArrowRight" || e.key === "ArrowLeft")) {
+      e.preventDefault();
+      this.adjustIndent(card, e.key === "ArrowRight" ? 1 : -1);
+      card.focus();
+    } else if (inEditor && (e.key === "ArrowUp" || e.key === "ArrowDown")) {
+      e.preventDefault();
+      this.moveCardInEditor(card, e.key === "ArrowUp" ? -1 : 1);
+    }
+  }
+
+  /**
+   * エディタの中でカードを1つ上／下へ動かす。
+   * 並べ替えがドラッグしかないと、キーボードでは順序を直せない
+   */
+  moveCardInEditor(card, dir) {
+    if (card.dataset.isLocked === "true") return;
+    const cards = Array.from(this.editorList.querySelectorAll(".block-card"));
+    const to = cards.indexOf(card) + dir;
+    if (to < 0 || to >= cards.length) return;
+
+    if (dir < 0) this.editorList.insertBefore(card, cards[to]);
+    else this.editorList.insertBefore(card, cards[to].nextElementSibling);
+
+    this.onBlocksChanged();
+    card.focus();
   }
 
   /**
@@ -510,6 +591,7 @@ class DNCLApp {
       card.dataset.indent = "0";
     }
 
+    this.updateCardLabel(card);
     this.onBlocksChanged();
   }
 
@@ -523,7 +605,8 @@ class DNCLApp {
     card.classList.remove(`indent-${currentIndent}`);
     card.classList.add(`indent-${nextIndent}`);
     card.dataset.indent = nextIndent;
-    
+
+    this.updateCardLabel(card);
     this.onBlocksChanged();
   }
 
@@ -1314,14 +1397,55 @@ ${consoleText}
 `;
   }
 
+  /** いま開いているモーダル（無ければ null） */
+  openModal() {
+    if (this.aiModal.classList.contains("open")) return this.aiModal;
+    if (this.answerModal.classList.contains("open")) return this.answerModal;
+    return null;
+  }
+
+  /** モーダルの中の操作できる要素を、順番のまま集める */
+  focusables(modal) {
+    return Array.from(modal.querySelectorAll("button, textarea, input, select, a[href]"))
+      .filter(el => !el.disabled && el.offsetParent !== null);
+  }
+
+  /** Tab がモーダルの外へ出ないように端で折り返す */
+  trapFocus(e, modal) {
+    const items = this.focusables(modal);
+    if (items.length === 0) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
+  /** モーダルを開く前にいた場所を覚えておき、閉じたらそこへ返す */
+  showModal(modal, focusTarget) {
+    this.lastFocused = document.activeElement;
+    modal.classList.add("open");
+    if (focusTarget) focusTarget.focus();
+  }
+
+  hideModal(modal) {
+    modal.classList.remove("open");
+    if (this.lastFocused && document.contains(this.lastFocused)) this.lastFocused.focus();
+    this.lastFocused = null;
+  }
+
   openAIModal() {
     const prompt = this.generateAIPrompt();
     this.promptTextarea.value = prompt;
-    this.aiModal.classList.add("open");
+    this.showModal(this.aiModal, this.copyPromptBtn);
   }
 
   closeAIModal() {
-    this.aiModal.classList.remove("open");
+    this.hideModal(this.aiModal);
   }
 
   /**
@@ -1416,11 +1540,11 @@ ${consoleText}
     
     this.answerCodePreview.textContent = lines.join("\n");
     this.answerExplanationText.textContent = this.currentProblem.explanation;
-    this.answerModal.classList.add("open");
+    this.showModal(this.answerModal, this.closeAnswerModalBtn);
   }
 
   closeAnswerModal() {
-    this.answerModal.classList.remove("open");
+    this.hideModal(this.answerModal);
   }
 
   /**

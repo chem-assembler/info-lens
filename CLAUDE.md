@@ -47,6 +47,10 @@ SchoolLenz の情報系サブブランド。公開URL: https://info.schoollenz.c
   問題データや UI のセレクタを変えたときは `node dncl/verify_demos.js` も通す（録画台本が追随できているか）。
   DNCL の文法や `dncl-to-python.js` を触ったときは `node dncl/verify_python.js`
   （変換した Python を実際に走らせて DNCL と出力を突き合わせる）
+- **マウスでできることは、キーボードだけでもできること**（2026-08-12）。カードは Tab で選び、
+  Enter で出し入れ、←→ で字下げ、↑↓ で並べ替え。押せるものは `<button>` で作り、
+  `:focus-visible` の枠が出ること。モーダルは Escape で閉じ、Tab を中に閉じ込める。
+  学校のPC教室・マウスを使いにくい生徒が対象に含まれるので、クリック専用の操作を足さない
 - **録画モードは `?rec=` が無ければ完全に不活性であること**が絶対条件。
   通常利用・テストに影響を与えない（詳細は `docs/NEXT_dncl_recording.md`、設計の正は chem 側 `DESIGN_recording_mode.md`）
 - 公開名は **「1行ずつみるアルゴリズム」**（副題に DNCL を添える）。SchoolLenz の

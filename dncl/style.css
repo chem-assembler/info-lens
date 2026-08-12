@@ -263,6 +263,9 @@ main {
   text-align: center;
   padding: 0.4rem;
   font-size: 0.8rem;
+  font-family: inherit;
+  background: none;
+  border: none;
   border-radius: 6px;
   cursor: pointer;
   user-select: none;
@@ -401,6 +404,25 @@ main {
 .indent-btn:hover {
   background: rgba(255, 255, 255, 0.15);
   color: white;
+}
+
+/* キーボードで操作している人に「いまどこにいるか」を見せる。
+   マウス操作では出さない（:focus ではなく :focus-visible） */
+.block-card:focus-visible,
+.diff-tab:focus-visible,
+.guide-header:focus-visible,
+button:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent-purple);
+  outline-offset: 2px;
+}
+
+/* インデント操作はホバーで出てくるので、キーボードで選んだときも同じように出す */
+.block-card:focus-within .indent-btn-group,
+.block-card:focus-visible .indent-btn-group {
+  opacity: 1;
 }
 
 .empty-placeholder {
@@ -1202,6 +1224,10 @@ footer {
   padding: 0.6rem 0.8rem;
   font-size: 0.9rem;
   font-weight: 500;
+  font-family: inherit;
+  background: none;
+  border: none;
+  text-align: left;
   color: #ddd6fe;
   display: flex;
   justify-content: space-between;

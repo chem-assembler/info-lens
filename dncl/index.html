@@ -73,17 +73,17 @@
 
         <!-- 難易度切り替えタブ -->
         <nav class="difficulty-tabs" id="difficulty-tabs" aria-label="問題の難易度設定">
-          <div class="diff-tab active" data-difficulty="easy" id="tab-easy">イージー</div>
-          <div class="diff-tab" data-difficulty="normal" id="tab-normal">ノーマル</div>
-          <div class="diff-tab" data-difficulty="hard" id="tab-hard">ハード</div>
+          <button type="button" class="diff-tab active" data-difficulty="easy" id="tab-easy">イージー</button>
+          <button type="button" class="diff-tab" data-difficulty="normal" id="tab-normal">ノーマル</button>
+          <button type="button" class="diff-tab" data-difficulty="hard" id="tab-hard">ハード</button>
         </nav>
 
         <!-- 初心者向け基本解説アコーディオン -->
         <div class="guide-accordion" style="margin: 0.5rem 1rem 0.5rem 1rem;">
-          <div class="guide-header" id="guide-toggle" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+          <button type="button" class="guide-header" id="guide-toggle" aria-expanded="false" aria-controls="guide-body" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; width: 100%;">
             <span><i class="fas fa-graduation-cap"></i> 🔰 プログラミングのきほん（変数とインデント）</span>
             <i class="fas fa-chevron-down toggle-icon" id="guide-toggle-icon" style="transition: transform 0.2s;"></i>
-          </div>
+          </button>
           <div class="guide-body" id="guide-body" style="display: none; padding: 0.75rem 0.5rem 0.2rem 0.5rem;">
             <div class="guide-item">
               <h4 style="margin: 0 0 0.3rem 0; font-size: 0.95rem; color: #f59e0b;"><i class="fas fa-box"></i> 1. 変数の定義（初期化）とは？</h4>
@@ -99,7 +99,8 @@
         <!-- 使用可能なカードリスト（トレイ） -->
         <div class="operation-guide" style="margin: 0.5rem 1rem 0.5rem 1rem;">
           <i class="fas fa-lightbulb"></i>
-          <span>💡 カードをタップすると組み立てエリアへ移動します。もう一度タップすると、ここへ戻せます。</span>
+          <span>💡 カードをタップすると組み立てエリアへ移動します。もう一度タップすると、ここへ戻せます。<br>
+            キーボードでも操作できます。Tab でカードを選び、<b>Enter</b> で出し入れ、<b>←→</b> で字下げ、<b>↑↓</b> で並べ替えです。</span>
         </div>
         <div id="tray-list" class="card-tray" aria-label="利用可能なコードカード" style="margin-top: 0.2rem;">
           <!-- JSでカードを動的配置 -->
