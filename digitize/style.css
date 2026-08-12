@@ -1,0 +1,254 @@
+/* 1標本ずつみるデジタル化 — スタイル
+   dncl と同系のダークテーマ。外部アセットゼロ（フォントは OS 標準のみ） */
+
+:root {
+  --bg-body: #0b0d16;
+  --bg-card: #141726;
+  --bg-card-hover: #1a1e33;
+  --border-color: #242840;
+  --text-primary: #eceef7;
+  --text-secondary: #a0a5bd;
+  --text-muted: #757a95;
+  --accent-purple: #8b5cf6;
+  --accent-green: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-red: #ef4444;
+  --font-sans: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", YuGothic, "Noto Sans JP", Meiryo, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Noto Sans Mono", monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg-body);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+}
+
+/* ---------- ヘッダー ---------- */
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.7rem 1.2rem;
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(20, 23, 38, 0.7);
+}
+
+.logo-section { display: flex; align-items: baseline; gap: 0.8rem; flex-wrap: wrap; }
+.logo-section h1 { font-size: 1.15rem; margin: 0; }
+.logo-section span { font-size: 0.8rem; color: var(--text-secondary); }
+
+.back-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.85rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.25rem 0.6rem;
+}
+.back-link:hover { color: var(--text-primary); border-color: var(--accent-purple); }
+
+select {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  max-width: 70vw;
+}
+
+/* ---------- 3ペイン ---------- */
+
+main {
+  display: grid;
+  grid-template-columns: 300px 1fr 320px;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+.pane {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.pane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+.pane-header h2 { font-size: 0.95rem; margin: 0; }
+
+.pane-content { padding: 0.9rem 1rem; }
+
+/* ---------- 左ペイン: 課題とつまみ ---------- */
+
+.lesson-card h3 { margin: 0 0 0.4rem; font-size: 1rem; }
+.lesson-card p { margin: 0 0 0.8rem; font-size: 0.85rem; color: var(--text-secondary); }
+
+.control-block {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.7rem;
+}
+.control-block label { display: block; font-size: 0.85rem; margin-bottom: 0.3rem; }
+.control-block input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent-purple);
+  cursor: pointer;
+}
+.control-val { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent-purple); }
+
+.lock-note { display: none; font-size: 0.72rem; color: var(--text-muted); margin-left: 0.4rem; }
+.control-block.locked { opacity: 0.55; }
+.control-block.locked .lock-note { display: inline; }
+.control-block.locked input[type="range"] { cursor: default; }
+
+.explanation {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  border-top: 1px dashed var(--border-color);
+  padding-top: 0.7rem;
+}
+
+/* ---------- 中央ペイン: 波形 ---------- */
+
+.wave-actions { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+
+button {
+  font-family: inherit;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); }
+button:disabled { opacity: 0.4; cursor: default; }
+button.primary { background: var(--accent-purple); border-color: var(--accent-purple); color: #fff; }
+button.primary:hover:not(:disabled) { background: #7c3aed; }
+
+/* キーボード操作の現在地（マウスでは出さない） */
+button:focus-visible, select:focus-visible, input[type="range"]:focus-visible, a:focus-visible {
+  outline: 2px solid var(--accent-purple);
+  outline-offset: 2px;
+}
+
+.step-controls-group {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.15rem 0.4rem;
+}
+.step-controls-group .icon-btn { border: none; background: transparent; padding: 0.2rem 0.45rem; }
+#step-counter { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-secondary); min-width: 5.5em; text-align: center; }
+
+.speed-control { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; color: var(--text-secondary); }
+.speed-control input[type="range"] { width: 70px; accent-color: var(--accent-purple); }
+#speed-val { font-family: var(--font-mono); min-width: 3.5em; }
+
+#wave-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: #05060a;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+}
+
+/* SVG の中身 */
+.grid-level { stroke: rgba(139, 92, 246, 0.16); stroke-width: 1; }
+.level-label { fill: var(--text-muted); font-size: 10px; text-anchor: end; font-family: var(--font-mono); }
+.axis { stroke: rgba(255, 255, 255, 0.25); stroke-width: 1; }
+.wave-original { fill: none; stroke: #38bdf8; stroke-width: 2; opacity: 0.85; }
+.sample-line { stroke: rgba(255, 255, 255, 0.08); stroke-width: 1; stroke-dasharray: 3 3; }
+.sample-dot { fill: var(--accent-amber); }
+.restored-dot { fill: var(--accent-purple); }
+.restored-step { stroke: var(--accent-purple); stroke-width: 2.5; }
+.error-line { stroke: var(--accent-red); stroke-width: 2; }
+.bits-label { fill: var(--accent-green); font-size: 11px; text-anchor: middle; font-family: var(--font-mono); }
+.sample-dot.active, .restored-dot.active { stroke: #fff; stroke-width: 2; }
+.bits-label.active { font-weight: 700; fill: #fff; }
+
+.legend { display: flex; gap: 0.9rem; flex-wrap: wrap; font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.5rem; }
+.lg::before { content: "●"; margin-right: 0.3rem; }
+.lg-original::before { color: #38bdf8; }
+.lg-sample::before { color: var(--accent-amber); }
+.lg-restored::before { color: var(--accent-purple); }
+.lg-error::before { color: var(--accent-red); }
+
+.narration {
+  margin-top: 0.6rem;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  background: rgba(139, 92, 246, 0.08);
+  border-radius: 10px;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.85rem;
+  min-height: 2.4em;
+}
+
+/* ---------- 右ペイン: 数値 ---------- */
+
+#sample-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+#sample-table th {
+  text-align: left;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.2rem 0.4rem;
+}
+#sample-table td { padding: 0.18rem 0.4rem; border-bottom: 1px solid rgba(255, 255, 255, 0.04); }
+#sample-table tr.active td { background: rgba(139, 92, 246, 0.15); }
+
+.bit-section { margin-top: 0.8rem; border-top: 1px dashed var(--border-color); padding-top: 0.7rem; }
+.bit-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.3rem; }
+.bit-stream {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--accent-green);
+  word-break: break-all;
+  background: #05060a;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.5rem 0.6rem;
+  min-height: 2.2em;
+}
+.data-size { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.5rem; }
+
+/* ---------- フッター ---------- */
+
+footer { text-align: center; color: var(--text-muted); font-size: 0.75rem; padding: 1rem 0 1.4rem; }
+footer a { color: var(--text-secondary); }
+
+/* ---------- 小画面: 縦積み ----------
+   dncl のシート方式は使わない（波形と数値が1画面の高さに収まるため。設計書 3 節） */
+@media (max-width: 1100px) {
+  main { grid-template-columns: 1fr; }
+  #wave-pane { order: -1; } /* 波形を最初に。開いてすぐ「動くもの」が見えるように */
+}

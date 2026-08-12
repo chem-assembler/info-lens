@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1標本ずつみるデジタル化 — 標本化・量子化・符号化を動かして学ぶ | 情報レンズ</title>
+  <meta name="description" content="音のデジタル化（標本化・量子化・符号化）を、1標本ずつ進めて確かめる無料の学習ツール。標本化周波数と量子化ビット数を変えると、復元した波のずれとデータ量が同時に見える。情報レンズ（SchoolLenz）。">
+  <link rel="canonical" href="https://info.schoollenz.com/digitize/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SchoolLenz">
+  <meta property="og:title" content="1標本ずつみるデジタル化 — 情報レンズ">
+  <meta property="og:description" content="標本化・量子化・符号化を1標本ずつ。元の波と復元した波のずれ、データ量の変化が同時に見える。無料・広告なし・ログイン不要。">
+  <meta property="og:url" content="https://info.schoollenz.com/digitize/">
+  <meta name="theme-color" content="#0b0d16">
+  <!-- ファビコンはインラインSVG（外部アセットゼロ。情報レンズ共通の記号） -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%236f6cf0'/%3E%3Cg fill='%23ffffff'%3E%3Crect x='13' y='7.4' width='12' height='2.8' rx='1.4' opacity='.5'/%3E%3Crect x='13' y='14.6' width='14' height='2.8' rx='1.4'/%3E%3Crect x='13' y='21.8' width='9' height='2.8' rx='1.4' opacity='.5'/%3E%3Cpath d='M5.5 12.2 L11 16 L5.5 19.8 Z'/%3E%3C/g%3E%3C/svg%3E">
+  <!-- 新規ファイルの参照には ?v=1（Pages の 404 が4時間キャッシュされる事故を避ける。CLAUDE.md） -->
+  <link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+
+  <header>
+    <div class="logo-section">
+      <a href="../" class="back-link" title="情報レンズ（アプリ一覧）へ戻る">← 情報レンズ</a>
+      <h1>1標本ずつみるデジタル化</h1>
+      <span>音のデジタル化 — 標本化・量子化・符号化</span>
+    </div>
+    <div class="controls-section">
+      <div class="select-wrapper">
+        <select id="lesson-select" title="課題を選択してください"></select>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- 左: 課題とつまみ -->
+    <section class="pane" id="left-pane" aria-labelledby="left-pane-title">
+      <div class="pane-header"><h2 id="left-pane-title">課題</h2></div>
+      <div class="pane-content">
+        <article class="lesson-card">
+          <h3 id="lesson-title"></h3>
+          <p id="lesson-desc"></p>
+        </article>
+
+        <div class="control-block" id="rate-row">
+          <label for="rate-range">標本化周波数<span class="lock-note">（この課では固定）</span></label>
+          <input type="range" id="rate-range" min="4" max="32" step="1" value="8">
+          <div class="control-val" id="rate-val"></div>
+        </div>
+
+        <div class="control-block" id="bit-row">
+          <label for="bit-range">量子化ビット数<span class="lock-note">（この課では固定）</span></label>
+          <input type="range" id="bit-range" min="1" max="4" step="1" value="4">
+          <div class="control-val" id="bit-val"></div>
+        </div>
+
+        <div class="explanation" id="lesson-expl"></div>
+      </div>
+    </section>
+
+    <!-- 中央: 波形ビュー -->
+    <section class="pane" id="wave-pane" aria-label="波形ビュー">
+      <div class="pane-header">
+        <h2>波形</h2>
+        <div class="wave-actions">
+          <button id="run-btn" class="primary" title="1拍ずつ自動で進めます">▶ 再生</button>
+          <div class="step-controls-group">
+            <button id="step-back-btn" class="icon-btn" title="1拍戻る" disabled>◁</button>
+            <span id="step-counter">標本 0/0</span>
+            <button id="step-forward-btn" class="icon-btn" title="1拍進む（完成形からは頭出し）">▷</button>
+          </div>
+          <div class="speed-control">
+            <label for="speed-range">速度</label>
+            <input type="range" id="speed-range" min="100" max="1500" step="100" value="500">
+            <span id="speed-val">500ms</span>
+          </div>
+        </div>
+      </div>
+      <div class="pane-content">
+        <svg id="wave-svg" viewBox="0 0 820 420" role="img"
+             aria-label="元の波と、標本点・量子化の段階・復元した階段・量子化誤差を重ねた図"></svg>
+        <div class="legend">
+          <span class="lg lg-original">元の波</span>
+          <span class="lg lg-sample">標本（読み取った高さ）</span>
+          <span class="lg lg-restored">復元した波（量子化後）</span>
+          <span class="lg lg-error">量子化誤差（ずれ）</span>
+        </div>
+        <div id="narration" class="narration" role="status"></div>
+      </div>
+    </section>
+
+    <!-- 右: 数値ビュー -->
+    <section class="pane" id="number-pane" aria-label="数値ビュー">
+      <div class="pane-header"><h2>数値</h2></div>
+      <div class="pane-content">
+        <table id="sample-table">
+          <thead><tr><th>#</th><th>時刻</th><th>読み取り</th><th>段階</th><th>2進</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="bit-section">
+          <div class="bit-label">ビット列</div>
+          <div id="bit-stream" class="bit-stream"></div>
+          <div id="data-size" class="data-size"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>1標本ずつみるデジタル化 — <a href="../">情報レンズ</a> / <a href="https://schoollenz.com/">SchoolLenz</a> &copy; 2026</p>
+  </footer>
+
+  <!-- 新規ファイルの参照には ?v=1（理由は style.css の行と同じ） -->
+  <script src="digitize.js?v=1"></script>
+  <script src="lessons.js?v=1"></script>
+  <script src="app.js?v=1"></script>
+</body>
+</html>
