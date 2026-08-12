@@ -1013,84 +1013,10 @@ class DNCLApp {
       if (userOutput[i] !== expectedOutput[i]) return false;
     }
 
-    // 6. 初期化カードの順序依存・不適切位置チェック (初期化が制御ブロックより前に完了しているか)
-    const problemId = this.currentProblem.id;
-    const getIndex = (id) => this.editorBlocks.findIndex(b => b.id === id);
-
-    if (problemId === "sum_1_to_n") {
-      const idxN = getIndex("b1");
-      const idxSum = getIndex("b2");
-      const idxLoop = getIndex("b3");
-      if (idxLoop !== -1) {
-        if ((idxN !== -1 && idxN > idxLoop) || (idxSum !== -1 && idxSum > idxLoop)) return false;
-      }
-    } else if (problemId === "count_multiples_of_3") {
-      const idxN = getIndex("b1");
-      const idxCount = getIndex("b2");
-      const idxLoop = getIndex("b3");
-      if (idxLoop !== -1) {
-        if ((idxN !== -1 && idxN > idxLoop) || (idxCount !== -1 && idxCount > idxLoop)) return false;
-      }
-    } else if (problemId === "leap_year") {
-      const idxYear = getIndex("b1");
-      const idxLeap = getIndex("b2");
-      const idxIf = getIndex("b3");
-      if (idxIf !== -1) {
-        if ((idxYear !== -1 && idxYear > idxIf) || (idxLeap !== -1 && idxLeap > idxIf)) return false;
-      }
-    } else if (problemId === "find_max") {
-      const idxArr = getIndex("b0");
-      const idxMax = getIndex("b1");
-      const idxLoop = getIndex("b2");
-      if (idxLoop !== -1) {
-        if ((idxArr !== -1 && idxArr > idxLoop) || (idxMax !== -1 && idxMax > idxLoop)) return false;
-      }
-    } else if (problemId === "euclidean_algorithm") {
-      const idxA = getIndex("b1");
-      const idxB = getIndex("b2");
-      const idxLoop = getIndex("b3");
-      if (idxLoop !== -1) {
-        if ((idxA !== -1 && idxA > idxLoop) || (idxB !== -1 && idxB > idxLoop)) return false;
-      }
-    } else if (problemId === "linear_search") {
-      const idxArr = getIndex("b0_1");
-      const idxTarget = getIndex("b0_2");
-      const idxPos = getIndex("b1");
-      const idxLoop = getIndex("b2");
-      if (idxLoop !== -1) {
-        if ((idxArr !== -1 && idxArr > idxLoop) || (idxTarget !== -1 && idxTarget > idxLoop) || (idxPos !== -1 && idxPos > idxLoop)) return false;
-      }
-    } else if (problemId === "coin_change") {
-      const idxAmount = getIndex("b1");
-      const idxCoins = getIndex("b0");
-      const idxLoop = getIndex("b2");
-      if (idxLoop !== -1) {
-        if ((idxAmount !== -1 && idxAmount > idxLoop) || (idxCoins !== -1 && idxCoins > idxLoop)) return false;
-      }
-    } else if (problemId === "lesson_branch") {
-      const idxScore = getIndex("l1");
-      const idxIf = getIndex("l2");
-      if (idxIf !== -1 && idxScore !== -1 && idxScore > idxIf) return false;
-    } else if (problemId === "lesson_array") {
-      const idxArr = getIndex("l0");
-      const idxVal = getIndex("l1");
-      if (idxVal !== -1 && idxArr !== -1 && idxArr > idxVal) return false;
-    } else if (problemId === "lesson_while") {
-      const idxA = getIndex("l1");
-      const idxLoop = getIndex("l2");
-      if (idxLoop !== -1 && idxA !== -1 && idxA > idxLoop) return false;
-    } else if (problemId === "lesson_function") {
-      const idxDef = getIndex("l1");
-      const idxRet = getIndex("l2");
-      const idxCall = getIndex("l3");
-      // 関数定義は呼び出しより前、返すは定義ブロックの中（idxDef < idxRet < idxCall）
-      if (idxDef !== -1 && idxCall !== -1 && idxDef > idxCall) return false;
-      if (idxRet !== -1 && idxDef !== -1 && idxRet < idxDef) return false;
-    } else if (problemId === "lesson_2d_array") {
-      const idxArr = getIndex("l0");
-      const idxVal = getIndex("l1");
-      if (idxVal !== -1 && idxArr !== -1 && idxArr > idxVal) return false;
-    }
+    // 6. カードの並び順が模範解答（＋ problems.js の swappable で宣言した入れ替え）と一致しているか。
+    // 出力の一致（5）だけでは足りない: 初期値が initialState に入っているため、初期化カードを
+    // ループの後ろに置いても出力が同じになる問題がある（例: array_sum_avg の「合計 = 0」）
+    if (!DNCLOrder.isAllowed(this.currentProblem, this.editorBlocks.map(b => b.id))) return false;
 
     return true;
   }
@@ -1301,6 +1227,14 @@ class DNCLApp {
       if (idxAmount > idxLoop || idxCoins > idxLoop) {
         return "【アドバイス】前提設定「金額 = 780」や「硬貨 = [500, 100, 50, 10]」が、繰り返し（ループ）より下に配置されています。これでは繰り返しが始まる前に変数の初期化ができません。初期設定カードを繰り返しの上の位置に移動してください。";
       }
+    }
+
+    // 問題ごとの助言に当てはまらなかったときは、並び順のどこで模範解答から外れたかを指す。
+    // 出力がたまたま合っていても、処理の順番が違えば別のプログラムになっている
+    const mismatch = DNCLOrder.firstMismatch(this.currentProblem, blocks.map(b => b.id));
+    if (mismatch && mismatch.placedId) {
+      const placed = getBlock(mismatch.placedId);
+      return `【アドバイス】カードの並び順が正しくありません。上から ${mismatch.index + 1} 枚目（いま「${placed ? placed.text : mismatch.placedId}」があるところ）には、別のカードが来ます。実行の結果がたまたま同じでも、処理の順番が違うプログラムになっています。`;
     }
 
     return "プログラムの結果が期待と異なります。カードの並び順やインデント、穴埋めの値を確認してください。";

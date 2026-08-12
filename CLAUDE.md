@@ -24,6 +24,7 @@ SchoolLenz の情報系サブブランド。公開URL: https://info.schoollenz.c
 | `icons.css` | アイコン（CSSマスク＋インラインSVG。FontAwesome CDN の置き換え） |
 | `sortable-lite.js` | ドラッグ＆ドロップ（SortableJS CDN の置き換え・自前実装） |
 | `problems.js` | 演習問題15問＋構文学習12ユニットのデータ |
+| `order-rules.js` | 並び順の判定規則（`swappable` を解いて「許される並び」を作る。app.js と verify_problems.js が共有） |
 | `dncl-interpreter.js` | DNCLの解析・実行エンジン（DNCL→JS。実行はこちら） |
 | `dncl-to-python.js` | DNCL→Python 変換（対照表示のための1行1行の対応。実行には使わない） |
 | `app.js` | UI制御・ステップ実行・変数可視化 |
@@ -37,6 +38,11 @@ SchoolLenz の情報系サブブランド。公開URL: https://info.schoollenz.c
 - **外部アセットゼロ**。CDN・ウェブフォント・解析タグを入れない（オフラインで動く／閲覧者のIPを第三者に渡さない）。
   アイコンとドラッグ＆ドロップを自前に置き換えたのはこのため。復活させないこと
 - 全ファイル **UTF-8（BOMなし）**
+- **正解の並びは `correctBlocks` の順序そのもの**。出力の一致だけで判定しない
+  （`initialState` に初期値が入っているので、初期化カードをループの後ろに置いても
+  出力が同じになる問題がある＝誤った並びを「正解」と言ってしまう。2026-08-12 に実在した）。
+  入れ替えても同じプログラムになる箇所は `problems.js` の `swappable` に**宣言する**。
+  宣言が無害かどうかと、宣言し忘れの候補は `node dncl/verify_problems.js` が見張る
 - 問題データを触ったら `node dncl/verify_problems.js` を実行し、全件成功を確認してからコミット。
   問題データや UI のセレクタを変えたときは `node dncl/verify_demos.js` も通す（録画台本が追随できているか）。
   DNCL の文法や `dncl-to-python.js` を触ったときは `node dncl/verify_python.js`
