@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>OGP画像の元データ（情報レンズ）</title>
+<!--
+  SNSでシェアされたときのサムネイル（og:image）の元データ。
+  ここを直して 1200×630 で撮り直すと画像を作れる。外部アセットは使わない（OS標準フォントのみ）。
+
+  書き出し先:
+    #card-app → dncl/ogp.png   （1行ずつみるアルゴリズム）
+    #card-hub → ogp.png        （情報レンズのハブ）
+
+  撮り方はどちらでもよい:
+    ・ブラウザでこのファイルを開き、カードの部分を 1200×630 でスクリーンショットする
+    ・Playwright があるなら element.screenshot() で撮る（chem の tools/record に入っている）
+-->
+<style>
+  body { margin: 0; background: #333; font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", YuGothic, Meiryo, system-ui, sans-serif; }
+  .card {
+    width: 1200px; height: 630px; position: relative; overflow: hidden;
+    background: radial-gradient(1000px 600px at 78% 18%, #251f52 0%, #0b0d16 62%);
+    color: #eceef7; display: flex; align-items: center; gap: 56px; padding: 0 84px;
+    box-sizing: border-box; margin: 12px 0;
+  }
+  .left { flex: 1 1 auto; min-width: 0; }
+  .mark { width: 84px; height: 84px; border-radius: 20px; background: linear-gradient(150deg, #8c88ff, #5b53d6);
+          display: flex; align-items: center; justify-content: center; margin-bottom: 30px; }
+  .mark svg { width: 52px; height: 52px; display: block; }
+  h1 { font-size: 62px; line-height: 1.16; margin: 0 0 22px; letter-spacing: 0.01em; }
+  .sub { font-size: 27px; line-height: 1.55; color: #a8adc8; margin: 0; }
+  .foot { position: absolute; left: 84px; bottom: 54px; font-size: 23px; color: #8f88f5; letter-spacing: 0.04em; }
+  .badge { color: #757a95; }
+
+  /* 右側は「カードを並べて1行ずつ動かす」画面の要約 */
+  .stack { flex: 0 0 430px; display: flex; flex-direction: column; gap: 14px; }
+  .row { background: rgba(30, 35, 60, 0.85); border: 1px solid #242840; border-radius: 12px;
+         padding: 15px 18px; font-family: Consolas, "SF Mono", Menlo, monospace; font-size: 20px; color: #cbd5e1; }
+  .row.i1 { margin-left: 34px; }
+  .row.i2 { margin-left: 68px; }
+  .row.on { border-color: #8c88ff; background: rgba(90, 80, 190, 0.3); color: #fff; box-shadow: 0 0 0 3px rgba(140, 136, 255, 0.18); }
+</style>
+</head>
+<body>
+
+<div class="card" id="card-app">
+  <div class="left">
+    <div class="mark">
+      <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill="#ffffff">
+          <rect x="13" y="7.4" width="12" height="2.8" rx="1.4" opacity=".5"/>
+          <rect x="13" y="14.6" width="14" height="2.8" rx="1.4"/>
+          <rect x="13" y="21.8" width="9" height="2.8" rx="1.4" opacity=".5"/>
+          <path d="M5.5 12.2 L11 16 L5.5 19.8 Z"/>
+        </g>
+      </svg>
+    </div>
+    <h1>1行ずつみる<br>アルゴリズム</h1>
+    <p class="sub">共通テスト「情報I」の疑似言語（DNCL）。<br>カードで組み立てて、1行ずつ実行。</p>
+    <div class="foot">情報レンズ ／ SchoolLenz　<span class="badge">無料・広告なし・ログイン不要</span></div>
+  </div>
+  <div class="stack">
+    <div class="row">合計 = 0</div>
+    <div class="row">i を 1 から N まで…</div>
+    <div class="row i1 on">合計 = 合計 + i</div>
+    <div class="row">表示する(合計)</div>
+  </div>
+</div>
+
+<div class="card" id="card-hub">
+  <div class="left">
+    <div class="mark">
+      <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill="#ffffff">
+          <rect x="13" y="7.4" width="12" height="2.8" rx="1.4" opacity=".5"/>
+          <rect x="13" y="14.6" width="14" height="2.8" rx="1.4"/>
+          <rect x="13" y="21.8" width="9" height="2.8" rx="1.4" opacity=".5"/>
+          <path d="M5.5 12.2 L11 16 L5.5 19.8 Z"/>
+        </g>
+      </svg>
+    </div>
+    <h1>情報レンズ</h1>
+    <p class="sub">動くしくみを、見えるように。<br>共通テスト「情報I」の学習アプリ集。</p>
+    <div class="foot">SchoolLenz　<span class="badge">無料・広告なし・ログイン不要</span></div>
+  </div>
+  <div class="stack">
+    <div class="row on">1行ずつみるアルゴリズム</div>
+    <div class="row">情報デザイン（準備中）</div>
+    <div class="row">ネットワーク（準備中）</div>
+    <div class="row">データの活用（準備中）</div>
+  </div>
+</div>
+
+</body>
+</html>
