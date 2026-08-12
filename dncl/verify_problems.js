@@ -124,6 +124,48 @@ function runOrderValidation(targetList, modeName) {
   });
 }
 
+/**
+ * 変数モニターに出る名前の検証。
+ * 検出した変数が、初期値・代入先・ループ変数・関数の引数のどれでもないなら、
+ * それは文の一部を変数と読み違えている（「ループを抜ける」の「ループ」で実際に起きた）
+ */
+function runVariableValidation(targetList, modeName) {
+  console.log(`\n=== ${modeName} の変数検出の検証 ===`);
+  const NAME = "[a-zA-Z\\u30a0-\\u30ff\\u3040-\\u309f\\u4e00-\\u9faf_]";
+
+  targetList.forEach(item => {
+    const declared = new Set(Object.keys(item.initialState || {}));
+
+    item.correctBlocks.forEach(b => {
+      const t = b.text.trim();
+
+      const loop = t.match(new RegExp(`^(${NAME}+)\\s*を\\s.*から.*繰り返す:$`));
+      if (loop) declared.add(loop[1]);
+
+      const func = t.match(new RegExp(`^関数\\s*(${NAME}[${NAME}0-9]*)\\((.*?)\\)\\s*を定義する:$`));
+      if (func) {
+        declared.add(func[1]);
+        func[2].split(",").map(a => a.trim()).filter(Boolean).forEach(a => declared.add(a));
+      }
+
+      if (t.includes("=") && !/[=!<>]=|==/.test(t)) {
+        const left = t.split("=")[0].trim().replace(/\[.*$/, "").trim();
+        if (new RegExp(`^${NAME}+$`).test(left)) declared.add(left);
+      }
+    });
+
+    const detected = interpreter.detectVariables(item.correctBlocks);
+    const strays = detected.filter(name => !declared.has(name));
+    if (strays.length > 0) {
+      console.error(`❌ [${item.id}] 変数ではないものを変数として検出: ${strays.join(", ")}`);
+      failedTests++;
+    } else {
+      console.log(`   ✅ [${item.id}] ${detected.join(", ")}`);
+      passedTests++;
+    }
+  });
+}
+
 // 1. 問題演習の検証
 runValidation(problems, `問題演習 (${problems.length}問)`);
 
@@ -133,6 +175,10 @@ runValidation(syntaxLessons, `構文学習 (${syntaxLessons.length}ユニット)
 // 3. 並び順ルールの検証
 runOrderValidation(problems, `問題演習 (${problems.length}問)`);
 runOrderValidation(syntaxLessons, `構文学習 (${syntaxLessons.length}ユニット)`);
+
+// 4. 変数検出の検証
+runVariableValidation(problems, `問題演習 (${problems.length}問)`);
+runVariableValidation(syntaxLessons, `構文学習 (${syntaxLessons.length}ユニット)`);
 
 if (warnings.length > 0) {
   console.log("\n--- 参考: 出力が同じになるが不正解にしている並び（人が確認する）---");

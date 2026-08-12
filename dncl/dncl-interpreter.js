@@ -35,7 +35,9 @@ class DNCLInterpreter {
       }
 
       // ループ変数 (例: i を 1 から N まで...)
-      const loopMatch = text.match(/^([a-zA-Z\u30a0-\u30ff\u3040-\u309f\u4e00-\u9faf_]+)\s*を/);
+      // 「〜を」だけで拾うと「ループを抜ける」の「ループ」まで変数にしてしまい、
+      // 変数モニターに存在しない変数が「?」で並ぶ。繰り返しの見出しの形で判定する
+      const loopMatch = text.match(/^([a-zA-Z\u30a0-\u30ff\u3040-\u309f\u4e00-\u9faf_]+)\s*を\s.*から.*繰り返す:$/);
       if (loopMatch) {
         varSet.add(loopMatch[1]);
       }

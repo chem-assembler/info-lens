@@ -904,8 +904,9 @@ class DNCLApp {
       }
     });
 
-    // 変数モニターの更新
-    this.updateVariableMonitor(trace.variables);
+    // 変数モニターの更新（実行中の行を渡す。配列のどのマスを触っているかはそこから決まる）
+    const activeBlock = this.editorBlocks[activeBlockIndex];
+    this.updateVariableMonitor(trace.variables, activeBlock ? activeBlock.text : "");
 
     // コンソールの更新
     this.consoleOutput.innerHTML = "";
@@ -918,7 +919,101 @@ class DNCLApp {
     this.consoleOutput.scrollTop = this.consoleOutput.scrollHeight;
   }
 
-  updateVariableMonitor(variables) {
+  /**
+   * 文の中から「配列名[…]」の添字の式を取り出す。
+   * 入れ子（A[B[0]]）と2次元のカンマ（A[i, j]）に対応し、2次元は行の側（第1添字）を返す
+   */
+  indexExpressions(text, arrayName) {
+    const found = [];
+    const src = String(text || "");
+    const isNameChar = (ch) => /[a-zA-Z0-9゠-ヿ぀-ゟ一-龯_]/.test(ch);
+    let at = 0;
+
+    while ((at = src.indexOf(arrayName + "[", at)) !== -1) {
+      // 直前が名前の一部なら別の配列（例: BA[ ）なので飛ばす
+      if (at > 0 && isNameChar(src[at - 1])) {
+        at += arrayName.length;
+        continue;
+      }
+      const open = at + arrayName.length;
+      let depth = 0;
+      let close = -1;
+      let comma = -1;
+      for (let k = open; k < src.length; k++) {
+        const ch = src[k];
+        if (ch === "[") depth++;
+        else if (ch === "]") {
+          depth--;
+          if (depth === 0) { close = k; break; }
+        } else if (ch === "," && depth === 1) comma = k;
+      }
+      if (close === -1) break;
+      found.push(src.slice(open + 1, comma === -1 ? close : comma).trim());
+      at = close + 1;
+    }
+    return found;
+  }
+
+  /** 添字の式を、その時点の変数の値で計算する。計算できなければ null */
+  evalIndex(expr, variables) {
+    try {
+      const names = Object.keys(variables).filter(n => /^[^\d\W][\w゠-ヿ぀-ゟ一-龯]*$/.test(n));
+      const js = this.interpreter.translateExpression(expr);
+      const value = new Function(...names, `return (${js});`)(...names.map(n => variables[n]));
+      return Number.isInteger(value) ? value : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
+   * いま実行している行が、配列のどのマスを触っているかを求める。
+   * 「1行ずつみる」アプリなので、光らせる場所は変数 i の決め打ちではなく行から決める
+   * （bubble_sort の内側ループは j、binary_search は 中央 を見ている）
+   */
+  activeIndicesFor(arrayName, activeText, variables, length) {
+    const inRange = (n) => Number.isInteger(n) && n >= 0 && n < length;
+    const found = [];
+
+    this.indexExpressions(activeText, arrayName).forEach(expr => {
+      const n = this.evalIndex(expr, variables);
+      if (inRange(n) && !found.includes(n)) found.push(n);
+    });
+    if (found.length > 0) return found;
+
+    // 繰り返しの見出し行には添字が無いので、そのループ変数が指す先を出しておく
+    const loop = String(activeText || "").match(/^([a-zA-Z゠-ヿ぀-ゟ一-龯_]+)\s*を\s.*から.*繰り返す:$/);
+    if (loop) {
+      const n = this.evalIndex(loop[1], variables);
+      if (inRange(n)) return [n];
+    }
+    return [];
+  }
+
+  /**
+   * マスの下に出す目印。組み立てたプログラムで実際に添字として使われている変数だけを見る
+   * （値がたまたま範囲に入っただけの変数（合計など）を出さないため）
+   */
+  indexMarkersFor(arrayName, variables, length) {
+    const names = new Set();
+    this.editorBlocks.forEach(b => {
+      this.indexExpressions(b.text, arrayName).forEach(expr => {
+        (expr.match(/[a-zA-Z゠-ヿ぀-ゟ一-龯_][a-zA-Z0-9゠-ヿ぀-ゟ一-龯_]*/g) || [])
+          .forEach(n => names.add(n));
+      });
+    });
+
+    const markers = {};
+    names.forEach(name => {
+      const value = variables[name];
+      if (Number.isInteger(value) && value >= 0 && value < length) {
+        (markers[value] = markers[value] || []).push(name);
+      }
+    });
+    return markers;
+  }
+
+  updateVariableMonitor(variables, activeText = "") {
     const prevValues = {};
     this.varsGrid.querySelectorAll(".var-badge").forEach(badge => {
       const name = badge.dataset.varName;
@@ -936,8 +1031,13 @@ class DNCLApp {
 
       if (Array.isArray(val)) {
         hasArray = true;
-        // 配列ビジュアライザへレンダリング
-        this.renderArrayVisualizer(name, val, variables['i']); // i は現在のループカウンタと想定してハイライトに利用
+        // 配列ビジュアライザへレンダリング（光らせる場所は実行中の行から決める）
+        this.renderArrayVisualizer(
+          name,
+          val,
+          this.activeIndicesFor(name, activeText, variables, val.length),
+          this.indexMarkersFor(name, variables, val.length)
+        );
       } else if (name !== "arrayData" && typeof val !== "object") {
         // 通常の変数
         const badge = document.createElement("div");
@@ -966,11 +1066,11 @@ class DNCLApp {
     if (!hasArray && this.currentProblem.initialState.arrayData) {
       // 初期配列データを初期状態で表示
       const arrData = this.currentProblem.initialState.arrayData;
-      this.renderArrayVisualizer(arrData.name, arrData.values, -1);
+      this.renderArrayVisualizer(arrData.name, arrData.values, [], {});
     }
   }
 
-  renderArrayVisualizer(arrayName, arrayValues, activeIndex) {
+  renderArrayVisualizer(arrayName, arrayValues, activeIndices = [], markers = {}) {
     const container = document.createElement("div");
     container.className = "array-container";
 
@@ -983,10 +1083,13 @@ class DNCLApp {
     boxList.className = "array-box-list";
 
     arrayValues.forEach((val, idx) => {
+      const cell = document.createElement("div");
+      cell.className = "array-cell";
+
       const box = document.createElement("div");
       box.className = "array-box";
-      // 現在のループ変数 `i` がこのインデックスを指していればハイライト
-      if (idx === activeIndex) {
+      // いま実行している行が触っているマスを光らせる
+      if (activeIndices.includes(idx)) {
         box.classList.add("highlight");
       }
 
@@ -1000,7 +1103,15 @@ class DNCLApp {
 
       box.appendChild(valEl);
       box.appendChild(idxEl);
-      boxList.appendChild(box);
+      cell.appendChild(box);
+
+      // どの変数がこのマスを指しているかの目印（i と j が同時に見えるように）
+      const ptr = document.createElement("div");
+      ptr.className = "array-ptr";
+      ptr.textContent = (markers[idx] || []).join(" ");
+      cell.appendChild(ptr);
+
+      boxList.appendChild(cell);
     });
 
     container.appendChild(boxList);
