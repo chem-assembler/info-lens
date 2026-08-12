@@ -436,6 +436,10 @@ class DNCLInterpreter {
   translateError(errMsg) {
     if (!errMsg) return "プログラムの実行中に未知のエラーが発生しました。";
 
+    // 実行の打ち切り。これは「エラー」ではなく上限に達しただけなので、
+    // 「無限ループ」と決めつけず、そのまま出す（回数の多い処理でも起こりうる）
+    if (errMsg.includes("ステップで打ち切りました")) return errMsg;
+
     const errLower = errMsg.toLowerCase();
 
     // 1. ReferenceError (変数未定義)
@@ -488,7 +492,7 @@ class DNCLInterpreter {
         function _trace(blockIndex, vars) {
           _stepCount++;
           if (_stepCount > ${this.maxSteps}) {
-            throw new Error("無限ループが検出されたか、実行ステップ数が上限（${this.maxSteps}）を超えました。");
+            throw new Error("実行が長すぎたので、${this.maxSteps} ステップで打ち切りました。繰り返しが終わる条件（増やす向き・終わりの値・「ループを抜ける」の位置）を見直してください。");
           }
           // 配列やオブジェクトをクローンしてディープコピーを保存
           const clonedVars = {};
