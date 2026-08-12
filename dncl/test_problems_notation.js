@@ -29,6 +29,16 @@ const RULES = [
 ];
 
 const BLOCK_KEYS = ["correctBlocks", "easyBlocks", "normalBlocks", "hardBlocks"];
+
+/**
+ * 人が見て「このままでよい」と決めた箇所（2026-08-12 確認）。
+ * 旧表記を引用しているが、それ自体が説明の中身なので直すと文が成り立たない。
+ *   lesson_logic_ops … 「かつ」「または」を and / or に言い換える、という説明そのもの
+ * ここに足すときは、なぜ直さないのかを必ず書くこと（黙って消さない）
+ */
+const REVIEWED = new Set([
+  "[lesson:lesson_logic_ops] description（カードを「」で引用している箇所）",
+]);
 let ngCount = 0;
 let cardCount = 0;
 const warnings = [];
@@ -81,9 +91,16 @@ console.log("=== 問題カードの表記検査（共通テスト仕様）===\n"
 (problems || []).forEach(p => checkItem(p, "problem"));
 (syntaxLessons || []).forEach(l => checkItem(l, "lesson"));
 
-if (warnings.length) {
+const pending = [...new Set(warnings)].filter(w => !REVIEWED.has(w));
+const reviewed = [...new Set(warnings)].filter(w => REVIEWED.has(w));
+
+if (pending.length) {
   console.log("\n--- 警告: 解説文がカードを引用している可能性がある箇所（人が確認して直す）---");
-  [...new Set(warnings)].forEach(w => console.log(`WARN  ${w}`));
+  pending.forEach(w => console.log(`WARN  ${w}`));
+}
+if (reviewed.length) {
+  console.log("\n--- 確認ずみ（意図して旧表記を引用している）---");
+  reviewed.forEach(w => console.log(`OK    ${w}`));
 }
 
 /**
@@ -113,7 +130,7 @@ if (warnings.length) {
 
 console.log("\n==============================");
 console.log(`検査したカード: ${cardCount} 件 / 旧表記の残り: ${ngCount} 件`);
-console.log(`解説文の要確認: ${[...new Set(warnings)].length} 箇所（FAILには数えない）`);
+console.log(`解説文の要確認: ${pending.length} 箇所（FAILには数えない） / 確認ずみ: ${reviewed.length} 箇所`);
 console.log("==============================");
 if (ngCount > 0) {
   console.log("\nカードの表記が公式（新DNCL）に統一されていない。");

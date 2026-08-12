@@ -1171,7 +1171,7 @@ const syntaxLessons = [
   {
     id: "lesson_div_mod",
     title: "10. 整数除算 ÷ と剰余 %",
-    description: "17 を 5 で割ったときの「商の整数部分（÷）」と「余り（%）」をそれぞれ計算して表示するプログラムを完成させてください。",
+    description: "17 を 5 で割ったときの商（整数除算 ÷）と余り（%）を、それぞれ計算して表示するプログラムを完成させてください。",
     initialState: {
       商: undefined,
       余り: undefined
