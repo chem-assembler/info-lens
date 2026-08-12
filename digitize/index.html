@@ -25,6 +25,12 @@
       <h1>1標本ずつみるデジタル化</h1>
       <span>音のデジタル化 — 標本化・量子化・符号化</span>
     </div>
+    <!-- モード切り替え（dncl と同じ二部構成: 見て理解する / 計算して答える） -->
+    <nav class="mode-tabs" aria-label="学習モードの選択">
+      <button type="button" id="mode-lessons-btn" class="mode-tab active" title="しくみ編（見て理解する）に切り替えます">しくみ編</button>
+      <button type="button" id="mode-exercises-btn" class="mode-tab" title="演習編（データ量の計算問題）に切り替えます">演習編</button>
+    </nav>
+
     <div class="controls-section">
       <div class="select-wrapper">
         <select id="lesson-select" title="課題を選択してください"></select>
@@ -56,6 +62,21 @@
         </div>
 
         <div class="explanation" id="lesson-expl"></div>
+
+        <!-- 演習編: 条件と解答欄（条件リストは given から自動生成され、問題文と数値がずれない） -->
+        <div id="exercise-block" class="exercise-block">
+          <div class="given-label">条件</div>
+          <ul id="given-list" class="given-list"></ul>
+          <div class="answer-row">
+            <label for="answer-input" id="answer-label">答え</label>
+            <input type="text" id="answer-input" inputmode="numeric" autocomplete="off">
+            <span id="answer-unit" class="answer-unit"></span>
+          </div>
+          <div class="answer-actions">
+            <button type="button" id="grade-btn" class="primary">採点する</button>
+            <button type="button" id="hint-btn" title="計算の式を数値入りで表示します">式のヒント</button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -87,6 +108,13 @@
           <span class="lg lg-error">量子化誤差（ずれ）</span>
         </div>
         <div id="narration" class="narration" role="status"></div>
+
+        <!-- 演習編: 判定と式（波形の代わりにここが主役になる） -->
+        <div id="exercise-view" class="exercise-view">
+          <div id="grade-status" class="grade-status" role="status"></div>
+          <div id="formula-card" class="formula-card"></div>
+          <div id="exercise-expl" class="narration"></div>
+        </div>
       </div>
     </section>
 

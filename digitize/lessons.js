@@ -67,7 +67,72 @@ const lessons = [
   },
 ];
 
+/**
+ * 演習編の問題データ（データ量の計算。共通テスト型）。
+ *
+ * 各問のキー:
+ *   given … 条件。画面の「条件」欄は **この値から自動生成する**
+ *           （問題文と数値が食い違う事故を構造的に防ぐ）
+ *           sampleRate(Hz) / bitDepth / channels / seconds / dataBytes（逆算問題のみ）
+ *   ask   … 何を答えさせるか: "bits" | "bytes" | "sampleRate"
+ *   answer… 正解。verify_lessons.js が given から**再計算して照合する**ので、
+ *           手計算の書き間違いは機械が止める
+ */
+const exercises = [
+  {
+    id: "ex_basic_1sec",
+    title: "演1. 1秒分のデータ量（基本）",
+    scenario: "ある音声を、次の設定で1秒間デジタル録音する。データ量は何バイトになるか。",
+    given: { sampleRate: 8000, bitDepth: 8, channels: 1, seconds: 1 },
+    ask: "bytes",
+    answer: 8000,
+    explanation:
+      "1秒間の標本は 8000 個。1標本が 8 ビットなので 8000 × 8 × 1 × 1 = 64000 ビット。8 ビット = 1 バイトだから 64000 ÷ 8 = 8000 バイト。",
+  },
+  {
+    id: "ex_ten_seconds",
+    title: "演2. 10秒分のデータ量",
+    scenario: "次の設定で10秒間デジタル録音する。データ量は何バイトになるか。",
+    given: { sampleRate: 4000, bitDepth: 8, channels: 1, seconds: 10 },
+    ask: "bytes",
+    answer: 40000,
+    explanation:
+      "4000 × 8 × 1 × 10 = 320000 ビット。バイトに直すと 320000 ÷ 8 = 40000 バイト。時間を掛け忘れないこと。",
+  },
+  {
+    id: "ex_bits",
+    title: "演3. ビットで答える",
+    scenario: "次の設定で1秒間デジタル録音する。データ量は何ビットになるか。",
+    given: { sampleRate: 44100, bitDepth: 16, channels: 1, seconds: 1 },
+    ask: "bits",
+    answer: 705600,
+    explanation:
+      "44100 × 16 × 1 × 1 = 705600 ビット。問われている単位がビットかバイトかを、答える前に必ず確かめること。",
+  },
+  {
+    id: "ex_cd",
+    title: "演4. 音楽CDの1秒",
+    scenario: "音楽CDは次の設定である。1秒あたりのデータ量は何バイトになるか。",
+    given: { sampleRate: 44100, bitDepth: 16, channels: 2, seconds: 1 },
+    ask: "bytes",
+    answer: 176400,
+    explanation:
+      "44100 × 16 × 2 × 1 = 1411200 ビット、÷8 で 176400 バイト。ステレオはチャンネル数 2 を掛けるのを忘れやすい。",
+  },
+  {
+    id: "ex_reverse",
+    title: "演5. 標本化周波数を逆算",
+    scenario:
+      "8ビット・モノラルで3秒間録音したところ、データ量は 24000 バイトだった。標本化周波数は何 Hz だったか。",
+    given: { bitDepth: 8, channels: 1, seconds: 3, dataBytes: 24000 },
+    ask: "sampleRate",
+    answer: 8000,
+    explanation:
+      "24000 バイト × 8 = 192000 ビット。これを 8 ビット × 1 チャンネル × 3 秒 = 24 で割ると 8000。1秒間に 8000 回読み取っていた（8000 Hz）。",
+  },
+];
+
 // ブラウザ環境とNode環境の両方に対応
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = { lessons };
+  module.exports = { lessons, exercises };
 }

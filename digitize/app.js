@@ -16,8 +16,24 @@ class DigitizeApp {
     this.playbackSpeed = 500;
     this.DURATION_MS = 8; // 画面に見せる波の長さ。標本数→周波数の換算にも使う
 
+    // モード（しくみ編 / 演習編）
+    this.mode = "lessons";
+    this.exercise = null;
+    this.hintShown = false;
+
     // DOM
     this.lessonSelect = document.getElementById("lesson-select");
+    this.modeLessonsBtn = document.getElementById("mode-lessons-btn");
+    this.modeExercisesBtn = document.getElementById("mode-exercises-btn");
+    this.givenList = document.getElementById("given-list");
+    this.answerInput = document.getElementById("answer-input");
+    this.answerLabel = document.getElementById("answer-label");
+    this.answerUnit = document.getElementById("answer-unit");
+    this.gradeBtn = document.getElementById("grade-btn");
+    this.hintBtn = document.getElementById("hint-btn");
+    this.gradeStatus = document.getElementById("grade-status");
+    this.formulaCard = document.getElementById("formula-card");
+    this.exerciseExpl = document.getElementById("exercise-expl");
     this.lessonTitle = document.getElementById("lesson-title");
     this.lessonDesc = document.getElementById("lesson-desc");
     this.lessonExpl = document.getElementById("lesson-expl");
@@ -44,7 +60,19 @@ class DigitizeApp {
   }
 
   initEvents() {
-    this.lessonSelect.addEventListener("change", e => this.loadLesson(e.target.value));
+    this.lessonSelect.addEventListener("change", e => {
+      if (this.mode === "lessons") this.loadLesson(e.target.value);
+      else this.loadExercise(e.target.value);
+    });
+
+    this.modeLessonsBtn.addEventListener("click", () => this.switchMode("lessons"));
+    this.modeExercisesBtn.addEventListener("click", () => this.switchMode("exercises"));
+
+    this.gradeBtn.addEventListener("click", () => this.grade());
+    this.hintBtn.addEventListener("click", () => this.showHint());
+    this.answerInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") this.grade();
+    });
 
     this.rateRange.addEventListener("input", () => {
       this.sampleCount = parseInt(this.rateRange.value, 10);
@@ -71,13 +99,140 @@ class DigitizeApp {
 
   loadLessonList() {
     this.lessonSelect.innerHTML = "";
-    lessons.forEach(l => {
+    const list = this.mode === "lessons" ? lessons : exercises;
+    list.forEach(l => {
       const opt = document.createElement("option");
       opt.value = l.id;
       opt.textContent = l.title;
       this.lessonSelect.appendChild(opt);
     });
-    this.loadLesson(lessons[0].id);
+    if (this.mode === "lessons") this.loadLesson(list[0].id);
+    else this.loadExercise(list[0].id);
+  }
+
+  switchMode(mode) {
+    if (this.mode === mode) return;
+    this.mode = mode;
+    this.pause();
+    this.modeLessonsBtn.classList.toggle("active", mode === "lessons");
+    this.modeExercisesBtn.classList.toggle("active", mode === "exercises");
+    document.body.classList.toggle("mode-exercises", mode === "exercises");
+    this.loadLessonList();
+  }
+
+  // ---------- 演習編 ----------
+
+  loadExercise(id) {
+    const ex = exercises.find(e => e.id === id);
+    if (!ex) return;
+    this.exercise = ex;
+    this.hintShown = false;
+
+    this.lessonTitle.textContent = ex.title;
+    this.lessonDesc.textContent = ex.scenario;
+
+    // 条件は given から自動生成する（問題文と数値の食い違いを構造的に防ぐ）
+    this.givenList.innerHTML = "";
+    const g = ex.given;
+    const rows = [];
+    if ("sampleRate" in g) rows.push(`標本化周波数: ${g.sampleRate.toLocaleString()} Hz（1秒間に ${g.sampleRate.toLocaleString()} 回）`);
+    if ("bitDepth" in g) rows.push(`量子化ビット数: ${g.bitDepth} ビット`);
+    if ("channels" in g) rows.push(`チャンネル数: ${g.channels}（${g.channels === 1 ? "モノラル" : "ステレオ"}）`);
+    if ("seconds" in g) rows.push(`録音時間: ${g.seconds} 秒`);
+    if ("dataBytes" in g) rows.push(`データ量: ${g.dataBytes.toLocaleString()} バイト`);
+    rows.forEach(text => {
+      const li = document.createElement("li");
+      li.textContent = text;
+      this.givenList.appendChild(li);
+    });
+
+    const unit = { bits: "ビット", bytes: "バイト", sampleRate: "Hz" }[ex.ask];
+    this.answerLabel.textContent = "答え";
+    this.answerUnit.textContent = unit;
+    this.answerInput.value = "";
+    this.answerInput.setAttribute("aria-label", `答え（${unit}）`);
+
+    this.gradeStatus.textContent = "";
+    this.gradeStatus.className = "grade-status";
+    this.formulaCard.textContent = "";
+    this.formulaCard.classList.remove("show");
+    this.exerciseExpl.textContent = "";
+    this.exerciseExpl.style.display = "none";
+    this.answerInput.focus();
+  }
+
+  /** 全角数字・カンマを受け付けて数値にする。数値でなければ NaN */
+  normalizeNumber(str) {
+    const s = String(str || "").trim()
+      .replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
+      .replace(/[，,]/g, "");
+    if (!/^\d+$/.test(s)) return NaN;
+    return Number(s);
+  }
+
+  grade() {
+    const ex = this.exercise;
+    if (!ex) return;
+    const value = this.normalizeNumber(this.answerInput.value);
+
+    if (Number.isNaN(value)) {
+      this.setGrade("warn", "数値で入力してください（全角やカンマ入りでもかまいません）。");
+      return;
+    }
+    if (value === ex.answer) {
+      this.setGrade("ok", `正解！ ${ex.answer.toLocaleString()} ${this.answerUnit.textContent} です。`);
+      this.exerciseExpl.textContent = ex.explanation;
+      this.exerciseExpl.style.display = "block";
+      this.showHint(); // 正解後は式も見せて締める
+      return;
+    }
+    // 惜しい間違い（単位の取り違え）は名指しで返す。8倍・1/8倍はほぼ確実にそれ
+    if (ex.ask === "bytes" && value === ex.answer * 8) {
+      this.setGrade("ng", "それはビットの値です。8 ビット = 1 バイトなので、8 で割ってバイトに直しましょう。");
+      return;
+    }
+    if (ex.ask === "bits" && value * 8 === ex.answer) {
+      this.setGrade("ng", "それはバイトに直した値です。この問題はビットのまま答えます（バイト × 8 = ビット）。");
+      return;
+    }
+    this.setGrade("ng", "答えが違います。条件の数値をすべて使ったか（時間・チャンネル数の掛け忘れ）、単位を確かめてください。");
+  }
+
+  setGrade(kind, text) {
+    this.gradeStatus.textContent = text;
+    this.gradeStatus.className = "grade-status " + kind;
+  }
+
+  /** 式を数値入りで見せる。答えの数値そのものは、正解前は伏せる */
+  showHint() {
+    const ex = this.exercise;
+    const g = ex.given;
+    const solved = this.gradeStatus.classList.contains("ok");
+    const n = v => v.toLocaleString();
+    let lines;
+    if (ex.ask === "sampleRate") {
+      const denom = `${g.bitDepth} ビット × ${g.channels} チャンネル × ${g.seconds} 秒`;
+      lines = [
+        `データ量 ${n(g.dataBytes)} バイト × 8 = ${n(g.dataBytes * 8)} ビット`,
+        `${n(g.dataBytes * 8)} ÷ （${denom}） = 標本化周波数 ${solved ? n(ex.answer) + " Hz" : "？ Hz"}`,
+      ];
+    } else {
+      const bits = g.sampleRate * g.bitDepth * g.channels * g.seconds;
+      lines = [
+        `${n(g.sampleRate)} 回/秒 × ${g.bitDepth} ビット × ${g.channels} チャンネル × ${g.seconds} 秒 = ${solved || ex.ask === "bytes" ? n(bits) + " ビット" : "？ ビット"}`,
+      ];
+      if (ex.ask === "bytes") {
+        lines.push(`${n(bits)} ビット ÷ 8 = ${solved ? n(ex.answer) + " バイト" : "？ バイト"}`);
+      }
+    }
+    this.formulaCard.innerHTML = "";
+    lines.forEach(text => {
+      const div = document.createElement("div");
+      div.textContent = text;
+      this.formulaCard.appendChild(div);
+    });
+    this.formulaCard.classList.add("show");
+    this.hintShown = true;
   }
 
   loadLesson(id) {

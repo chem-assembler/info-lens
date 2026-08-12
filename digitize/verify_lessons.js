@@ -13,7 +13,7 @@
  */
 
 const Digitize = require("./digitize.js");
-const { lessons } = require("./lessons.js");
+const { lessons, exercises } = require("./lessons.js");
 
 let passed = 0;
 let failed = 0;
@@ -99,6 +99,61 @@ lessons.forEach(lesson => {
 
   console.log(`   ✅ [${lesson.id}] ${combos} 通りの設定で検査`);
   passed++;
+});
+
+// ---------- 演習編 ----------
+// answer を given から再計算して照合する（手計算の書き間違いを機械で止める。設計書 5 節）
+
+console.log("");
+exercises.forEach(ex => {
+  const g = ex.given || {};
+  const errors = [];
+
+  if (!ex.id || !ex.title || !ex.scenario || !ex.explanation) {
+    errors.push("id / title / scenario / explanation のどれかが欠けている");
+  }
+
+  let expected = null;
+  if (ex.ask === "bits" || ex.ask === "bytes") {
+    ["sampleRate", "bitDepth", "channels", "seconds"].forEach(k => {
+      if (!(k in g)) errors.push(`given.${k} が無い（ask=${ex.ask} には必須）`);
+    });
+    if (errors.length === 0) {
+      const bits = g.sampleRate * g.bitDepth * g.channels * g.seconds;
+      if (ex.ask === "bytes" && bits % 8 !== 0) {
+        errors.push(`ビット数 ${bits} が 8 で割り切れない（バイトで答えさせる問題として不適）`);
+      } else {
+        expected = ex.ask === "bits" ? bits : bits / 8;
+      }
+    }
+  } else if (ex.ask === "sampleRate") {
+    ["bitDepth", "channels", "seconds", "dataBytes"].forEach(k => {
+      if (!(k in g)) errors.push(`given.${k} が無い（ask=sampleRate には必須）`);
+    });
+    if ("sampleRate" in g) errors.push("逆算問題の given に sampleRate が入っている（答えが条件欄に出てしまう）");
+    if (errors.length === 0) {
+      const denom = g.bitDepth * g.channels * g.seconds;
+      const value = (g.dataBytes * 8) / denom;
+      if (!Number.isInteger(value)) {
+        errors.push(`逆算結果 ${value} が整数にならない（条件の数値が不適）`);
+      } else {
+        expected = value;
+      }
+    }
+  } else {
+    errors.push(`未知の ask: ${ex.ask}`);
+  }
+
+  if (errors.length === 0 && expected !== ex.answer) {
+    errors.push(`answer ${ex.answer} が再計算 ${expected} と一致しない`);
+  }
+
+  if (errors.length > 0) {
+    errors.forEach(e => fail(ex.id, e));
+  } else {
+    console.log(`   ✅ [${ex.id}] 再計算 ${expected} = answer`);
+    passed++;
+  }
 });
 
 console.log("\n==============================");
