@@ -209,6 +209,9 @@ main {
 /* 問題の枠：中身の高さに合わせ、長い問題文だけ枠内でスクロールさせる */
 #problem-pane .pane-content {
   padding: 0.9rem 1.1rem;
+  /* flex:1（.pane-content の既定）のままだと上限いっぱいまで伸び、
+     短い問題文でも枠の下半分が空く。中身の高さにして、上限だけ効かせる */
+  flex: 0 1 auto;
   max-height: 30vh;
 }
 #problem-pane .problem-card { margin-bottom: 0.75rem; }
@@ -953,12 +956,25 @@ footer {
 @media (max-width: 1200px) {
   main {
     grid-template-columns: 1fr;
+    grid-template-rows: none;
     height: auto;
     overflow-y: visible;
   }
   .pane {
     height: 500px;
   }
+
+  /* 1カラムに落ちるので、3カラム用の配置指定は解く（残すと空の列ができる） */
+  #problem-pane, #left-pane, #editor-pane, #output-pane {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  /* 問題の枠は中身ぶんでよい（.pane の 500px は縦に間延びする） */
+  #problem-pane {
+    height: auto;
+  }
+  #problem-pane .pane-content { max-height: none; }
 }
 
 /* 学習モード選択タブ */
