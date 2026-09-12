@@ -697,6 +697,16 @@ textarea:focus-visible,
   height: 200px;
 }
 
+/* 「組み立てたプログラム」への前置き。
+   変数モニター・出力と等間隔に並べると3つが同じ重さに見えるので、
+   ここだけ上をひと呼吸ぶん空け、説明は下の枠へ寄せる（＝ここから別の話） */
+.preview-note {
+  margin: 0.75rem 0.2rem -0.5rem;
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
 /* 3カラムのときだけ、変数モニターを詰めて余った高さをここへ渡す。
    下端に空きを残すと3つの節が宙に浮いて見えるので、いちばん長くなる
    「組み立てたプログラム」に伸びてもらう（小画面は1カラムなので触らない） */
@@ -975,6 +985,12 @@ footer {
     height: auto;
   }
   #problem-pane .pane-content { max-height: none; }
+
+  /* 出力の列も中身ぶんに。500px に押し込むと、変数・出力・組み立てたプログラムが
+     互いを削り合う（992px 以下では既に height:auto にしてある） */
+  #output-pane {
+    height: auto;
+  }
 }
 
 /* 学習モード選択タブ */
@@ -1577,8 +1593,10 @@ footer a:hover {
   body.stepping.sheet-collapsed #output-pane > *:not(.sheet-bar) { display: none; }
   body.stepping.sheet-collapsed .sheet-toggle i { transform: rotate(180deg); }
 
-  /* 実行中は「組み立てたプログラム」を隠す：同じ内容が上のカード列に見えている */
-  body.stepping .preview-section { display: none; }
+  /* 実行中は「組み立てたプログラム」を隠す：同じ内容が上のカード列に見えている
+     （前置きの1文も一緒に隠す。枠が無いのに説明だけ残ると宙に浮く） */
+  body.stepping .preview-section,
+  body.stepping .preview-note { display: none; }
 
   /* シートに隠れる分の余白。実行中の行がシートの下に潜らないようにもする */
   body.stepping { padding-bottom: 48vh; }
@@ -1804,6 +1822,7 @@ footer a:hover {
 .recording #reset-btn,
 .recording #explanation-section,
 .recording .preview-section,
+.recording .preview-note,
 /* 問題選択は以前ヘッダーの中にあり、収録では header ごと消えていた。
    「問題」の枠へ移したので、収録の見た目を変えないようここでも消す */
 .recording #problem-pane .select-wrapper { display: none !important; }
@@ -1815,6 +1834,7 @@ footer a:hover {
 /* Python 対照そのものを見せる台本（demos.json の showPreview）だけ、ペインを出す。
    実行中に隠す規則（body.stepping）より強くする必要があるので !important */
 .recording.rec-show-preview .preview-section { display: flex !important; }
+.recording.rec-show-preview .preview-note { display: block !important; }
 
 /* この台本では見せたいコードが画面の一番下にあるので、字幕は上へ逃がす
    （下に置くと Python の最後の数行を隠してしまう） */
