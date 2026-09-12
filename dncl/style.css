@@ -171,6 +171,8 @@ main {
   flex: 1;
   display: grid;
   grid-template-columns: 280px 1fr 380px;
+  /* 上段＝問題の枠、下段＝組み立て。左右の列は2段ぶんをまたぐ */
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 1.5rem;
   padding: 1.5rem;
   max-width: 1800px;
@@ -179,6 +181,22 @@ main {
   height: calc(100vh - 75px);
   min-height: 500px;
 }
+
+/* DOM の順序は「問題 → カード → 組み立て → 出力」（小画面で1カラムに積んだとき、
+   読む順になる）。3カラムの配置だけを明示して、問題を中央列の上段に置く */
+#problem-pane { grid-column: 2; grid-row: 1; }
+#left-pane    { grid-column: 1; grid-row: 1 / span 2; }
+#editor-pane  { grid-column: 2; grid-row: 2; }
+#output-pane  { grid-column: 3; grid-row: 1 / span 2; }
+
+/* 問題の枠：中身の高さに合わせ、長い問題文だけ枠内でスクロールさせる */
+#problem-pane .pane-content {
+  padding: 0.9rem 1.1rem;
+  max-height: 30vh;
+}
+#problem-pane .problem-card { margin-bottom: 0.75rem; }
+/* 中央列は広いので、難易度タブまで横いっぱいに伸ばすと押し場所が散る */
+#problem-pane .difficulty-tabs { margin-bottom: 0; max-width: 360px; }
 
 /* ペイン共通 */
 .pane {
@@ -950,11 +968,21 @@ footer {
   /* メインレイアウトを1カラムにして全画面表示 */
   main {
     grid-template-columns: 1fr !important;
+    grid-template-rows: none !important;
     height: auto;
     overflow-y: visible;
     padding: 0.75rem;
     gap: 1rem;
   }
+
+  /* 1カラムに積むときは DOM の順（問題 → カード → 組み立て → 出力）に戻す */
+  #problem-pane, #left-pane, #editor-pane, #output-pane {
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+
+  /* 縦に積むと枠内スクロールは邪魔になる（ページごとスクロールすればよい） */
+  #problem-pane .pane-content { max-height: none; }
 
   .pane {
     height: auto;
@@ -1044,6 +1072,12 @@ footer {
     grid-template-columns: 1fr 1.2fr !important;
     align-items: stretch;
   }
+
+  /* 横持ちは「問題」を上に1本通し、その下にトレイと組み立てを左右へ並べる */
+  #problem-pane {
+    grid-column: span 2 !important;
+  }
+  #problem-pane .pane-content { max-height: 26vh; overflow-y: auto; }
 
   #left-pane {
     height: auto;

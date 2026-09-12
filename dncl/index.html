@@ -21,7 +21,9 @@
   <!-- ファビコンはインラインSVG（外部アセットゼロを守るため、ファイルを増やさない） -->
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%236f6cf0'/%3E%3Cg fill='%23ffffff'%3E%3Crect x='13' y='7.4' width='12' height='2.8' rx='1.4' opacity='.5'/%3E%3Crect x='13' y='14.6' width='14' height='2.8' rx='1.4'/%3E%3Crect x='13' y='21.8' width='9' height='2.8' rx='1.4' opacity='.5'/%3E%3Cpath d='M5.5 12.2 L11 16 L5.5 19.8 Z'/%3E%3C/g%3E%3C/svg%3E">
   <link rel="stylesheet" href="icons.css">
-  <link rel="stylesheet" href="style.css">
+  <!-- ?v= が無いと GitHub Pages のキャッシュ（css/js は4時間）で古い実体が配られる。
+       中身を変えたらこの N を上げること -->
+  <link rel="stylesheet" href="style.css?v=2">
   <!-- ドラッグ＆ドロップ（自前実装・外部CDNなし） -->
   <script src="sortable-lite.js"></script>
 </head>
@@ -64,11 +66,12 @@
 
   <!-- メインコンテンツ -->
   <main>
-    
-    <!-- 左ペイン：問題とカードトレイ -->
-    <section class="pane" id="left-pane" aria-labelledby="left-pane-title">
+
+    <!-- 問題ペイン：中央列の上段（組み立ての真上）。
+         問題文・難易度は「これから組み立てるもの」なので、組み立てエリアの隣に置く -->
+    <section class="pane" id="problem-pane" aria-labelledby="problem-pane-title">
       <div class="pane-header">
-        <h2 id="left-pane-title"><i class="fas fa-book-open"></i> 問題とカード</h2>
+        <h2 id="problem-pane-title"><i class="fas fa-book-open"></i> 問題</h2>
       </div>
       <div class="pane-content">
         <!-- 問題カード -->
@@ -86,7 +89,15 @@
           <button type="button" class="diff-tab" data-difficulty="normal" id="tab-normal">ノーマル</button>
           <button type="button" class="diff-tab" data-difficulty="hard" id="tab-hard">ハード</button>
         </nav>
+      </div>
+    </section>
 
+    <!-- 左ペイン：カードトレイ -->
+    <section class="pane" id="left-pane" aria-labelledby="left-pane-title">
+      <div class="pane-header">
+        <h2 id="left-pane-title"><i class="fas fa-box"></i> 使うカード</h2>
+      </div>
+      <div class="pane-content">
         <!-- 初心者向け基本解説アコーディオン -->
         <div class="guide-accordion" style="margin: 0.5rem 1rem 0.5rem 1rem;">
           <button type="button" class="guide-header" id="guide-toggle" aria-expanded="false" aria-controls="guide-body" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; width: 100%;">
