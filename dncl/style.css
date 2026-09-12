@@ -516,9 +516,13 @@ textarea:focus-visible,
   overflow-y: auto;
 }
 
-/* 変数モニター */
+/* 変数モニター
+   flex:1 で余白をすべて吸わせていたため、変数が1つでも右ペインの上半分を占め、
+   すぐ下にあるはずの「出力（コンソール）」が遠くへ押し下げられていた。
+   中身の高さに合わせ、変数が増えたぶんだけ（上限まで）伸びるようにする */
 .var-monitor-section {
-  flex: 1;
+  flex: 0 0 auto;
+  max-height: 45%;
 }
 
 .vars-grid {
@@ -690,6 +694,9 @@ textarea:focus-visible,
   height: 200px;
 }
 
+/* 3カラムのときだけ、変数モニターを詰めて余った高さをここへ渡す。
+   下端に空きを残すと3つの節が宙に浮いて見えるので、いちばん長くなる
+   「組み立てたプログラム」に伸びてもらう（小画面は1カラムなので触らない） */
 .preview-code {
   font-family: var(--font-mono);
   font-size: 0.8rem;
@@ -701,6 +708,25 @@ textarea:focus-visible,
   height: 160px;
   overflow-y: auto;
   white-space: pre-wrap;
+}
+
+@media (min-width: 993px) {
+  .preview-section {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 180px;
+  }
+  .preview-section .sec-content {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .preview-code {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+  }
 }
 
 /* 表示の切り替えタブ */
