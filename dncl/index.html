@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="icons.css">
   <!-- ?v= が無いと GitHub Pages のキャッシュ（css/js は4時間）で古い実体が配られる。
        中身を変えたらこの N を上げること -->
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
   <!-- ドラッグ＆ドロップ（自前実装・外部CDNなし） -->
   <script src="sortable-lite.js"></script>
 </head>
@@ -50,13 +50,8 @@
     </nav>
     
     <div class="controls-section">
-      <!-- 問題選択ドロップダウン -->
-      <div class="select-wrapper">
-        <select id="problem-select" title="問題を選択してください">
-          <!-- JSで動的生成 -->
-        </select>
-      </div>
-      
+      <!-- 問題選択は「問題」の枠の中（#problem-pane のヘッダー）にある。
+           ここに置くと AI 相談ボタンのほうが問題文より近くなり、何を選ぶ操作なのか読めなかった -->
       <!-- AI質問ファイル生成ボタン -->
       <button id="ai-prompt-btn" class="secondary" title="外部の生成AI（ChatGPT/Gemini等）への質問文を生成します">
         <i class="fas fa-robot"></i> AIに相談する
@@ -72,6 +67,12 @@
     <section class="pane" id="problem-pane" aria-labelledby="problem-pane-title">
       <div class="pane-header">
         <h2 id="problem-pane-title"><i class="fas fa-book-open"></i> 問題</h2>
+        <!-- 問題選択ドロップダウン。選んだ結果（問題文）のすぐ横に置く -->
+        <div class="select-wrapper">
+          <select id="problem-select" title="問題を選択してください">
+            <!-- JSで動的生成 -->
+          </select>
+        </div>
       </div>
       <div class="pane-content">
         <!-- 問題カード -->

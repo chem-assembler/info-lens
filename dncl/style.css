@@ -189,6 +189,23 @@ main {
 #editor-pane  { grid-column: 2; grid-row: 2; }
 #output-pane  { grid-column: 3; grid-row: 1 / span 2; }
 
+/* 問題選択は「問題」の枠のヘッダーに置く。選ぶ操作と、選ばれた問題文を隣り合わせる
+   （ヘッダーに置くと AI 相談ボタンのほうが近く、何のための選択なのか読めなかった） */
+#problem-pane .pane-header {
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+#problem-pane .select-wrapper {
+  flex: 1 1 220px;
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+#problem-pane #problem-select {
+  width: 100%;
+  max-width: 420px;
+}
+
 /* 問題の枠：中身の高さに合わせ、長い問題文だけ枠内でスクロールさせる */
 #problem-pane .pane-content {
   padding: 0.9rem 1.1rem;
@@ -1546,6 +1563,7 @@ footer a:hover {
      ------------------------------------------------------------------ */
   header button,
   header select,
+  #problem-select,
   .mode-tab,
   .diff-tab,
   .editor-actions button,
@@ -1743,7 +1761,10 @@ footer a:hover {
 .recording #show-answer-btn,
 .recording #reset-btn,
 .recording #explanation-section,
-.recording .preview-section { display: none !important; }
+.recording .preview-section,
+/* 問題選択は以前ヘッダーの中にあり、収録では header ごと消えていた。
+   「問題」の枠へ移したので、収録の見た目を変えないようここでも消す */
+.recording #problem-pane .select-wrapper { display: none !important; }
 /* 解説は短尺では誰も読まないうえ、正解した瞬間に現れて字幕の下敷きになる */
 /* 「組み立てたプログラム」は上のカード列と同じ内容。画面を食ううえ字幕の下敷きになる */
 
