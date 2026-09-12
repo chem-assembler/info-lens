@@ -20,12 +20,12 @@
   <meta name="theme-color" content="#0b0d16">
   <!-- ファビコンはインラインSVG（外部アセットゼロを守るため、ファイルを増やさない） -->
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%236f6cf0'/%3E%3Cg fill='%23ffffff'%3E%3Crect x='13' y='7.4' width='12' height='2.8' rx='1.4' opacity='.5'/%3E%3Crect x='13' y='14.6' width='14' height='2.8' rx='1.4'/%3E%3Crect x='13' y='21.8' width='9' height='2.8' rx='1.4' opacity='.5'/%3E%3Cpath d='M5.5 12.2 L11 16 L5.5 19.8 Z'/%3E%3C/g%3E%3C/svg%3E">
-  <link rel="stylesheet" href="icons.css">
   <!-- ?v= が無いと GitHub Pages のキャッシュ（css/js は4時間）で古い実体が配られる。
-       中身を変えたらこの N を上げること -->
+       中身を変えたらその N を上げること。素の参照（?v= 無し）を残さない -->
+  <link rel="stylesheet" href="icons.css?v=1">
   <link rel="stylesheet" href="style.css?v=6">
   <!-- ドラッグ＆ドロップ（自前実装・外部CDNなし） -->
-  <script src="sortable-lite.js"></script>
+  <script src="sortable-lite.js?v=1"></script>
 </head>
 <body>
 
@@ -301,17 +301,19 @@
     <p>1行ずつみるアルゴリズム（DNCL） — <a href="../">情報レンズ</a> / <a href="https://schoollenz.com/">SchoolLenz</a> &copy; 2026</p>
   </footer>
 
-  <!-- スクリプトの読み込み -->
-  <script src="problems.js"></script>
-  <!-- 並び順の判定規則（app.js の checkSolution と verify_problems.js が共有する）。
-       ?v=1 は付け足しではなく必要: 公開前に一度でも 404 を引かせると、GitHub Pages の CDN が
-       その 404 を max-age=14400（4時間）で持ち続ける。新しい URL にすればそれを避けられる -->
+  <!-- スクリプトの読み込み。
+       ?v= は付け足しではなく必要: 公開前に一度でも 404 を引かせると、GitHub Pages の CDN が
+       その 404 を max-age=14400（4時間）で持ち続ける。新しい URL にすればそれを避けられる。
+       据え置いたまま中身を直すと、今度は古い実体が4時間配られる。番号はファイル単位でよい -->
+  <script src="problems.js?v=1"></script>
+  <!-- 並び順の判定規則（app.js の checkSolution と verify_problems.js が共有する） -->
   <script src="order-rules.js?v=1"></script>
-  <script src="dncl-interpreter.js"></script>
+  <script src="dncl-interpreter.js?v=1"></script>
   <!-- dncl-interpreter.js より後に読む（2次元添字の解釈を共有するため） -->
-  <script src="dncl-to-python.js"></script>
-  <script src="app.js"></script>
-  <!-- 録画モード（?rec= があるときだけ動く。無ければ完全に不活性） -->
-  <script src="rec.js"></script>
+  <script src="dncl-to-python.js?v=1"></script>
+  <script src="app.js?v=1"></script>
+  <!-- 録画モード（?rec= があるときだけ動く。無ければ完全に不活性）。
+       demos.json は rec.js が ?rec= のときだけ fetch する（cache:'no-cache' 指定） -->
+  <script src="rec.js?v=1"></script>
 </body>
 </html>
