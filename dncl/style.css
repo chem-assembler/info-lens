@@ -366,6 +366,15 @@ main {
   border-color: var(--accent-purple);
 }
 
+/* 穴埋め欄の案内文字。ブラウザ既定の灰色は欄の地に対して 3.84:1 で薄すぎた。
+   いちばん明るい欄の地（実行中の「いまの行」の紫）でも 4.86:1 を保ちつつ、
+   入力した文字（黄 #f59e0b）より明度で 1.44 倍暗くして「案内」と分かる薄さを残す。
+   色み（灰と黄）でも見分けられる。Firefox は既定で半透明にするので opacity も明示する */
+.block-card input::placeholder {
+  color: #8b93a1;
+  opacity: 1;
+}
+
 .block-card.dummy-card {
   border-left: 1px solid var(--border-color);
 }
@@ -873,13 +882,29 @@ textarea:focus-visible,
   justify-content: center;
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--transition-normal);
+  /* 閉じているときは visibility:hidden にして、中のボタンに Tab が止まらないようにする
+     （opacity だけだと透明のまま Tab で入れてしまい、読み上げにも出ていた）。
+     visibility は閉じるフェードが終わってから切り替える（0s を遅らせる）。
+     開くときは遅延なしで先に見える状態にするので、開いた直後の focus() も効く */
+  visibility: hidden;
+  transition: opacity var(--transition-normal), visibility 0s linear var(--transition-normal);
   z-index: 100;
 }
 
 .modal-overlay.open {
   opacity: 1;
   pointer-events: auto;
+  visibility: visible;
+  transition: opacity var(--transition-normal), visibility 0s;
+}
+
+/* モーダルの中のボタンは、汎用の `select, button { transition: all }` のせいで
+   親から受け継いだ visibility まで 0.15 秒かけて遷移させてしまう。その間は「まだ隠れている」
+   扱いになり、開いた直後の focus() が効かずフォーカスが外に残っていた（2026-09-14 実測）。
+   遷移させる性質を明示して visibility を外す（ホバーの色の変化などはそのまま残る） */
+.modal-overlay button,
+.modal-overlay select {
+  transition-property: background-color, border-color, color, box-shadow, transform, opacity;
 }
 
 .modal {

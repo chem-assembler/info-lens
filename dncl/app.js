@@ -1747,11 +1747,14 @@ ${consoleText}
   showModal(modal, focusTarget) {
     this.lastFocused = document.activeElement;
     modal.classList.add("open");
+    // 閉じている間は読み上げからも隠す（visibility:hidden と同じ状態を属性でも明示する）
+    modal.removeAttribute("aria-hidden");
     if (focusTarget) focusTarget.focus();
   }
 
   hideModal(modal) {
     modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
     if (this.lastFocused && document.contains(this.lastFocused)) this.lastFocused.focus();
     this.lastFocused = null;
   }

@@ -23,7 +23,7 @@
   <!-- ?v= が無いと GitHub Pages のキャッシュ（css/js は4時間）で古い実体が配られる。
        中身を変えたらその N を上げること。素の参照（?v= 無し）を残さない -->
   <link rel="stylesheet" href="icons.css?v=1">
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=8">
   <!-- ドラッグ＆ドロップ（自前実装・外部CDNなし） -->
   <script src="sortable-lite.js?v=1"></script>
 </head>
@@ -259,7 +259,7 @@
   </section>
 
   <!-- AIプロンプト生成モーダル -->
-  <div id="ai-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div id="ai-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
     <div class="modal">
       <div class="modal-header">
         <h3 id="modal-title"><i class="fas fa-robot"></i> 生成AI用質問プロンプト</h3>
@@ -280,7 +280,7 @@
   </div>
 
   <!-- 模範解答モーダル -->
-  <div id="answer-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="answer-modal-title">
+  <div id="answer-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="answer-modal-title" aria-hidden="true">
     <div class="modal">
       <div class="modal-header">
         <h3 id="answer-modal-title"><i class="fas fa-lightbulb"></i> 模範解答 (正解のコード)</h3>
@@ -311,7 +311,7 @@
   <script src="dncl-interpreter.js?v=1"></script>
   <!-- dncl-interpreter.js より後に読む（2次元添字の解釈を共有するため） -->
   <script src="dncl-to-python.js?v=1"></script>
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
   <!-- 録画モード（?rec= があるときだけ動く。無ければ完全に不活性）。
        demos.json は rec.js が ?rec= のときだけ fetch する（cache:'no-cache' 指定） -->
   <script src="rec.js?v=1"></script>
