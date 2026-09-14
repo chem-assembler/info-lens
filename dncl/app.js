@@ -406,11 +406,30 @@ class DNCLApp {
     return arr;
   }
 
+  /**
+   * カードの文から命令の種類を決める。見た目（色とフローチャート記号の形）専用で、
+   * 判定や実行には使わない。情報Iのフローチャート記号に合わせる:
+   *   代入＝処理（長方形）/ 条件＝判断（ひし形）/ 繰り返し＝ループ端（六角形）/ 表示＝入出力（平行四辺形）
+   * ダミーカードも同じ規則で塗る（色で正誤が漏れないように）
+   */
+  blockKind(text) {
+    const s = (text || "").trim();
+    if (/繰り返す|ループを抜ける/.test(s)) return "kind-loop";
+    if (/^(もし|そうでなくもし|そうでなければ)/.test(s)) return "kind-if";
+    if (/表示する/.test(s)) return "kind-print";
+    if (/^(関数|返す)/.test(s)) return "kind-func";
+    if (/(^|[^=!<>])=(?!=)/.test(s)) return "kind-assign";
+    return null; // 当てはまらない文は既定の色（灰青）のまま
+  }
+
   createBlockCard(block) {
     const card = document.createElement("div");
     card.className = "block-card indent-0";
     card.dataset.id = block.id;
     card.dataset.indent = "0";
+
+    const kind = this.blockKind(block.text);
+    if (kind) card.classList.add(kind);
 
     // マウスやタッチが使えなくてもカードを並べられるようにする。
     // 固定カード（isLocked）は動かせないので、素通りさせてタブ移動の邪魔をしない

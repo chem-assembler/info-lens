@@ -1807,6 +1807,149 @@ footer a:hover {
 }
 
 /* ==========================================================================
+   カードを「手で動かす部品」に見せる（2026-09-14）
+   カードが問題文・きほん・操作説明と同じ暗い地に溶けて、動かせる物だと分からなかった。
+   動かせるカードにだけ、次の手がかりを付ける（説明の箱には1つも付けない＝この差が中身）:
+     1. 命令の種類ごとの色の地
+     2. 左端のつかむ帯（点が2列）… タッチでもホバー無しで常に見える
+     3. 少し浮いた影。マウスを乗せると持ち上がり、押すと沈む
+     4. 情報Iのフローチャート記号の形（色だけに意味を持たせない。
+        緑と橙は明度比 1.18 しかなく、色覚によっては見分けられないため）
+   固定カード（動かせない）は帯・影・持ち上がりを付けず、平らなまま
+   ========================================================================== */
+.block-card {
+  --kind: #94a3b8;          /* 帯と記号の色（種類が決まらない文の既定） */
+  --kind-bg: #1c2233;       /* 地（不透明にしてコントラストを確定させる） */
+  --kind-bg-hover: #232a3e;
+  --kind-border: #3a4458;
+}
+.block-card.kind-assign { --kind: #34d399; --kind-bg: #12302a; --kind-bg-hover: #173a33; --kind-border: #2a6b57; }
+.block-card.kind-loop   { --kind: #fb923c; --kind-bg: #38240f; --kind-bg-hover: #432c14; --kind-border: #7a4a22; }
+.block-card.kind-if     { --kind: #38bdf8; --kind-bg: #0f2a3f; --kind-bg-hover: #13334c; --kind-border: #22607f; }
+.block-card.kind-print  { --kind: #f472b6; --kind-bg: #3a1830; --kind-bg-hover: #452039; --kind-border: #7a3563; }
+.block-card.kind-func   { --kind: #facc15; --kind-bg: #332c0c; --kind-bg-hover: #3d3510; --kind-border: #6e5f1c; }
+
+.block-card:not(.locked-card) {
+  background-color: var(--kind-bg);
+  /* つかむ帯: 左端 12px を種類の色で塗り、その上に点を2列打つ */
+  background-image:
+    radial-gradient(circle at center, rgba(0, 0, 0, 0.45) 1.1px, transparent 1.7px),
+    radial-gradient(circle at center, rgba(0, 0, 0, 0.45) 1.1px, transparent 1.7px),
+    linear-gradient(to right, var(--kind) 0 12px, transparent 12px);
+  background-size: 5px 5px, 5px 5px, 100% 100%;
+  background-position: 1px 2px, 6px 2px, 0 0;
+  background-repeat: repeat-y, repeat-y, no-repeat;
+  border: 1px solid var(--kind-border);  /* 字下げの細い色線（.indent-N）はここで上書きする */
+  padding-left: calc(12px + 0.75rem);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35), 0 4px 10px rgba(0, 0, 0, 0.35);
+  transition: background-color var(--transition-fast), box-shadow var(--transition-fast),
+              transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+/* 固定カードは帯を持たないが、文の頭の位置だけは動かせるカードとそろえる */
+.block-card.locked-card {
+  padding-left: calc(12px + 0.75rem);
+}
+
+/* 持ち上がる（マウスなど、ホバーがある端末だけ。タッチでは押したままに見えてしまう） */
+@media (hover: hover) {
+  .block-card:not(.locked-card):hover {
+    background-color: var(--kind-bg-hover);
+    border-color: var(--kind);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3), 0 10px 20px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* 押すと沈む（タッチでも出る「つかんだ」手ごたえ） */
+.block-card:not(.locked-card):active {
+  background-color: var(--kind-bg-hover);
+  border-color: var(--kind);
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block-card:not(.locked-card):hover,
+  .block-card:not(.locked-card):active { transform: none; }
+}
+
+/* フローチャート記号（文の頭。字下げボタンと本文のあいだに入る） */
+.block-card::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 16px;
+  height: 11px;
+  background: var(--kind);
+  border-radius: 1px;                     /* 既定・代入＝処理（長方形） */
+}
+.block-card.kind-if::before {             /* 条件＝判断（ひし形） */
+  height: 15px;
+  border-radius: 0;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+.block-card.kind-loop::before {           /* 繰り返し＝ループ端（六角形） */
+  height: 13px;
+  border-radius: 0;
+  clip-path: polygon(22% 0, 78% 0, 100% 50%, 78% 100%, 22% 100%, 0 50%);
+}
+.block-card.kind-print::before {          /* 表示＝入出力（平行四辺形） */
+  border-radius: 0;
+  clip-path: polygon(28% 0, 100% 0, 72% 100%, 0 100%);
+}
+.block-card.kind-func::before {           /* 関数＝端子（角丸） */
+  border-radius: 999px;
+}
+.block-card.locked-card::before {
+  background: #64748b;                    /* 動かせないカードは記号も灰色 */
+}
+
+/* トレイのカードの字下げボタンは、どの幅でも働かない（app.js の adjustIndent が
+   組み立てエリアの外のカードを弾く）。小画面では既に消していたが、PC幅では透明のまま
+   幅と Tab の止まり先を2つずつ食い、記号だけが本文から離れた行に取り残されていた */
+#tray-list .indent-btn-group { display: none; }
+
+/* 3カラムの細いトレイ（280px）では、1段目に「記号 …… ＋」、2段目に文を置く。
+   短い文も長い文も同じ組み方になり、記号と ＋ が文の長さに振り回されない */
+@media (min-width: 1201px) {
+  #tray-list .block-card::before { order: 0; }
+  #tray-list .block-card::after { order: 0; margin-left: auto; }
+  #tray-list .block-card .block-text { order: 1; flex-basis: 100%; }
+}
+
+/* キーボードで選んだ枠。色の付いたカードの上でも埋もれないよう、明るい色・太め・少し離す */
+.block-card:focus-visible {
+  outline: 3px solid #c4b5fd;
+  outline-offset: 3px;
+}
+
+/* 以下は、上の地・影の指定に負けないよう、状態ごとの見た目を置き直す */
+
+/* 実行中の「いまの行」: 地を紫にして強く光らせる（帯と記号は残して種類も読める） */
+#editor-list .block-card.active-line {
+  background-color: #3b2d6e;
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 0 1px var(--accent-purple), 0 0 16px rgba(139, 92, 246, 0.45);
+  transform: none;
+}
+
+/* ドラッグ中に元の場所へ残る影（入る先の目印） */
+.block-card.sortable-ghost:not(.locked-card) {
+  opacity: 0.45;
+  background-image: none;
+  background-color: rgba(139, 92, 246, 0.12);
+  border: 1.5px dashed var(--kind);
+  box-shadow: none;
+  transform: none;
+}
+
+/* 誤りのダミーカードを明かしたとき（赤い左帯は元の !important 指定のまま） */
+.block-card.dummy-card.reveal-error {
+  border-color: var(--accent-red);
+  box-shadow: 0 0 0 1px var(--accent-red), 0 0 14px var(--accent-red-glow);
+}
+
+/* ==========================================================================
    録画モード（?rec= のときだけ付く .recording / rec-* クラス）
    設計は chem 側 DESIGN_recording_mode.md。通常利用ではここは一切当たらない
    ========================================================================== */
