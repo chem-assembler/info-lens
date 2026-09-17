@@ -471,7 +471,10 @@ class DNCLApp {
         input.dataset.inputKey = found[1];
         input.placeholder = spec.placeholder;
         input.setAttribute("aria-label", spec.placeholder);
-        input.addEventListener("input", () => this.updatePreview());
+        // 入力のたびに editorBlocks を組み直す。updatePreview だけを呼ぶと、カードを置いた時点の
+        // editorBlocks（空欄は [input_cond] のまま）で描き直すことになり、右のプログラムにも
+        // 実行（interpreter.run）にも、カードを動かすまで入力が届かなかった
+        input.addEventListener("input", () => this.onBlocksChanged());
         // ドラッグ開始時にテキストボックスがフォーカスされてキー入力イベントが奪われるのを防ぐ
         input.addEventListener("mousedown", (e) => e.stopPropagation());
         // 例（spec.hint）は欄を押したときだけ出す。ハードは自分で考える難易度なので、
