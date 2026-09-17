@@ -167,8 +167,8 @@ const problems = [
     hardBlocks: [
       { id: "b1", text: "西暦 = 2024", isLocked: true },
       { id: "b2", text: "うるう年 = 0" },
-      { id: "b3", text: "もし [input_cond1] ならば:", inputs: { input_cond1: { placeholder: "外の条件", hint: "例: 西暦 % 4 == 0", correct: "西暦 % 4 == 0" } } },
-      { id: "b4", text: "もし [input_cond2] ならば:", inputs: { input_cond2: { placeholder: "内の条件", hint: "例: 西暦 % 100 != 0 or 西暦 % 400 == 0", correct: "西暦 % 100 != 0 or 西暦 % 400 == 0" } } },
+      { id: "b3", text: "もし [input_cond1] ならば:", inputs: { input_cond1: { placeholder: "条件1", hint: "例: 西暦 % 4 == 0", correct: "西暦 % 4 == 0" } } },
+      { id: "b4", text: "もし [input_cond2] ならば:", inputs: { input_cond2: { placeholder: "条件2", hint: "例: 西暦 % 100 != 0 or 西暦 % 400 == 0", correct: "西暦 % 100 != 0 or 西暦 % 400 == 0" } } },
       { id: "b5", text: "うるう年 = 1" },
       { id: "b6", text: "表示する(うるう年)" }
     ],
