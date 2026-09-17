@@ -23,7 +23,7 @@
   <!-- ?v= が無いと GitHub Pages のキャッシュ（css/js は4時間）で古い実体が配られる。
        中身を変えたらその N を上げること。素の参照（?v= 無し）を残さない -->
   <link rel="stylesheet" href="icons.css?v=1">
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
   <!-- ドラッグ＆ドロップ（自前実装・外部CDNなし） -->
   <script src="sortable-lite.js?v=1"></script>
 </head>
@@ -305,13 +305,13 @@
        ?v= は付け足しではなく必要: 公開前に一度でも 404 を引かせると、GitHub Pages の CDN が
        その 404 を max-age=14400（4時間）で持ち続ける。新しい URL にすればそれを避けられる。
        据え置いたまま中身を直すと、今度は古い実体が4時間配られる。番号はファイル単位でよい -->
-  <script src="problems.js?v=1"></script>
+  <script src="problems.js?v=2"></script>
   <!-- 並び順の判定規則（app.js の checkSolution と verify_problems.js が共有する） -->
   <script src="order-rules.js?v=1"></script>
   <script src="dncl-interpreter.js?v=1"></script>
   <!-- dncl-interpreter.js より後に読む（2次元添字の解釈を共有するため） -->
   <script src="dncl-to-python.js?v=1"></script>
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
   <!-- 録画モード（?rec= があるときだけ動く。無ければ完全に不活性）。
        demos.json は rec.js が ?rec= のときだけ fetch する（cache:'no-cache' 指定） -->
   <script src="rec.js?v=1"></script>

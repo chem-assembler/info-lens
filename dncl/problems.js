@@ -50,7 +50,7 @@ const problems = [
     hardBlocks: [
       { id: "b4", text: "合計 = 合計 + [input_add]", inputs: { input_add: { placeholder: "足す値", correct: "i" } } },
       { id: "b1", text: "N = 10", isLocked: true },
-      { id: "b5", text: "表示する([input_print])", inputs: { input_print: { placeholder: "表示する変数", correct: "合計" } } },
+      { id: "b5", text: "表示する([input_print])", inputs: { input_print: { placeholder: "変数", correct: "合計" } } },
       { id: "b3", text: "i を 1 から N まで 1 ずつ増やしながら繰り返す:" },
       { id: "b2", text: "合計 = 0" }
     ],
@@ -109,8 +109,8 @@ const problems = [
       { id: "b1", text: "N = 20", isLocked: true },
       { id: "b2", text: "個数 = 0" },
       { id: "b3", text: "i を 1 から N まで 1 ずつ増やしながら繰り返す:" },
-      { id: "b4", text: "もし [input_cond] == 0 ならば:", inputs: { input_cond: { placeholder: "条件式 (例: i % 3)", correct: "i % 3" } } },
-      { id: "b5", text: "個数 = [input_inc]", inputs: { input_inc: { placeholder: "加算式 (例: 個数 + 1)", correct: "個数 + 1" } } },
+      { id: "b4", text: "もし [input_cond] == 0 ならば:", inputs: { input_cond: { placeholder: "条件式", hint: "例: i % 3", correct: "i % 3" } } },
+      { id: "b5", text: "個数 = [input_inc]", inputs: { input_inc: { placeholder: "加算式", hint: "例: 個数 + 1", correct: "個数 + 1" } } },
       { id: "b6", text: "表示する(個数)" }
     ],
     narratives: {
@@ -167,8 +167,8 @@ const problems = [
     hardBlocks: [
       { id: "b1", text: "西暦 = 2024", isLocked: true },
       { id: "b2", text: "うるう年 = 0" },
-      { id: "b3", text: "もし [input_cond1] ならば:", inputs: { input_cond1: { placeholder: "最初の条件 (例: 西暦 % 4 == 0)", correct: "西暦 % 4 == 0" } } },
-      { id: "b4", text: "もし [input_cond2] ならば:", inputs: { input_cond2: { placeholder: "ネストの条件 (例: 西暦 % 100 != 0 or 西暦 % 400 == 0)", correct: "西暦 % 100 != 0 or 西暦 % 400 == 0" } } },
+      { id: "b3", text: "もし [input_cond1] ならば:", inputs: { input_cond1: { placeholder: "外の条件", hint: "例: 西暦 % 4 == 0", correct: "西暦 % 4 == 0" } } },
+      { id: "b4", text: "もし [input_cond2] ならば:", inputs: { input_cond2: { placeholder: "内の条件", hint: "例: 西暦 % 100 != 0 or 西暦 % 400 == 0", correct: "西暦 % 100 != 0 or 西暦 % 400 == 0" } } },
       { id: "b5", text: "うるう年 = 1" },
       { id: "b6", text: "表示する(うるう年)" }
     ],
@@ -289,10 +289,10 @@ const problems = [
     hardBlocks: [
       { id: "b1", text: "A = 48", isLocked: true },
       { id: "b2", text: "B = 18", isLocked: true },
-      { id: "b3", text: "[input_cond] の間、繰り返す:", inputs: { input_cond: { placeholder: "繰り返し条件 (例: B > 0)", correct: "B > 0" } } },
+      { id: "b3", text: "[input_cond] の間、繰り返す:", inputs: { input_cond: { placeholder: "条件式", hint: "例: B > 0", correct: "B > 0" } } },
       { id: "b4", text: "余り = A % B" },
-      { id: "b5", text: "A = [input_a]", inputs: { input_a: { placeholder: "次のAに入る値", correct: "B" } } },
-      { id: "b6", text: "B = [input_b]", inputs: { input_b: { placeholder: "次のBに入る値", correct: "余り" } } },
+      { id: "b5", text: "A = [input_a]", inputs: { input_a: { placeholder: "次のA", correct: "B" } } },
+      { id: "b6", text: "B = [input_b]", inputs: { input_b: { placeholder: "次のB", correct: "余り" } } },
       { id: "b7", text: "表示する(A)" }
     ],
     narratives: {
@@ -358,7 +358,7 @@ const problems = [
     hardBlocks: [
       { id: "b0_1", text: "A = [8, 3, 5, 9, 2]", isLocked: true },
       { id: "b0_2", text: "target = 9", isLocked: true },
-      { id: "b1", text: "位置 = [input_notfound]", inputs: { input_notfound: { placeholder: "見つからない時の値", correct: "-1" } } },
+      { id: "b1", text: "位置 = [input_notfound]", inputs: { input_notfound: { placeholder: "無いとき", correct: "-1" } } },
       { id: "b2", text: "i を 0 から 4 まで 1 ずつ増やしながら繰り返す:" },
       { id: "b3", text: "もし [input_search] == target ならば:", inputs: { input_search: { placeholder: "探索対象", correct: "A[i]" } } },
       { id: "b4", text: "位置 = i" },
@@ -424,8 +424,8 @@ const problems = [
       { id: "b1", text: "金額 = 780", isLocked: true },
       { id: "b0", text: "硬貨 = [500, 100, 50, 10]", isLocked: true },
       { id: "b2", text: "i を 0 から 3 まで 1 ずつ増やしながら繰り返す:" },
-      { id: "b3", text: "枚数 = [input_div]", inputs: { input_div: { placeholder: "金額を硬貨で割る整数除算の式 (例: 金額 ÷ 硬貨[i])", correct: "金額 ÷ 硬貨[i]" } } },
-      { id: "b4", text: "金額 = [input_mod]", inputs: { input_mod: { placeholder: "余り金額の式 (例: 金額 % 硬貨[i])", correct: "金額 % 硬貨[i]" } } },
+      { id: "b3", text: "枚数 = [input_div]", inputs: { input_div: { placeholder: "整数除算", hint: "例: 金額 ÷ 硬貨[i]", correct: "金額 ÷ 硬貨[i]" } } },
+      { id: "b4", text: "金額 = [input_mod]", inputs: { input_mod: { placeholder: "余りの式", hint: "例: 金額 % 硬貨[i]", correct: "金額 % 硬貨[i]" } } },
       { id: "b5", text: "表示する(枚数)" }
     ],
     narratives: {
@@ -496,8 +496,8 @@ const problems = [
       { id: "b0", text: "A = [10, 20, 30, 40, 50]", isLocked: true },
       { id: "b1", text: "合計 = 0" },
       { id: "b2", text: "i を 0 から 4 まで 1 ずつ増やしながら繰り返す:" },
-      { id: "b3", text: "合計 = 合計 + [input_add]", inputs: { input_add: { placeholder: "加算する要素", correct: "A[i]" } } },
-      { id: "b4", text: "平均 = [input_avg]", inputs: { input_avg: { placeholder: "平均の計算式", correct: "合計 / 5" } } },
+      { id: "b3", text: "合計 = 合計 + [input_add]", inputs: { input_add: { placeholder: "足す要素", correct: "A[i]" } } },
+      { id: "b4", text: "平均 = [input_avg]", inputs: { input_avg: { placeholder: "平均の式", correct: "合計 / 5" } } },
       { id: "b5", text: "表示する(\"平均は\", 平均)" }
     ],
     narratives: {
@@ -551,7 +551,7 @@ const problems = [
       { id: "b0", text: "A = [1, 2, 3, 4, 5, 6]", isLocked: true },
       { id: "b1", text: "偶数個数 = 0" },
       { id: "b2", text: "i を 0 から 5 まで 1 ずつ増やしながら繰り返す:" },
-      { id: "b3", text: "もし [input_cond] == 0 ならば:", inputs: { input_cond: { placeholder: "偶数判定の式", correct: "A[i] % 2" } } },
+      { id: "b3", text: "もし [input_cond] == 0 ならば:", inputs: { input_cond: { placeholder: "偶数判定", correct: "A[i] % 2" } } },
       { id: "b4", text: "偶数個数 = 偶数個数 + 1" },
       { id: "b5", text: "表示する(偶数個数)" }
     ],
@@ -644,7 +644,7 @@ const problems = [
     ],
     hardBlocks: [
       { id: "b0", text: "A = [10, 20, 30, 40, 50]", isLocked: true },
-      { id: "b1", text: "i を 4 から 0 まで 1 ずつ[input_step]ながら繰り返す:", inputs: { input_step: { placeholder: "増減指定 (増やし/減らし)", correct: "減らし" } } },
+      { id: "b1", text: "i を 4 から 0 まで 1 ずつ[input_step]ながら繰り返す:", inputs: { input_step: { placeholder: "増減指定", hint: "増やし/減らし", correct: "減らし" } } },
       { id: "b2", text: "表示する(A[i])" }
     ],
     narratives: {
@@ -728,7 +728,7 @@ const problems = [
       { id: "b3", text: "右 = 6" },
       { id: "b4", text: "位置 = -1" },
       { id: "b5", text: "左 <= 右 の間、繰り返す:" },
-      { id: "b6", text: "中央 = [input_mid]", inputs: { input_mid: { placeholder: "中央位置の計算式", correct: "(左 + 右) ÷ 2" } } },
+      { id: "b6", text: "中央 = [input_mid]", inputs: { input_mid: { placeholder: "中央の式", correct: "(左 + 右) ÷ 2" } } },
       { id: "b7", text: "もし A[中央] == target ならば:" },
       { id: "b8", text: "位置 = 中央" },
       { id: "b9", text: "ループを抜ける" },
@@ -802,7 +802,7 @@ const problems = [
       { id: "b0", text: "A = [5, 3, 8, 4, 1]", isLocked: true },
       { id: "b1", text: "i を 0 から 3 まで 1 ずつ増やしながら繰り返す:" },
       { id: "b2", text: "j を 0 から 3 - i まで 1 ずつ増やしながら繰り返す:" },
-      { id: "b3", text: "もし [input_cond] ならば:", inputs: { input_cond: { placeholder: "隣接要素の比較式", correct: "A[j] > A[j + 1]" } } },
+      { id: "b3", text: "もし [input_cond] ならば:", inputs: { input_cond: { placeholder: "隣と比較", correct: "A[j] > A[j + 1]" } } },
       { id: "b4", text: "作業用 = A[j]" },
       { id: "b5", text: "A[j] = A[j + 1]" },
       { id: "b6", text: "A[j + 1] = 作業用" },
@@ -859,7 +859,7 @@ const problems = [
       { id: "b1", text: "i を 0 から 1 まで 1 ずつ増やしながら繰り返す:" },
       { id: "b2", text: "行合計 = 0" },
       { id: "b3", text: "j を 0 から 2 まで 1 ずつ増やしながら繰り返す:" },
-      { id: "b4", text: "行合計 = 行合計 + [input_elem]", inputs: { input_elem: { placeholder: "2次元配列のアクセス", correct: "A[i,j]" } } },
+      { id: "b4", text: "行合計 = 行合計 + [input_elem]", inputs: { input_elem: { placeholder: "配列要素", correct: "A[i,j]" } } },
       { id: "b5", text: "表示する(行合計)" }
     ],
     narratives: {
@@ -915,7 +915,7 @@ const problems = [
       { id: "b1", text: "N = 13", isLocked: true },
       { id: "b2", text: "フラグ = 1" },
       { id: "b3", text: "i を 2 から N - 1 まで 1 ずつ増やしながら繰り返す:" },
-      { id: "b4", text: "もし [input_mod] == 0 ならば:", inputs: { input_mod: { placeholder: "割り切れ判定の式", correct: "N % i" } } },
+      { id: "b4", text: "もし [input_mod] == 0 ならば:", inputs: { input_mod: { placeholder: "約数判定", correct: "N % i" } } },
       { id: "b5", text: "フラグ = 0" },
       { id: "b6", text: "ループを抜ける" },
       { id: "b7", text: "表示する(フラグ)" }

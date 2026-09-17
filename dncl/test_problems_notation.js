@@ -64,6 +64,7 @@ function checkItem(item, kind) {
         Object.entries(b.inputs).forEach(([name, spec]) => {
           checkText(`[${kind}:${item.id}] ${key} ${b.id} inputs.${name}.correct`, spec.correct);
           checkText(`[${kind}:${item.id}] ${key} ${b.id} inputs.${name}.placeholder`, spec.placeholder);
+          checkText(`[${kind}:${item.id}] ${key} ${b.id} inputs.${name}.hint`, spec.hint);
         });
       }
       // ダミーカードの理由文もカード表記を引用しがちなので警告対象に

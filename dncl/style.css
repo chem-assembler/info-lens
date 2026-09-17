@@ -366,6 +366,35 @@ main {
   border-color: var(--accent-purple);
 }
 
+/* 穴埋め欄の幅。案内（placeholder）は全角4字までに決めてあり、その4字が必ず入る幅にする。
+   em で決めるのは、小画面で文字を 1rem に上げたときも一緒に広がるように。
+   80px を下限にして、PC幅では従来どおり、小画面でも 82px（従来 80px）にとどめる
+   （5字の幅にすると小画面で欄が次の行へ落ち、カードが1段高くなった）。
+   長い答えは欄の中で横に流れる。全問が収まるかは test_input_hints.js が見張る */
+.block-card .block-input {
+  width: max(80px, calc(4.2em + 0.8rem + 2px));
+}
+
+/* 穴埋め欄の例の札（app.js の showInputHint）。欄を押したときだけ欄のそばに出る。
+   トレイと組み立てエリアはスクロールする箱なので、切れないよう画面に固定して置く */
+.block-input-hint {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9000;
+  max-width: calc(100vw - 16px);
+  padding: 0.25rem 0.55rem;
+  background: #0b1020;
+  border: 1px solid var(--accent-purple);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  color: #e2e8f0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  pointer-events: none; /* 札の下のカードや欄を押せなくしない */
+}
+
 /* 穴埋め欄の案内文字。ブラウザ既定の灰色は欄の地に対して 3.84:1 で薄すぎた。
    いちばん明るい欄の地（実行中の「いまの行」の紫）でも 4.86:1 を保ちつつ、
    入力した文字（黄 #f59e0b）より明度で 1.44 倍暗くして「案内」と分かる薄さを残す。

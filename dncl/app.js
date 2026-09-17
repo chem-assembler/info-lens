@@ -346,6 +346,7 @@ class DNCLApp {
   }
 
   resetWorkspace() {
+    this.hideInputHint(); // 作り直すカードの欄に札が残らないように
     this.resetExecution();
     this.statusBar.style.display = "none";
     this.explanationSection.style.display = "none";
@@ -473,6 +474,18 @@ class DNCLApp {
         input.addEventListener("input", () => this.updatePreview());
         // ドラッグ開始時にテキストボックスがフォーカスされてキー入力イベントが奪われるのを防ぐ
         input.addEventListener("mousedown", (e) => e.stopPropagation());
+        // 例（spec.hint）は欄を押したときだけ出す。ハードは自分で考える難易度なので、
+        // 例が常に見えていると答えに近くなりすぎる（2026-09-17 決定）。
+        // 案内（placeholder）は入力すると消えるが、例はフォーカスし直せば何度でも見返せる
+        if (spec.hint) {
+          input.dataset.hint = spec.hint;
+          input.addEventListener("focus", () => this.showInputHint(input));
+          input.addEventListener("click", () => this.showInputHint(input));
+          input.addEventListener("blur", () => this.hideInputHint(input));
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && this.inputHintTarget === input) this.hideInputHint(input);
+          });
+        }
         textSpan.appendChild(input);
 
         cursor = found.index + found[0].length;
@@ -546,6 +559,70 @@ class DNCLApp {
 
     this.updateCardLabel(card);
     return card;
+  }
+
+  /**
+   * 穴埋め欄の例の札。ページに1枚だけ置き、フォーカスした欄のそばへ動かして使う。
+   * カードの中に置かない理由:
+   *   - トレイ・組み立てエリアはスクロールする箱なので、中に置くと端で札が切れる
+   *   - カードの文字（.block-text の textContent）はカードの読み上げラベルになる。
+   *     中に置くと、フォーカスしていなくても例（＝ほぼ答え）が読み上げられてしまう
+   *   - ドラッグ中の複製（cloneNode）に札が写り込まない
+   */
+  ensureInputHint() {
+    if (this.inputHint) return this.inputHint;
+    const el = document.createElement("div");
+    el.id = "block-input-hint";
+    el.className = "block-input-hint";
+    el.setAttribute("role", "tooltip");
+    el.hidden = true;
+    document.body.appendChild(el);
+    this.inputHint = el;
+
+    const follow = () => { if (!el.hidden) this.placeInputHint(); };
+    window.addEventListener("scroll", follow, true); // 中の箱のスクロールも拾う
+    window.addEventListener("resize", follow);
+    if (window.visualViewport) window.visualViewport.addEventListener("resize", follow); // スマホのキーボード
+    // 欄の外を押したら閉じる（ドラッグの開始でフォーカスが残る場合も、札を置き去りにしない）
+    document.addEventListener("pointerdown", (e) => {
+      if (this.inputHintTarget && e.target !== this.inputHintTarget) this.hideInputHint();
+    }, true);
+    return el;
+  }
+
+  showInputHint(input) {
+    if (!input.dataset.hint || document.activeElement !== input) return;
+    const el = this.ensureInputHint();
+    el.textContent = input.dataset.hint;
+    el.hidden = false;
+    this.inputHintTarget = input;
+    input.setAttribute("aria-describedby", el.id);
+    this.placeInputHint();
+  }
+
+  /** input を渡したときは、その欄の札を出しているときだけ閉じる */
+  hideInputHint(input) {
+    if (input && this.inputHintTarget !== input) return;
+    if (this.inputHintTarget) this.inputHintTarget.removeAttribute("aria-describedby");
+    this.inputHintTarget = null;
+    if (this.inputHint) this.inputHint.hidden = true;
+  }
+
+  /** 欄の下に出す。下に入りきらなければ上。左右は画面の中に収める */
+  placeInputHint() {
+    const input = this.inputHintTarget;
+    const el = this.inputHint;
+    if (!input || !input.isConnected) { this.hideInputHint(); return; }
+    const r = input.getBoundingClientRect();
+    const vw = document.documentElement.clientWidth;
+    const vh = window.innerHeight;
+    const gap = 6, margin = 8;
+    const w = el.offsetWidth, h = el.offsetHeight;
+    let top = r.bottom + gap;
+    if (top + h > vh - margin && r.top - gap - h >= margin) top = r.top - gap - h;
+    const left = Math.max(margin, Math.min(r.left, vw - margin - w));
+    el.style.left = `${Math.round(left)}px`;
+    el.style.top = `${Math.round(top)}px`;
   }
 
   /**
